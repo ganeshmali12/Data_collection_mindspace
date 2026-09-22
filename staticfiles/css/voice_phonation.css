@@ -1,0 +1,421 @@
+:root {
+  --bg-gradient: linear-gradient(135deg, #e8f5e9 0%, #f1f8e9 40%, #e0f2f1 100%);
+  --primary-green: #0d6848;
+  --accent-green: #25b871;
+  --light-green-bg: #eaf6f0;
+  --track-color: #e5ece8;
+  --text-dark: #1b3d2f;
+  --text-muted: #6b8278;
+  --card-bg: #FCFBF8;
+  --card-border: rgba(255, 255, 255, 0.8);
+  --ms-green-dark: #051F20;
+  --ms-green-soft: #DAF1DE;
+  --ms-red: #dc2626;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+/* ── Page Wrapper ────────────────────────────────── */
+
+.phonation-page {
+  min-height: calc(100vh - 40px);
+  width: 100%;
+  background: #F2FAF4;
+  padding: 17px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+/* ── Main Container ─────────────────────────────── */
+
+.app-container {
+  position: relative;
+  width: 100%;
+  max-width: 765px;
+  height: 510px;
+  background: var(--bg-gradient);
+  border-radius: 20px;
+  overflow: hidden;
+  box-shadow: 0 17px 34px rgba(0, 0, 0, 0.1);
+  padding: 27px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+}
+
+/* ── Decorative Leaves ──────────────────────────── */
+
+.bg-leaf-left,
+.bg-leaf-right {
+  position: absolute;
+  pointer-events: none;
+  opacity: 0.6;
+}
+
+.bg-leaf-left {
+  bottom: -17px;
+  left: -17px;
+  width: 187px;
+}
+
+.bg-leaf-right {
+  bottom: -17px;
+  right: -17px;
+  width: 187px;
+  transform: scaleX(-1);
+}
+
+/* ── Header ─────────────────────────────────────── */
+
+.header {
+  z-index: 2;
+  width: 100%;
+}
+
+.logo-container {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  color: var(--primary-green);
+  font-weight: 700;
+  font-size: 0.94rem;
+  margin-bottom: 7px;
+}
+
+.logo-icon {
+  width: 19px;
+  height: 19px;
+  fill: currentColor;
+}
+
+.title {
+  color: var(--text-dark);
+  font-size: 1.57rem;
+  font-weight: 700;
+  text-align: center;
+}
+
+.subtitle {
+  color: var(--text-muted);
+  font-size: 0.81rem;
+  margin-top: 3px;
+  text-align: center;
+}
+
+.count-display {
+  color: var(--accent-green);
+  font-weight: 700;
+  font-size: 0.98rem;
+  margin-top: 10px;
+}
+
+/* ── Progress Bar ───────────────────────────────── */
+
+.progress-bar-container {
+  width: 238px;
+  height: 5px;
+  background-color: var(--track-color);
+  border-radius: 9px;
+  margin-top: 10px;
+  overflow: hidden;
+}
+
+.progress-bar-fill {
+  width: 0%;
+  height: 100%;
+  background-color: var(--accent-green);
+  border-radius: 10px;
+  transition: width 0.4s ease;
+}
+
+/* ── Center Ring + Waveforms ────────────────────── */
+
+.visualizer-section {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 34px;
+  position: relative;
+  z-index: 2;
+}
+
+.audio-waves {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  opacity: 0.4;
+}
+
+.wave-bar {
+  width: 4px;
+  background: var(--accent-green);
+  border-radius: 9px;
+}
+
+.circle-container {
+  position: relative;
+  width: 187px;
+  height: 187px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.circle-svg {
+  transform: rotate(-90deg);
+  width: 187px;
+  height: 187px;
+}
+
+.circle-bg {
+  fill: none;
+  stroke: #d8eae1;
+  stroke-width: 7;
+}
+
+.circle-progress {
+  fill: none;
+  stroke: var(--accent-green);
+  stroke-width: 8;
+  stroke-linecap: round;
+  stroke-dasharray: 628.319;
+  stroke-dashoffset: 628.319;
+  transition: stroke-dashoffset 0.5s ease;
+}
+
+.circle-content {
+  position: absolute;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+}
+
+.devanagari-char {
+  font-size: 3.83rem;
+  font-weight: 700;
+  color: var(--primary-green);
+  line-height: 1;
+  border-radius: 50%;
+  transition: transform 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease, background 0.25s ease;
+}
+
+.devanagari-char.listening {
+  transform: scale(1.03);
+  border: 2px solid var(--accent-green);
+}
+
+.devanagari-char.success {
+  border: 2px solid var(--accent-green);
+}
+
+/* ── Start Button ───────────────────────────────── */
+
+.btn-start {
+  background: var(--primary-green);
+  color: white;
+  padding: 10px 34px;
+  border: none;
+  border-radius: 10px;
+  font-weight: 600;
+  font-size: 0.89rem;
+  font-family: inherit;
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  box-shadow: 0 5px 14px rgba(13, 104, 72, 0.2);
+  transition: all 0.2s;
+  cursor: pointer;
+  z-index: 2;
+}
+
+.btn-start:hover {
+  transform: translateY(-2px);
+  background: #0a543a;
+}
+
+.btn-start:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.mic-icon {
+  width: 17px;
+  height: 17px;
+  fill: currentColor;
+}
+
+/* ── Status Box ─────────────────────────────────── */
+
+.status-box {
+  min-height: 26px;
+  width: 100%;
+  max-width: 442px;
+  border-radius: 9px;
+  background: rgba(255, 255, 255, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.8);
+  color: var(--text-muted);
+  display: grid;
+  place-items: center;
+  text-align: center;
+  padding: 7px 12px;
+  font-size: 0.7rem;
+  font-weight: 600;
+  z-index: 2;
+}
+
+/* ── Sound Tabs (bottom) ────────────────────────── */
+
+.tabs-container {
+  background: var(--card-bg);
+
+  border: 1px solid var(--card-border);
+  border-radius: 15px;
+  padding: 10px;
+  display: flex;
+  gap: 10px;
+  width: 100%;
+  max-width: 680px;
+  z-index: 2;
+}
+
+.sound-chip {
+  flex: 1;
+  height: 48px;
+  background: white;
+  border: 1px solid #eef2f0;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.19rem;
+  font-weight: 600;
+  color: var(--text-dark);
+  cursor: default;
+  transition: all 0.2s;
+}
+
+.sound-chip.active {
+  background: var(--light-green-bg);
+  border-color: #a3dac2;
+  color: var(--primary-green);
+}
+
+.sound-chip.current {
+  background: var(--light-green-bg);
+  border-color: #a3dac2;
+  color: var(--primary-green);
+}
+
+.sound-chip.done {
+  background: var(--ms-green-soft);
+  color: var(--ms-green-dark);
+  border-color: var(--accent-green);
+}
+
+.sound-chip.failed {
+  background: #fef2f2;
+  color: #991b1b;
+  border-color: #fecaca;
+}
+
+/* ═══ Hidden elements (JS pipeline) ═══════════════ */
+
+.mission-line,
+.progress-row,
+.meter-section,
+.pipeline-row,
+.button-row,
+.backend-result-box,
+.score-box {
+  display: none !important;
+}
+
+/* ═══ Responsive ══════════════════════════════════ */
+
+@media (max-width: 1100px) {
+  .phonation-page {
+    padding: 15px;
+    align-items: flex-start;
+  }
+}
+
+@media (max-width: 768px) {
+  .app-container {
+    height: auto;
+    min-height: 425px;
+    padding: 20px 15px 15px;
+    border-radius: 15px;
+  }
+
+  .title {
+    font-size: 1.19rem;
+  }
+
+  .circle-container {
+    width: 153px;
+    height: 153px;
+  }
+
+  .circle-svg {
+    width: 153px;
+    height: 153px;
+  }
+
+  .devanagari-char {
+    font-size: 2.89rem;
+  }
+
+  .visualizer-section {
+    gap: 17px;
+  }
+
+  .audio-waves {
+    display: none;
+  }
+
+  .sound-chip {
+    height: 41px;
+    font-size: 0.98rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .app-container {
+    padding: 15px 12px 12px;
+  }
+
+  .circle-container {
+    width: 136px;
+    height: 136px;
+  }
+
+  .circle-svg {
+    width: 136px;
+    height: 136px;
+  }
+
+  .devanagari-char {
+    font-size: 2.55rem;
+  }
+
+  .sound-chip {
+    height: 36px;
+    font-size: 0.85rem;
+  }
+
+  .progress-bar-container {
+    width: 100%;
+    max-width: 204px;
+  }
+}

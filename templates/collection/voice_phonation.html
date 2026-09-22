@@ -1,0 +1,164 @@
+{% extends "collection/base.html" %}
+{% load static %}
+
+{% block title %}Voice Phonation Activity | Manovedh{% endblock %}
+
+
+{% block styles %}
+<link rel="stylesheet" href="{% static 'css/voice_phonation.css' %}">
+{% endblock %}
+
+
+{% block content %}
+<div class="phonation-page"
+    data-sounds-url="{% url 'collection:phonation_sound_config' %}"
+    data-upload-url="{% url 'collection:upload_voice_phonation' %}"
+    data-complete-url="{% url 'collection:complete_voice_phonation' %}"
+    data-status-url="{% url 'collection:screening_status' %}"
+    data-next-url="{% url 'collection:completed' %}">
+
+  <div class="app-container">
+
+    <!-- Decorative Leaves -->
+    <svg class="bg-leaf-left" viewBox="0 0 200 200" fill="none">
+      <path d="M20 180 C 60 140, 40 80, 10 60 C 50 70, 90 100, 80 150 Z" fill="#9cd3b8" opacity="0.5"/>
+      <path d="M10 190 C 80 180, 120 120, 100 40 C 130 90, 130 160, 40 200 Z" fill="#69b891" opacity="0.4"/>
+    </svg>
+    <svg class="bg-leaf-right" viewBox="0 0 200 200" fill="none">
+      <path d="M20 180 C 60 140, 40 80, 10 60 C 50 70, 90 100, 80 150 Z" fill="#9cd3b8" opacity="0.5"/>
+      <path d="M10 190 C 80 180, 120 120, 100 40 C 130 90, 130 160, 40 200 Z" fill="#69b891" opacity="0.4"/>
+    </svg>
+
+    <!-- Header -->
+    <div class="header flex flex-col items-center">
+      <h1 class="title">Voice Phonation Activity</h1>
+      <p class="subtitle" id="speakPrompt">Pronounce each sound 7 times</p>
+      <div class="count-display" id="completedText">0 / 7</div>
+      <div class="progress-bar-container">
+        <div class="progress-bar-fill" id="activityProgress"></div>
+      </div>
+    </div>
+
+    <!-- Center: Ring + Waveforms -->
+    <div class="visualizer-section">
+
+      <!-- Waveform Left -->
+      <div class="audio-waves" id="wavesLeft">
+        <div class="wave-bar" style="height:12px;"></div>
+        <div class="wave-bar" style="height:24px;"></div>
+        <div class="wave-bar" style="height:18px;"></div>
+        <div class="wave-bar" style="height:48px;"></div>
+        <div class="wave-bar" style="height:28px;"></div>
+        <div class="wave-bar" style="height:52px;"></div>
+        <div class="wave-bar" style="height:20px;"></div>
+        <div class="wave-bar" style="height:10px;"></div>
+      </div>
+
+      <!-- Circular Progress Ring -->
+      <div class="circle-container">
+        <svg class="circle-svg" viewBox="0 0 220 220">
+          <circle class="circle-bg" cx="110" cy="110" r="100"></circle>
+          <circle class="circle-progress" id="ringProgress" cx="110" cy="110" r="100"></circle>
+        </svg>
+        <div class="circle-content">
+          <div class="devanagari-char" id="currentSound">क</div>
+        </div>
+      </div>
+
+      <!-- Waveform Right -->
+      <div class="audio-waves" id="wavesRight">
+        <div class="wave-bar" style="height:10px;"></div>
+        <div class="wave-bar" style="height:20px;"></div>
+        <div class="wave-bar" style="height:52px;"></div>
+        <div class="wave-bar" style="height:28px;"></div>
+        <div class="wave-bar" style="height:48px;"></div>
+        <div class="wave-bar" style="height:18px;"></div>
+        <div class="wave-bar" style="height:24px;"></div>
+        <div class="wave-bar" style="height:12px;"></div>
+      </div>
+    </div>
+
+    <!-- Start Button -->
+    <button type="button" class="btn-start" id="startBtn">
+      <svg class="mic-icon" fill="currentColor" viewBox="0 0 24 24">
+        <path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3z"/>
+        <path d="M17 11c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c3.39-.49 6-3.39 6-6.92h-2z"/>
+      </svg>
+      <span>Start</span>
+    </button>
+
+    <!-- Status Box -->
+    <div class="status-box" id="statusBox">Press Start once. Manovedh will capture all sounds automatically.</div>
+
+    <!-- Sound Tabs -->
+    <div class="tabs-container" id="soundChips"></div>
+
+    <!-- ═══ Hidden elements kept for JS pipeline ═══ -->
+
+    <div class="mission-line" style="display:none;">
+      <span id="missionText">Mission 1 of 7</span>
+      <strong id="streakText">Streak: 0</strong>
+    </div>
+
+    <div class="progress-row" style="display:none;">
+      <strong class="progress-percent" id="progressPercent">0%</strong>
+    </div>
+
+    <div class="meter-section">
+      <div class="meter-row">
+        <div class="meter-block">
+          <div class="meter-top">
+            <span>Voice Strength</span>
+            <strong id="voicePercent">0%</strong>
+          </div>
+          <div class="voice-track">
+            <div class="threshold-marker"></div>
+            <div class="voice-fill" id="voiceFill"></div>
+          </div>
+        </div>
+        <div class="meter-block">
+          <div class="meter-top">
+            <span>Hold Time</span>
+            <strong id="holdPercent">0%</strong>
+          </div>
+          <div class="hold-track">
+            <div class="hold-fill" id="holdFill"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="pipeline-row">
+      <div class="pipeline-step" id="stepRecord"><span>1</span><strong>Record</strong></div>
+      <div class="pipeline-step" id="stepExtract"><span>2</span><strong>Features</strong></div>
+      <div class="pipeline-step" id="stepPca"><span>3</span><strong>PCA</strong></div>
+      <div class="pipeline-step" id="stepScore"><span>4</span><strong>Score</strong></div>
+    </div>
+
+    <div class="button-row">
+      <button type="button" class="btn stop" id="stopBtn" disabled>Stop</button>
+      <button type="button" class="btn submit" id="submitBtn" disabled>Submit Sound</button>
+    </div>
+
+    <div class="backend-result-box" id="backendResultBox">
+      <div><span>Raw Features</span><strong id="rawFeatureCount">&mdash;</strong></div>
+      <div><span>PCA Features</span><strong id="pcaFeatureCount">&mdash;</strong></div>
+      <div><span>Pipeline</span><strong id="pipelineState">Waiting</strong></div>
+    </div>
+
+    <div class="score-box" style="display:none;">
+      <span>Completed</span>
+      <strong id="scoreText">0</strong>
+    </div>
+
+    <form id="csrfForm" style="display:none;">
+      {% csrf_token %}
+    </form>
+
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{% static 'js/voice_phonation.js' %}"></script>
+{% endblock %}

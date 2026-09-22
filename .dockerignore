@@ -1,0 +1,9 @@
+.dockerignore
+.env
+.venv/
+__pycache__/
+*.py[cod]
+data_collection.sqlite3
+media/
+staticfiles/
+.git/
