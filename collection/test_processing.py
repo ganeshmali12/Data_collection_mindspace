@@ -1,3 +1,4 @@
+import json
 from io import BytesIO
 from unittest.mock import patch
 
@@ -8,6 +9,23 @@ from .models import AnalysisResult, CollectionSession, MediaCapture
 
 
 class CombinedProcessingTests(TestCase):
+    def setUp(self):
+        self.client.post(
+            "/consent/submit/",
+            data=json.dumps({
+                "patient_id": "PID-TEST-1",
+                "gender": "Male",
+                "age": 25,
+                "consent_record_date": "2026-09-24",
+                "agree_voice": True,
+                "agree_video": True,
+                "agree_transcript": True,
+                "agree_publication": True,
+                "agree_terms": True,
+            }),
+            content_type="application/json",
+        )
+
     @patch("collection.services.combined_processing.score_features")
     @patch("collection.services.combined_processing.extract_features")
     def test_face_processing_persists_raw_and_normalized_results(self, extract_features, score_features):

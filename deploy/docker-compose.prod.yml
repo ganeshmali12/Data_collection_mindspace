@@ -1,0 +1,59 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: mindspace-data-collection-postgres
+    restart: always
+    environment:
+      POSTGRES_DB: ${DB_NAME:-mindspace_collection}
+      POSTGRES_USER: ${DB_USER:-mindspace_user}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-mindspace_local_password}
+    volumes:
+      - mindspace_postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-mindspace_user} -d ${DB_NAME:-mindspace_collection}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  web:
+    build:
+      context: ..
+      dockerfile: Dockerfile
+    container_name: mindspace-data-collection-web
+    restart: always
+    env_file:
+      - ../.env
+    environment:
+      DB_HOST: postgres
+      DB_PORT: 5432
+    ports:
+      - "${DATA_COLLECTION_BIND_IP:-0.0.0.0}:${DATA_COLLECTION_PORT:-8000}:8000"
+    volumes:
+      - ../media:/app/media
+      - ../staticfiles:/app/staticfiles
+    depends_on:
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/health/', timeout=5)"]
+      interval: 20s
+      timeout: 10s
+      start_period: 20s
+      retries: 5
+
+  nginx:
+    image: nginx:alpine
+    container_name: mindspace-data-collection-nginx
+    restart: always
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx/default.conf:/etc/nginx/conf.d/default.conf:ro
+      - ../staticfiles:/app/staticfiles:ro
+      - ../media:/app/media:ro
+    depends_on:
+      web:
+        condition: service_healthy
+
+volumes:
+  mindspace_postgres_data:

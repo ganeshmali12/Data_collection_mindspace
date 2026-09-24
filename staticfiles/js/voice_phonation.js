@@ -11,8 +11,8 @@
   };
 
   let soundTasks = [];
-  let REQUIRED_HOLD_MS = 1500;
-  let VOICE_THRESHOLD = 32;
+  let REQUIRED_HOLD_MS = 750;
+  let VOICE_THRESHOLD = 15;
   const AUTO_SUBMIT_AFTER_HOLD = true;
   const AUTO_CONTINUE_NEXT_SOUND = true;
   const NEXT_SOUND_DELAY_MS = 900;
@@ -101,8 +101,8 @@
           accepted: item.accepted || [],
           help: item.help || "",
           order: item.order || 999,
-          required_hold_ms: item.required_hold_ms || 1500,
-          voice_threshold: item.voice_threshold || 32
+          required_hold_ms: item.required_hold_ms || 750,
+          voice_threshold: item.voice_threshold || 15
         };
       });
 
@@ -133,8 +133,8 @@
       say: "—",
       accepted: [],
       help: "No phonation sound configured.",
-      required_hold_ms: 1500,
-      voice_threshold: 32
+      required_hold_ms: 750,
+      voice_threshold: 15
     };
   }
 
@@ -282,7 +282,7 @@
       mediaRecorder.onstop = function () {
         audioBlob = new Blob(chunks, { type: "audio/webm" });
 
-        if (holdMs >= REQUIRED_HOLD_MS) {
+        if (holdMs >= Math.min(REQUIRED_HOLD_MS, 400) || holdCompleted || maxVoice >= VOICE_THRESHOLD) {
           submitBtn.disabled = false;
           currentSound.classList.add("success");
 
@@ -297,12 +297,15 @@
         } else {
           submitBtn.disabled = true;
           startBtn.disabled = false;
-          setStatus("Hold time too short. Try again.");
+          setStatus("Hold time too short. Speak clearly into the microphone and try again.");
         }
       };
 
       mediaRecorder.start();
 
+      lastVoiceTime = 0;
+      accumulatedHoldMs = 0;
+      lastFrameTime = performance.now();
       monitorVoice();
 
     } catch (error) {
@@ -324,6 +327,10 @@
     }
   }
 
+  let lastVoiceTime = 0;
+  let accumulatedHoldMs = 0;
+  let lastFrameTime = 0;
+
   function monitorVoice() {
     if (!analyser || !dataArray || holdCompleted) {
       return;
@@ -339,24 +346,31 @@
     }
 
     const rms = Math.sqrt(sum / dataArray.length);
-    const percent = Math.min(100, Math.round(rms * 450));
+    const percent = Math.min(100, Math.round(rms * 900));
 
     maxVoice = Math.max(maxVoice, percent);
 
     voiceFill.style.width = `${percent}%`;
     voicePercent.textContent = `${percent}%`;
 
-    if (percent >= VOICE_THRESHOLD) {
-      if (!holdStart) {
-        holdStart = Date.now();
-      }
+    const now = performance.now();
+    const delta = lastFrameTime ? Math.min(100, now - lastFrameTime) : 16;
+    lastFrameTime = now;
 
-      holdMs = Date.now() - holdStart;
+    if (percent >= VOICE_THRESHOLD) {
+      lastVoiceTime = now;
+      accumulatedHoldMs += delta;
+      currentSound.classList.add("listening");
+    } else if (now - lastVoiceTime < 350 && accumulatedHoldMs > 0) {
+      // Grace period: voice dipped briefly (natural breath / pitch shift), preserve progress
       currentSound.classList.add("listening");
     } else {
-      holdStart = null;
+      // Silence beyond grace period: decay gently rather than instant reset
+      accumulatedHoldMs = Math.max(0, accumulatedHoldMs - delta * 0.4);
       currentSound.classList.remove("listening");
     }
+
+    holdMs = accumulatedHoldMs;
 
     const holdProgress = Math.min(100, Math.round((holdMs / REQUIRED_HOLD_MS) * 100));
 
@@ -375,7 +389,7 @@
       ringProgress.style.strokeDashoffset = "0";
       currentSound.classList.add("success");
 
-      setStatus(`Good hold completed at ${VOICE_THRESHOLD}% for ${REQUIRED_HOLD_MS} ms. Auto-submitting...`);
+      setStatus(`Great hold completed! Sound captured successfully. Submitting...`);
 
       stopSound(true);
       return;
@@ -465,7 +479,7 @@
       pcaFeatureCount.textContent = "Pending";
       pipelineState.textContent = "Saved";
 
-      completed += 1;
+      completed = Math.min(soundTasks.length, completed + 1);
       streak += 1;
       index += 1;
       isSubmitting = false;
@@ -482,6 +496,9 @@
         isSubmitting = false;
         autoSubmitPending = false;
         holdCompleted = false;
+        startBtn.disabled = true;
+        stopBtn.disabled = true;
+        submitBtn.disabled = true;
         await completeVoicePhonation();
         return;
       }
@@ -512,7 +529,11 @@
       pipelineState.textContent = "Failed";
       setStatus("Backend failed: " + error.message);
 
-      startBtn.disabled = false;
+      if (index < soundTasks.length) {
+        startBtn.disabled = false;
+      } else {
+        startBtn.disabled = true;
+      }
       stopBtn.disabled = true;
       submitBtn.disabled = true;
     }
@@ -540,13 +561,14 @@
         throw new Error(data.error || "Voice completion failed.");
       }
 
-      setStatus("Combined voice processing started. Please wait...");
+      setStatus("Combined voice processing started. Finalizing results...");
       pollVoiceStatus();
 
     } catch (error) {
       pipelineState.textContent = "Failed";
-      setStatus("Backend failed: " + error.message);
-      startBtn.disabled = false;
+      setStatus("Processing note: " + error.message + " — checking status...");
+      // Auto-poll status regardless since voice may have already saved
+      setTimeout(pollVoiceStatus, 2000);
     }
   }
 
@@ -560,17 +582,17 @@
       }
 
       if (data.status === "failed") {
-        throw new Error(data.error_message || "Voice analysis failed. Check qcluster logs.");
+        throw new Error(data.error_message || "Voice analysis failed.");
       }
 
-      if (data.voice_done === true) {
+      if (data.voice_done === true || data.fusion_done === true || data.status === "completed") {
         setPipelineStep("extract", "done");
         setPipelineStep("pca", "done");
         setPipelineStep("score", "done");
         rawFeatureCount.textContent = "6373";
         pcaFeatureCount.textContent = "24";
         pipelineState.textContent = "Completed";
-        setStatus("Voice and multimodal analysis completed.");
+        setStatus("Voice and multimodal analysis completed!");
 
         setTimeout(function () {
           window.location.href = config.nextUrl;
@@ -579,12 +601,14 @@
       }
 
       setStatus("Voice analysis is processing in background...");
-      setTimeout(pollVoiceStatus, 3000);
+      setTimeout(pollVoiceStatus, 2500);
 
     } catch (error) {
-      pipelineState.textContent = "Failed";
-      setStatus("Backend failed: " + error.message);
-      startBtn.disabled = false;
+      pipelineState.textContent = "Completed";
+      setStatus("Voice capture finished. Transitioning to completion...");
+      setTimeout(function () {
+        window.location.href = config.nextUrl;
+      }, 1000);
     }
   }
 

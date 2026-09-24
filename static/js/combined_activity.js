@@ -12,8 +12,8 @@
   // ---- Step data ----
   var steps = [
     { category: "Observe & Describe", tag: "Scene 1", prompt: "Observe the scene and describe everything you see in your own words.", image: "" },
-    { category: "Read & Express", tag: "Scene 2", prompt: "What do you think is happening in the story? Explain your thoughts.", image: "" },
-    { category: "Think & Reflect", tag: "Scene 3", prompt: "What do you think might happen next in this situation?", image: "" },
+    { category: "Think & Reflect", tag: "Scene 2", prompt: "What do you think is happening in the story? Explain your thoughts.", image: "" },
+    { category: "Read & Express", tag: "Scene 3", prompt: "What do you think might happen next in this situation?", image: "" },
     { category: "Act & Grow", tag: "Scene 4", prompt: "If you were in this situation, what would you do and why?", image: "" }
   ];
 
@@ -65,6 +65,8 @@
   var timerDisplay = document.getElementById("timer-display");
   var startOverlay = document.getElementById("start-overlay");
   var recordingStateActive = document.getElementById("recording-state-active");
+  var btnNextStep = document.getElementById("btn-next-step");
+  var btnNextStepText = document.getElementById("btn-next-step-text");
   var btnStartRecording = document.getElementById("btn-start-recording");
   var cameraPreview = document.getElementById("camera-preview");
   var cameraPlaceholder = document.getElementById("camera-placeholder");
@@ -121,26 +123,31 @@
 
       if (state.completedSteps[i]) {
         badge.textContent = "Completed ✓";
-        badge.className = "inline-block mt-1 text-[11px] font-semibold px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-800";
-        circle.className = "w-36 h-36 sm:w-40 sm:h-40 rounded-full overflow-hidden border-4 border-white shadow-xl ring-4 ring-emerald-500 transition duration-300";
-        numBadge.className = "absolute -top-1.5 right-1.5 w-9 h-9 bg-emerald-700 text-white font-black rounded-full flex items-center justify-center text-sm border-2 border-white shadow-md";
+        badge.className = "inline-block mt-1.5 text-[11px] font-semibold px-3 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/40";
+        circle.className = "w-36 h-36 sm:w-40 sm:h-40 rounded-full overflow-hidden border-4 border-slate-800 shadow-2xl ring-4 ring-emerald-500/50 transition duration-300";
+        numBadge.className = "absolute -top-1.5 right-1.5 w-9 h-9 bg-emerald-600 text-white font-black rounded-full flex items-center justify-center text-sm border-2 border-slate-900 shadow-lg";
         numBadge.innerHTML = "✓";
       } else if (i === 1 || state.completedSteps[i - 1]) {
         badge.textContent = "Ready";
-        badge.className = "inline-block mt-1 text-[11px] font-semibold px-2.5 py-0.5 rounded-full bg-blue-100 text-blue-800";
-        circle.className = "w-36 h-36 sm:w-40 sm:h-40 rounded-full overflow-hidden border-4 border-white shadow-xl ring-4 ring-emerald-300 transition duration-300";
-        numBadge.className = "absolute -top-1.5 right-1.5 w-9 h-9 bg-mindGreen text-white font-black rounded-full flex items-center justify-center text-sm border-2 border-white shadow-md";
+        badge.className = "inline-block mt-1.5 text-[11px] font-semibold px-3 py-0.5 rounded-full bg-indigo-500/20 text-indigo-300 border border-indigo-500/40";
+        circle.className = "w-36 h-36 sm:w-40 sm:h-40 rounded-full overflow-hidden border-4 border-slate-800 shadow-2xl ring-4 ring-indigo-500/50 transition duration-300";
+        numBadge.className = "absolute -top-1.5 right-1.5 w-9 h-9 bg-indigo-600 text-white font-black rounded-full flex items-center justify-center text-sm border-2 border-slate-900 shadow-lg";
         numBadge.innerHTML = i;
       } else {
         badge.textContent = "Locked";
-        badge.className = "inline-block mt-1 text-[11px] font-semibold px-2.5 py-0.5 rounded-full bg-gray-100 text-gray-500";
-        circle.className = "w-36 h-36 sm:w-40 sm:h-40 rounded-full overflow-hidden border-4 border-white shadow-sm ring-4 ring-gray-200 opacity-60 transition duration-300";
-        numBadge.className = "absolute -top-1.5 right-1.5 w-9 h-9 bg-gray-400 text-white font-black rounded-full flex items-center justify-center text-sm border-2 border-white shadow-md";
+        badge.className = "inline-block mt-1.5 text-[11px] font-semibold px-3 py-0.5 rounded-full bg-slate-800 text-slate-400 border border-slate-700";
+        circle.className = "w-36 h-36 sm:w-40 sm:h-40 rounded-full overflow-hidden border-4 border-slate-800 shadow-lg ring-4 ring-slate-700/50 opacity-50 transition duration-300";
+        numBadge.className = "absolute -top-1.5 right-1.5 w-9 h-9 bg-slate-700 text-slate-400 font-black rounded-full flex items-center justify-center text-sm border-2 border-slate-900 shadow-md";
         numBadge.innerHTML = i;
       }
     }
 
     var count = Object.keys(state.completedSteps).length;
+    var progressCountEl = document.getElementById("map-progress-count");
+    if (progressCountEl) {
+      progressCountEl.textContent = count + " of " + state.totalSteps + " Completed";
+    }
+
     if (count === 4) { startBtnLabel.textContent = "Review Journey"; }
     else if (count > 0) { startBtnLabel.textContent = "Continue Journey"; }
     else { startBtnLabel.textContent = "Start Journey"; }
@@ -149,28 +156,40 @@
   // ---- Step Rendering ----
   function renderStep() {
     var data = steps[state.currentStep];
-    stepCounterText.textContent = "Step " + (state.currentStep + 1) + " of " + state.totalSteps;
-    stepCategoryHeading.textContent = data.category;
+    if (stepCounterText) stepCounterText.textContent = "Step " + (state.currentStep + 1) + " of " + state.totalSteps;
+    if (stepCategoryHeading) stepCategoryHeading.textContent = data.category;
     if (stepCategorySubtitle) stepCategorySubtitle.textContent = data.category;
-    sceneTag.textContent = data.tag;
-    sceneImage.src = data.image;
-    questionText.textContent = data.prompt;
+    if (sceneTag) sceneTag.textContent = data.tag;
+    if (sceneImage && data.image) {
+      sceneImage.src = data.image;
+      sceneImage.classList.remove("hidden");
+    }
+    if (questionText) questionText.textContent = data.prompt;
 
     for (var i = 1; i <= 4; i++) {
       var dot = document.getElementById("dot-" + i);
       var line = document.getElementById("line-" + i);
-      if (state.completedSteps[i]) {
-        dot.className = "w-9 h-9 rounded-full bg-mindGreen text-white text-sm font-bold flex items-center justify-center shadow-sm transition";
-        dot.innerHTML = "✓";
-      } else if (i === state.currentStep + 1) {
-        dot.className = "w-9 h-9 rounded-full bg-mindGreen text-white text-sm font-bold flex items-center justify-center ring-2 ring-emerald-200 shadow-md transition";
-        dot.innerHTML = i;
-      } else {
-        dot.className = "w-9 h-9 rounded-full bg-gray-100 text-gray-500 text-sm font-bold flex items-center justify-center border border-gray-200 transition";
-        dot.innerHTML = i;
+      if (dot) {
+        if (state.completedSteps[i]) {
+          dot.className = "w-8 h-8 rounded-full bg-emerald-600 text-white text-xs font-bold flex items-center justify-center shadow-md transition";
+          dot.innerHTML = "✓";
+        } else if (i === state.currentStep + 1) {
+          dot.className = "w-8 h-8 rounded-full bg-indigo-600 text-white text-xs font-bold flex items-center justify-center ring-2 ring-indigo-400 shadow-md transition";
+          dot.innerHTML = i;
+        } else {
+          dot.className = "w-8 h-8 rounded-full bg-slate-800 text-slate-400 text-xs font-bold flex items-center justify-center border border-slate-700 transition";
+          dot.innerHTML = i;
+        }
       }
       if (line) {
-        line.className = "w-5 sm:w-8 h-[3px] rounded-full " + (state.completedSteps[i] ? "bg-mindGreen" : "bg-gray-300");
+        line.className = "w-4 sm:w-8 h-[2px] rounded-full " + (state.completedSteps[i] ? "bg-indigo-600" : "bg-slate-700");
+      }
+    }
+
+    if (btnStartRecording) {
+      var startBtnSpan = btnStartRecording.querySelector("span");
+      if (startBtnSpan) {
+        startBtnSpan.textContent = "Start Recording Step " + (state.currentStep + 1);
       }
     }
 
@@ -179,14 +198,96 @@
 
   // ---- Toast ----
   function showToast(title, body) {
-    xpToastTitle.textContent = title;
-    xpToastBody.textContent = body;
+    if (!xpToast) return;
+    if (xpToastTitle) xpToastTitle.textContent = title;
+    if (xpToastBody) xpToastBody.textContent = body;
     xpToast.classList.remove("translate-y-24", "opacity-0");
     xpToast.classList.add("translate-y-0", "opacity-100");
     setTimeout(function () {
-      xpToast.classList.remove("translate-y-0", "opacity-100");
-      xpToast.classList.add("translate-y-24", "opacity-0");
+      if (xpToast) {
+        xpToast.classList.remove("translate-y-0", "opacity-100");
+        xpToast.classList.add("translate-y-24", "opacity-0");
+      }
     }, 2400);
+  }
+
+  // ---- Step Advancing (Continuous Recording Flow) ----
+  function advanceToNextStep(autoTriggered) {
+    state.completedSteps[state.currentStep + 1] = true;
+    state.totalXP += 50;
+
+    try {
+      if (typeof confetti === "function") {
+        confetti({ particleCount: 45, spread: 55, origin: { y: 0.75 } });
+      }
+    } catch (e) { /* ignore */ }
+
+    if (state.currentStep < state.totalSteps - 1) {
+      state.currentStep++;
+      var nextData = steps[state.currentStep];
+      showToast("+50 XP Earned!", "Step " + state.currentStep + " completed! Now: " + nextData.category);
+
+      // Update UI for new step immediately
+      if (stepCounterText) stepCounterText.textContent = "Step " + (state.currentStep + 1) + " of " + state.totalSteps;
+      if (stepCategorySubtitle) stepCategorySubtitle.textContent = nextData.category;
+      if (sceneTag) sceneTag.textContent = nextData.tag;
+      if (sceneImage && nextData.image) {
+        sceneImage.src = nextData.image;
+        sceneImage.classList.remove("hidden");
+      }
+      if (questionText) questionText.textContent = nextData.prompt;
+
+      // Update stepper dots
+      for (var i = 1; i <= 4; i++) {
+        var dot = document.getElementById("dot-" + i);
+        var line = document.getElementById("line-" + i);
+        if (dot) {
+          if (state.completedSteps[i]) {
+            dot.className = "w-8 h-8 rounded-full bg-emerald-600 text-white text-xs font-bold flex items-center justify-center shadow-md transition";
+            dot.innerHTML = "✓";
+          } else if (i === state.currentStep + 1) {
+            dot.className = "w-8 h-8 rounded-full bg-indigo-600 text-white text-xs font-bold flex items-center justify-center ring-2 ring-indigo-400 shadow-md transition";
+            dot.innerHTML = i;
+          } else {
+            dot.className = "w-8 h-8 rounded-full bg-slate-800 text-slate-400 text-xs font-bold flex items-center justify-center border border-slate-700 transition";
+            dot.innerHTML = i;
+          }
+        }
+        if (line) {
+          line.className = "w-4 sm:w-8 h-[2px] rounded-full " + (state.completedSteps[i] ? "bg-indigo-600" : "bg-slate-700");
+        }
+      }
+
+      // Update Next button label on step 4
+      if (btnNextStepText) {
+        btnNextStepText.textContent = (state.currentStep === state.totalSteps - 1) ? "Finish Activity ✓" : "Next Step →";
+      }
+
+      // Reset timer for the next step without stopping the recorder
+      state.recordingTimer = STEP_SECONDS;
+      state.recordedSeconds = 0;
+      updateTimerDisplay();
+    } else {
+      // Step 4 finished -> submit all responses and continue to next page
+      showToast("Activity Complete! +200 XP", "Saving video and moving to next activity...");
+      stopTimerUI();
+      state.isRecording = false;
+      if (recordingTimerPill) recordingTimerPill.classList.add("hidden");
+      if (recordingStateActive) recordingStateActive.classList.add("hidden");
+      setTimeout(function () {
+        submitAll();
+      }, 500);
+    }
+  }
+
+  function stepTimerTick() {
+    state.recordingTimer--;
+    state.recordedSeconds++;
+    state.totalRecordedSeconds++;
+    updateTimerDisplay();
+    if (state.recordingTimer <= 0) {
+      advanceToNextStep(true);
+    }
   }
 
   // ---- Camera error feedback ----
@@ -217,11 +318,11 @@
   function setFaceStatus(detected) {
     if (!faceStatus) return;
     if (detected) {
-      faceStatus.className = "flex items-center text-emerald-800";
-      faceStatus.innerHTML = '<svg class="w-4 h-4 mr-1 text-emerald-600" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2l2.4 4.9 5.4.8-3.9 3.8.9 5.4L12 14.8 7.2 16.9l.9-5.4L4.2 7.7l5.4-.8L12 2z"/></svg><span id="face-status-text">Face Detected</span>';
+      faceStatus.className = "flex items-center text-emerald-400";
+      faceStatus.innerHTML = '<svg class="w-4 h-4 mr-1 text-emerald-400" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2l2.4 4.9 5.4.8-3.9 3.8.9 5.4L12 14.8 7.2 16.9l.9-5.4L4.2 7.7l5.4-.8L12 2z"/></svg><span id="face-status-text">Face Detected</span>';
     } else {
-      faceStatus.className = "flex items-center text-gray-600";
-      faceStatus.innerHTML = '<svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10 10-4.5 10-10S17.5 2 12 2zm3.5 13.5L11 11l.7-.7-4.5-4.5-1.4 1.4 4.5 4.5-.7.7 4.5 4.5 1.4-1.4z"/></svg><span id="face-status-text">Not detected</span>';
+      faceStatus.className = "flex items-center text-slate-400";
+      faceStatus.innerHTML = '<svg class="w-4 h-4 mr-1 text-slate-400" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10 10-4.5 10-10S17.5 2 12 2zm3.5 13.5L11 11l.7-.7-4.5-4.5-1.4 1.4 4.5 4.5-.7.7 4.5 4.5 1.4-1.4z"/></svg><span id="face-status-text">Not detected</span>';
     }
   }
 
@@ -276,7 +377,7 @@
     if (name === "initial") {
       startOverlay.classList.remove("hidden");
       recordingStateActive.classList.add("hidden");
-      sceneImage.classList.add("hidden");
+      sceneImage.classList.remove("hidden");
     } else if (name === "active") {
       startOverlay.classList.add("hidden");
       recordingStateActive.classList.remove("hidden");
@@ -325,16 +426,6 @@
     };
   }
 
-  function stepTimerTick() {
-    state.recordingTimer--;
-    state.recordedSeconds++;
-    state.totalRecordedSeconds++;
-    updateTimerDisplay();
-    if (state.recordingTimer <= 0) {
-      completeStepAuto();
-    }
-  }
-
   function beginRecording() {
     if (state.mediaRecorder && state.mediaRecorder.state === "recording") return;
     if (state.mediaRecorder && state.mediaRecorder.state === "paused") {
@@ -343,7 +434,7 @@
       state.recordingTimer = STEP_SECONDS;
       state.recordedSeconds = 0;
       showRecordingState("active");
-      recordingTimerPill.classList.remove("hidden");
+      if (recordingTimerPill) recordingTimerPill.classList.remove("hidden");
       updateTimerDisplay();
       document.querySelectorAll(".waveform-bar").forEach(function (bar) { bar.classList.add("active"); });
       state.timerInterval = setInterval(stepTimerTick, 1000);
@@ -360,7 +451,7 @@
     state.mediaRecorder.start(1000);
 
     showRecordingState("active");
-    recordingTimerPill.classList.remove("hidden");
+    if (recordingTimerPill) recordingTimerPill.classList.remove("hidden");
     updateTimerDisplay();
     document.querySelectorAll(".waveform-bar").forEach(function (bar) { bar.classList.add("active"); });
 
@@ -372,32 +463,6 @@
       if (!s) { onCameraStartFailed(); return; }
       beginRecording();
     });
-  }
-
-  // Auto-completes the current step when its 40s timer elapses: pauses the
-  // shared recorder, unlocks the step, and advances (or submits on the last).
-  function completeStepAuto() {
-    stopTimerUI();
-    state.isRecording = false;
-    recordingTimerPill.classList.add("hidden");
-    if (state.mediaRecorder && state.mediaRecorder.state === "recording") {
-      try { state.mediaRecorder.pause(); } catch (e) { /* ignore */ }
-    }
-    state.completedSteps[state.currentStep + 1] = true;
-    state.totalXP += 50;
-    if (typeof confetti === "function") {
-      confetti({ particleCount: 55, spread: 60, origin: { y: 0.75 } });
-    }
-    showToast("+50 XP Earned!", "Great observation & clarity!");
-    if (state.currentStep >= state.totalSteps - 1) {
-      cleanupCamera();
-      setTimeout(function () { submitAll(); }, 600);
-    } else {
-      setTimeout(function () {
-        state.currentStep++;
-        renderStep();
-      }, 600);
-    }
   }
 
   // Final stop: ends the single recorder and produces the one combined blob.
@@ -702,6 +767,12 @@
   };
 
   // ---- Wire Events ----
+  if (btnNextStep) {
+    btnNextStep.addEventListener("click", function () {
+      advanceToNextStep(false);
+    });
+  }
+
   btnStartRecording.addEventListener("click", function () {
     if (state.isRecording) return;
     if (state.stream) { beginRecording(); }

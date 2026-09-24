@@ -1,421 +1,213 @@
+/* ── Voice Phonation Activity — Frameless Layout CSS ── */
+
 :root {
-  --bg-gradient: linear-gradient(135deg, #e8f5e9 0%, #f1f8e9 40%, #e0f2f1 100%);
-  --primary-green: #0d6848;
-  --accent-green: #25b871;
-  --light-green-bg: #eaf6f0;
-  --track-color: #e5ece8;
-  --text-dark: #1b3d2f;
-  --text-muted: #6b8278;
-  --card-bg: #FCFBF8;
-  --card-border: rgba(255, 255, 255, 0.8);
-  --ms-green-dark: #051F20;
-  --ms-green-soft: #DAF1DE;
-  --ms-red: #dc2626;
+  --emerald: #10b981;
+  --emerald-glow: rgba(16, 185, 129, 0.4);
+  --cyan: #06b6d4;
+  --indigo: #6366f1;
 }
 
-* {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
-}
-
-/* ── Page Wrapper ────────────────────────────────── */
-
+/* ── Page root — transparent, inherits dark body background */
 .phonation-page {
-  min-height: calc(100vh - 40px);
-  width: 100%;
-  background: #F2FAF4;
-  padding: 17px;
-  display: flex;
-  justify-content: center;
-  align-items: center;
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  color: #f8fafc;
+  -webkit-font-smoothing: antialiased;
 }
 
-/* ── Main Container ─────────────────────────────── */
-
-.app-container {
-  position: relative;
-  width: 100%;
-  max-width: 765px;
-  height: 510px;
-  background: var(--bg-gradient);
-  border-radius: 20px;
-  overflow: hidden;
-  box-shadow: 0 17px 34px rgba(0, 0, 0, 0.1);
-  padding: 27px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: space-between;
-}
-
-/* ── Decorative Leaves ──────────────────────────── */
-
-.bg-leaf-left,
-.bg-leaf-right {
-  position: absolute;
-  pointer-events: none;
-  opacity: 0.6;
-}
-
-.bg-leaf-left {
-  bottom: -17px;
-  left: -17px;
-  width: 187px;
-}
-
-.bg-leaf-right {
-  bottom: -17px;
-  right: -17px;
-  width: 187px;
-  transform: scaleX(-1);
-}
-
-/* ── Header ─────────────────────────────────────── */
-
-.header {
-  z-index: 2;
-  width: 100%;
-}
-
-.logo-container {
-  display: flex;
-  align-items: center;
-  gap: 7px;
-  color: var(--primary-green);
-  font-weight: 700;
-  font-size: 0.94rem;
-  margin-bottom: 7px;
-}
-
-.logo-icon {
-  width: 19px;
-  height: 19px;
-  fill: currentColor;
-}
-
-.title {
-  color: var(--text-dark);
-  font-size: 1.57rem;
-  font-weight: 700;
-  text-align: center;
-}
-
-.subtitle {
-  color: var(--text-muted);
-  font-size: 0.81rem;
-  margin-top: 3px;
-  text-align: center;
-}
-
-.count-display {
-  color: var(--accent-green);
-  font-weight: 700;
-  font-size: 0.98rem;
-  margin-top: 10px;
-}
-
-/* ── Progress Bar ───────────────────────────────── */
-
-.progress-bar-container {
-  width: 238px;
-  height: 5px;
-  background-color: var(--track-color);
-  border-radius: 9px;
-  margin-top: 10px;
-  overflow: hidden;
-}
-
-.progress-bar-fill {
-  width: 0%;
-  height: 100%;
-  background-color: var(--accent-green);
-  border-radius: 10px;
-  transition: width 0.4s ease;
-}
-
-/* ── Center Ring + Waveforms ────────────────────── */
-
-.visualizer-section {
-  width: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 34px;
-  position: relative;
-  z-index: 2;
-}
+/* ── Audio Waveform Visualizers ─────────────────────── */
 
 .audio-waves {
-  display: flex;
-  align-items: center;
-  gap: 5px;
-  opacity: 0.4;
+  position: relative;
+  z-index: 10;
+  height: 80px;
+  align-items: flex-end;
 }
 
 .wave-bar {
-  width: 4px;
-  background: var(--accent-green);
-  border-radius: 9px;
+  width: 5px;
+  background: linear-gradient(180deg, var(--emerald), var(--cyan));
+  border-radius: 9999px;
+  opacity: 0.3;
+  transition: all 0.15s ease;
 }
 
+.audio-waves .wave-bar:nth-child(1) { height: 14px; }
+.audio-waves .wave-bar:nth-child(2) { height: 26px; }
+.audio-waves .wave-bar:nth-child(3) { height: 40px; }
+.audio-waves .wave-bar:nth-child(4) { height: 58px; }
+.audio-waves .wave-bar:nth-child(5) { height: 38px; }
+.audio-waves .wave-bar:nth-child(6) { height: 46px; }
+.audio-waves .wave-bar:nth-child(7) { height: 24px; }
+.audio-waves .wave-bar:nth-child(8) { height: 12px; }
+
+/* Active waveform animation (applied via .listening class on parent) */
+.devanagari-char.listening ~ .audio-waves .wave-bar,
+.visualizer-section:has(.devanagari-char.listening) .wave-bar {
+  opacity: 0.9;
+}
+
+/* Always-on subtle idle pulse */
+.audio-waves .wave-bar:nth-child(1) { animation: wave-idle 2.1s ease-in-out infinite 0.0s; }
+.audio-waves .wave-bar:nth-child(2) { animation: wave-idle 1.8s ease-in-out infinite 0.2s; }
+.audio-waves .wave-bar:nth-child(3) { animation: wave-idle 2.4s ease-in-out infinite 0.4s; }
+.audio-waves .wave-bar:nth-child(4) { animation: wave-idle 2.0s ease-in-out infinite 0.1s; }
+.audio-waves .wave-bar:nth-child(5) { animation: wave-idle 1.9s ease-in-out infinite 0.35s; }
+.audio-waves .wave-bar:nth-child(6) { animation: wave-idle 2.3s ease-in-out infinite 0.15s; }
+.audio-waves .wave-bar:nth-child(7) { animation: wave-idle 1.7s ease-in-out infinite 0.3s; }
+.audio-waves .wave-bar:nth-child(8) { animation: wave-idle 2.2s ease-in-out infinite 0.05s; }
+
+@keyframes wave-idle {
+  0%, 100% { transform: scaleY(0.5); opacity: 0.25; }
+  50% { transform: scaleY(1.15); opacity: 0.55; }
+}
+
+/* ── Circular Hold Progress Ring ────────────────────── */
+
 .circle-container {
+  width: 240px;
+  height: 240px;
   position: relative;
-  width: 187px;
-  height: 187px;
-  display: flex;
-  justify-content: center;
-  align-items: center;
+  z-index: 10;
+  flex-shrink: 0;
+}
+
+.circle-halo {
+  position: absolute;
+  inset: -16px;
+  border-radius: 50%;
+  background: radial-gradient(circle, var(--emerald-glow) 0%, transparent 65%);
+  opacity: 0;
+  transition: opacity 0.4s ease;
+  pointer-events: none;
 }
 
 .circle-svg {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
   transform: rotate(-90deg);
-  width: 187px;
-  height: 187px;
 }
 
+/* No dark fill — transparent ring sits over background */
 .circle-bg {
-  fill: none;
-  stroke: #d8eae1;
-  stroke-width: 7;
+  fill: rgba(255, 255, 255, 0.03);
+  stroke: rgba(255, 255, 255, 0.08);
+  stroke-width: 8;
 }
 
 .circle-progress {
   fill: none;
-  stroke: var(--accent-green);
+  stroke: url(#ringGrad);
   stroke-width: 8;
   stroke-linecap: round;
   stroke-dasharray: 628.319;
   stroke-dashoffset: 628.319;
-  transition: stroke-dashoffset 0.5s ease;
+  transition: stroke-dashoffset 0.08s linear;
+  filter: drop-shadow(0 0 10px rgba(16, 185, 129, 0.5));
 }
 
 .circle-content {
-  position: absolute;
-  text-align: center;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  pointer-events: none;
+  position: relative;
+  z-index: 2;
 }
 
+/* ── Devanagari Character Display ───────────────────── */
+
 .devanagari-char {
-  font-size: 3.83rem;
-  font-weight: 700;
-  color: var(--primary-green);
+  font-family: 'Outfit', 'Noto Sans Devanagari', sans-serif;
+  font-size: 4.5rem;
   line-height: 1;
-  border-radius: 50%;
-  transition: transform 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease, background 0.25s ease;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  user-select: none;
+  color: #f8fafc;
 }
 
 .devanagari-char.listening {
-  transform: scale(1.03);
-  border: 2px solid var(--accent-green);
+  color: #34d399;
+  text-shadow: 0 0 24px rgba(16, 185, 129, 0.75);
+  transform: scale(1.08);
+}
+
+/* Show halo when listening */
+.circle-container:has(.devanagari-char.listening) .circle-halo {
+  opacity: 1;
+  animation: halo-pulse 2s ease-in-out infinite;
+}
+
+@keyframes halo-pulse {
+  0%, 100% { opacity: 0.6; transform: scale(1); }
+  50% { opacity: 1; transform: scale(1.06); }
 }
 
 .devanagari-char.success {
-  border: 2px solid var(--accent-green);
+  color: #10b981;
+  text-shadow: 0 0 32px rgba(16, 185, 129, 1);
+  transform: scale(1.14);
 }
 
-/* ── Start Button ───────────────────────────────── */
+/* ── Meter Track Threshold Marker ───────────────────── */
 
-.btn-start {
-  background: var(--primary-green);
-  color: white;
-  padding: 10px 34px;
-  border: none;
-  border-radius: 10px;
-  font-weight: 600;
-  font-size: 0.89rem;
-  font-family: inherit;
-  display: flex;
-  align-items: center;
-  gap: 9px;
-  box-shadow: 0 5px 14px rgba(13, 104, 72, 0.2);
-  transition: all 0.2s;
-  cursor: pointer;
+.threshold-marker {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 15%;
+  width: 2px;
+  background: #f59e0b;
+  box-shadow: 0 0 6px rgba(245, 158, 11, 0.9);
   z-index: 2;
+  border-radius: 1px;
 }
 
-.btn-start:hover {
-  transform: translateY(-2px);
-  background: #0a543a;
+.meter-fill {
+  transition: width 0.08s ease;
 }
 
-.btn-start:disabled {
-  opacity: 0.45;
-  cursor: not-allowed;
-  transform: none;
-}
-
-.mic-icon {
-  width: 17px;
-  height: 17px;
-  fill: currentColor;
-}
-
-/* ── Status Box ─────────────────────────────────── */
-
-.status-box {
-  min-height: 26px;
-  width: 100%;
-  max-width: 442px;
-  border-radius: 9px;
-  background: rgba(255, 255, 255, 0.6);
-  border: 1px solid rgba(255, 255, 255, 0.8);
-  color: var(--text-muted);
-  display: grid;
-  place-items: center;
-  text-align: center;
-  padding: 7px 12px;
-  font-size: 0.7rem;
-  font-weight: 600;
-  z-index: 2;
-}
-
-/* ── Sound Tabs (bottom) ────────────────────────── */
-
-.tabs-container {
-  background: var(--card-bg);
-
-  border: 1px solid var(--card-border);
-  border-radius: 15px;
-  padding: 10px;
-  display: flex;
-  gap: 10px;
-  width: 100%;
-  max-width: 680px;
-  z-index: 2;
-}
+/* ── Sound Selection Chips ──────────────────────────── */
 
 .sound-chip {
-  flex: 1;
-  height: 48px;
-  background: white;
-  border: 1px solid #eef2f0;
-  border-radius: 10px;
-  display: flex;
+  display: inline-flex;
   align-items: center;
   justify-content: center;
-  font-size: 1.19rem;
-  font-weight: 600;
-  color: var(--text-dark);
+  min-width: 52px;
+  height: 48px;
+  padding: 0 1.1rem;
+  background: rgba(15, 23, 42, 0.55);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 14px;
+  font-family: 'Outfit', 'Noto Sans Devanagari', sans-serif;
+  font-size: 1.35rem;
+  font-weight: 700;
+  color: #64748b;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  user-select: none;
   cursor: default;
-  transition: all 0.2s;
-}
-
-.sound-chip.active {
-  background: var(--light-green-bg);
-  border-color: #a3dac2;
-  color: var(--primary-green);
 }
 
 .sound-chip.current {
-  background: var(--light-green-bg);
-  border-color: #a3dac2;
-  color: var(--primary-green);
+  background: rgba(16, 185, 129, 0.15);
+  border-color: #10b981;
+  color: #34d399;
+  box-shadow: 0 0 18px rgba(16, 185, 129, 0.3), 0 0 0 1px rgba(16, 185, 129, 0.2);
+  transform: scale(1.1);
 }
 
 .sound-chip.done {
-  background: var(--ms-green-soft);
-  color: var(--ms-green-dark);
-  border-color: var(--accent-green);
+  background: rgba(16, 185, 129, 0.07);
+  border-color: rgba(16, 185, 129, 0.3);
+  color: #10b981;
+  opacity: 0.9;
 }
 
-.sound-chip.failed {
-  background: #fef2f2;
-  color: #991b1b;
-  border-color: #fecaca;
-}
+/* ── Disabled Button States ─────────────────────────── */
 
-/* ═══ Hidden elements (JS pipeline) ═══════════════ */
-
-.mission-line,
-.progress-row,
-.meter-section,
-.pipeline-row,
-.button-row,
-.backend-result-box,
-.score-box {
-  display: none !important;
-}
-
-/* ═══ Responsive ══════════════════════════════════ */
-
-@media (max-width: 1100px) {
-  .phonation-page {
-    padding: 15px;
-    align-items: flex-start;
-  }
-}
-
-@media (max-width: 768px) {
-  .app-container {
-    height: auto;
-    min-height: 425px;
-    padding: 20px 15px 15px;
-    border-radius: 15px;
-  }
-
-  .title {
-    font-size: 1.19rem;
-  }
-
-  .circle-container {
-    width: 153px;
-    height: 153px;
-  }
-
-  .circle-svg {
-    width: 153px;
-    height: 153px;
-  }
-
-  .devanagari-char {
-    font-size: 2.89rem;
-  }
-
-  .visualizer-section {
-    gap: 17px;
-  }
-
-  .audio-waves {
-    display: none;
-  }
-
-  .sound-chip {
-    height: 41px;
-    font-size: 0.98rem;
-  }
-}
-
-@media (max-width: 480px) {
-  .app-container {
-    padding: 15px 12px 12px;
-  }
-
-  .circle-container {
-    width: 136px;
-    height: 136px;
-  }
-
-  .circle-svg {
-    width: 136px;
-    height: 136px;
-  }
-
-  .devanagari-char {
-    font-size: 2.55rem;
-  }
-
-  .sound-chip {
-    height: 36px;
-    font-size: 0.85rem;
-  }
-
-  .progress-bar-container {
-    width: 100%;
-    max-width: 204px;
-  }
+button:disabled {
+  opacity: 0.3 !important;
+  cursor: not-allowed !important;
+  transform: none !important;
+  box-shadow: none !important;
 }

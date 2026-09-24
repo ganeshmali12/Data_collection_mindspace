@@ -21,6 +21,7 @@ def media_capture_upload_path(instance, filename):
 
 class CollectionSession(models.Model):
     STATUS_CHOICES = [
+        ("consent", "Consent"),
         ("questionnaire", "Questionnaire"),
         ("capture", "Capture"),
         ("processing", "Processing"),
@@ -29,14 +30,41 @@ class CollectionSession(models.Model):
     ]
     session_id = models.UUIDField(default=uuid.uuid4, unique=True, editable=False)
     participant_code = models.CharField(max_length=100, blank=True)
-    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default="questionnaire")
-    current_step = models.CharField(max_length=40, default="questionnaire")
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default="consent")
+    current_step = models.CharField(max_length=40, default="consent")
     consented_at = models.DateTimeField(null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
         return str(self.session_id)
+
+
+class ConsentRecord(models.Model):
+    session = models.OneToOneField(CollectionSession, on_delete=models.CASCADE, related_name="consent")
+    patient_id = models.CharField(max_length=100)
+    gender = models.CharField(max_length=30)
+    age = models.PositiveIntegerField()
+    consent_record_date = models.DateField()
+    agree_voice = models.BooleanField(default=False)
+    agree_video = models.BooleanField(default=False)
+    agree_transcript = models.BooleanField(default=False)
+    agree_publication = models.BooleanField(default=False)
+    agree_terms = models.BooleanField(default=False)
+    is_minor = models.BooleanField(default=False)
+    guardian_name = models.CharField(max_length=200, blank=True)
+    guardian_relationship = models.CharField(max_length=100, blank=True)
+    guardian_contact = models.CharField(max_length=100, blank=True)
+    guardian_confirm_parent = models.BooleanField(default=False)
+    guardian_confirm_minor = models.BooleanField(default=False)
+    guardian_confirm_modalities = models.BooleanField(default=False)
+    guardian_confirm_terms = models.BooleanField(default=False)
+    ip_address = models.GenericIPAddressField(null=True, blank=True)
+    user_agent = models.TextField(blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"Consent for {self.patient_id} ({self.session.session_id})"
 
 
 class QuestionnaireResponse(models.Model):
