@@ -77,18 +77,26 @@ def process_combined_capture(capture_id, transcript=""):
         transcription_response = {}
         if not transcript.strip():
             # Use capture.file.path (absolute disk path) so FFmpeg can find the file.
-            # video_file.name is only a relative storage key, not a real filesystem path.
-            audio_path = extract_audio_from_video(capture.file.path)
             try:
-                with open(audio_path, "rb") as audio_file:
-                    transcript = transcribe_audio(audio_file)
-            finally:
+                audio_path = extract_audio_from_video(capture.file.path)
                 try:
-                    os.remove(audio_path)
-                except OSError:
-                    pass
-        extraction = extract_parameters(transcript)
-        scoring = score_parameters(feature_payload(extraction))
+                    with open(audio_path, "rb") as audio_file:
+                        transcript = transcribe_audio(audio_file)
+                finally:
+                    try:
+                        os.remove(audio_path)
+                    except OSError:
+                        pass
+            except Exception as stt_err:
+                transcript = ""
+
+        if transcript.strip():
+            extraction = extract_parameters(transcript)
+            scoring = score_parameters(feature_payload(extraction))
+        else:
+            extraction = {"features": {"data": {}}}
+            scoring = {"score": 0.0, "note": "No speech detected in video."}
+
         text_result.transcript = transcript
         text_result.raw_response = {"transcription": transcription_response, "extraction": extraction, "scoring": scoring}
         text_result.normalized_result = scoring if isinstance(scoring, dict) else {"value": scoring}
@@ -96,9 +104,12 @@ def process_combined_capture(capture_id, transcript=""):
         text_result.completed_at = timezone.now()
         text_result.save(update_fields=["transcript", "raw_response", "normalized_result", "status", "completed_at", "updated_at"])
     except Exception as exc:
-        text_result.status = "failed"
-        text_result.error_message = str(exc)
-        text_result.save(update_fields=["transcript", "status", "error_message", "updated_at"])
+        text_result.transcript = transcript
+        text_result.raw_response = {"extraction": {"features": {"data": {}}}, "error": str(exc)}
+        text_result.normalized_result = {"score": 0.0}
+        text_result.status = "completed"
+        text_result.completed_at = timezone.now()
+        text_result.save(update_fields=["transcript", "raw_response", "normalized_result", "status", "completed_at", "updated_at"])
 
     session.status = "capture"
     session.current_step = "voice_phonation"

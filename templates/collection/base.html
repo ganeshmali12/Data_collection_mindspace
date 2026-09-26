@@ -6,9 +6,10 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <title>{% block title %}MindSpace Data Collection{% endblock %}</title>
   <script src="https://cdn.tailwindcss.com"></script>
+  {% block extra_css %}{% endblock %}
   {% block styles %}{% endblock %}
 </head>
-<body>
+<body class="min-h-screen bg-[#090d16] text-[#f8fafc]" style="background: radial-gradient(circle at 50% 0%, #151c33 0%, #090d16 70%) fixed;">
   {% block content %}{% endblock %}
   {% block scripts %}{% endblock %}
 </body>

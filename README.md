@@ -2,6 +2,8 @@
 
 Standalone Django project for local research data collection. It is intentionally separate from the existing `manovedh` application, database, users, media files, and deployment.
 
+> **Quick Start**: See the comprehensive [Local Setup & Execution Guide](docs/RUN_LOCALLY.md) for step-by-step instructions on running this project locally with Docker or Python.
+
 ## Boundary with the original project
 
 This project lives in:

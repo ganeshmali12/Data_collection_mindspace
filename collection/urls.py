@@ -6,6 +6,8 @@ app_name = "collection"
 
 urlpatterns = [
     path("", views.home, name="home"),
+    path("consent/", views.consent_view, name="consent"),
+    path("consent/submit/", views.submit_consent, name="submit_consent"),
     path("questionnaire/", views.questionnaire, name="questionnaire"),
     path("questionnaire/submit/", views.submit_questionnaire, name="submit_questionnaire"),
     path("screening/combined/", views.combined_activity, name="combined_activity"),

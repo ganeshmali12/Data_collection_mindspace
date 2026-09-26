@@ -4,8 +4,9 @@ from unittest.mock import patch
 
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.test import TestCase
+from django.utils import timezone
 
-from .models import AnalysisResult, CollectionSession, MediaCapture
+from .models import AnalysisResult, CollectionSession, ConsentRecord, MediaCapture
 
 
 class VoiceProcessingTests(TestCase):
@@ -31,7 +32,19 @@ class VoiceProcessingTests(TestCase):
         score_features.return_value = {"prediction_label": "normal", "confidence_score": 0.9}
         process_fusion.return_value = None
 
-        session = CollectionSession.objects.create()
+        session = CollectionSession.objects.create(consented_at=timezone.now())
+        ConsentRecord.objects.create(
+            session=session,
+            patient_id="PID-VOICE",
+            gender="Female",
+            age=30,
+            consent_record_date="2026-09-24",
+            agree_voice=True,
+            agree_video=True,
+            agree_transcript=True,
+            agree_publication=True,
+            agree_terms=True,
+        )
         client_session = self.client.session
         client_session["collection_session_id"] = str(session.session_id)
         client_session.save()

@@ -1,0 +1,1017 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Manovedh — Informed Consent Form</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #090d16;
+    --bg-card: rgba(17, 24, 39, 0.85);
+    --bg-card-hover: rgba(26, 36, 56, 0.85);
+    --border: rgba(255, 255, 255, 0.08);
+    --border-highlight: rgba(99, 102, 241, 0.4);
+    --text-primary: #f8fafc;
+    --text-secondary: #94a3b8;
+    --text-muted: #64748b;
+    --accent: #6366f1;
+    --accent-emerald: #10b981;
+    --accent-emerald-soft: rgba(16, 185, 129, 0.12);
+    --accent-amber: #f59e0b;
+    --accent-amber-soft: rgba(245, 158, 11, 0.12);
+    --accent-indigo-soft: rgba(99, 102, 241, 0.12);
+    --accent-rose: #f43f5e;
+    --radius-lg: 18px;
+    --radius-md: 12px;
+    --radius-sm: 8px;
+    --radius-pill: 9999px;
+    --transition: 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  body {
+    font-family: 'Inter', sans-serif;
+    background: radial-gradient(circle at 50% 0%, #151c33 0%, var(--bg) 70%);
+    color: var(--text-primary);
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    padding: 2.5rem 1rem 4rem;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .shell {
+    width: 100%;
+    max-width: 780px;
+    display: flex;
+    flex-direction: column;
+    gap: 1.75rem;
+  }
+
+  /* Header Branding */
+  .header-card {
+    background: linear-gradient(135deg, rgba(30, 41, 59, 0.9) 0%, rgba(15, 23, 42, 0.95) 100%);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 2rem;
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.5);
+  }
+
+  .header-card::before {
+    content: "";
+    position: absolute;
+    top: 0; left: 0; right: 0; height: 4px;
+    background: linear-gradient(90deg, #10b981, #6366f1, #06b6d4);
+  }
+
+  .org-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: var(--accent-emerald-soft);
+    border: 1px solid rgba(16, 185, 129, 0.3);
+    color: #34d399;
+    padding: 0.35rem 0.85rem;
+    border-radius: var(--radius-pill);
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    margin-bottom: 0.75rem;
+  }
+
+  .app-title {
+    font-family: 'Outfit', sans-serif;
+    font-size: 2rem;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    color: #ffffff;
+    margin-bottom: 0.25rem;
+  }
+
+  .app-subtitle {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #cbd5e1;
+    margin-bottom: 0.5rem;
+  }
+
+  .purpose-tag {
+    font-size: 0.875rem;
+    color: #94a3b8;
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+  }
+
+  .purpose-tag strong {
+    color: #e2e8f0;
+  }
+
+  /* Section Styling */
+  .section-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 1.75rem;
+    backdrop-filter: blur(12px);
+    transition: var(--transition);
+  }
+
+  .section-card:hover {
+    border-color: rgba(255, 255, 255, 0.12);
+  }
+
+  .section-header {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 1.25rem;
+  }
+
+  .section-pill {
+    width: 28px;
+    height: 28px;
+    border-radius: 8px;
+    background: var(--accent-indigo-soft);
+    border: 1px solid var(--border-highlight);
+    color: #818cf8;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.85rem;
+    font-weight: 700;
+  }
+
+  .section-title {
+    font-family: 'Outfit', sans-serif;
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: #f1f5f9;
+  }
+
+  /* Form Elements */
+  .form-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1.25rem;
+  }
+
+  @media (max-width: 640px) {
+    .form-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  .form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.45rem;
+  }
+
+  .form-label {
+    font-size: 0.85rem;
+    font-weight: 500;
+    color: var(--text-secondary);
+  }
+
+  .form-label .req {
+    color: var(--accent-rose);
+    margin-left: 0.2rem;
+  }
+
+  .input-control {
+    width: 100%;
+    background: rgba(15, 23, 42, 0.8);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: var(--radius-md);
+    padding: 0.75rem 1rem;
+    color: #f8fafc;
+    font-size: 0.95rem;
+    font-family: inherit;
+    outline: none;
+    transition: var(--transition);
+  }
+
+  .input-control:focus {
+    border-color: #6366f1;
+    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2);
+    background: rgba(15, 23, 42, 1);
+  }
+
+  .input-control[readonly] {
+    background: rgba(15, 23, 42, 0.45);
+    border-color: rgba(255, 255, 255, 0.08);
+    color: #94a3b8;
+    cursor: not-allowed;
+    user-select: none;
+  }
+
+  .gender-pills {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+  }
+
+  .gender-pill-opt {
+    flex: 1;
+    min-width: 80px;
+    text-align: center;
+    padding: 0.65rem 0.5rem;
+    background: rgba(15, 23, 42, 0.8);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: var(--text-secondary);
+    transition: var(--transition);
+    user-select: none;
+  }
+
+  .gender-pill-opt:hover {
+    background: rgba(30, 41, 59, 0.8);
+    color: #f8fafc;
+  }
+
+  .gender-pill-opt.selected {
+    background: var(--accent-indigo-soft);
+    border-color: #6366f1;
+    color: #a5b4fc;
+    font-weight: 600;
+  }
+
+  /* Modality Cards */
+  .modality-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1rem;
+    margin-top: 1rem;
+  }
+
+  @media (max-width: 640px) {
+    .modality-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  .modality-card {
+    background: rgba(15, 23, 42, 0.7);
+    border: 1px solid rgba(255, 255, 255, 0.07);
+    border-radius: var(--radius-md);
+    padding: 1.25rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .modality-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 0.25rem 0.6rem;
+    border-radius: var(--radius-pill);
+    font-size: 0.7rem;
+    font-weight: 600;
+    width: fit-content;
+  }
+
+  .badge-voice { background: rgba(59, 130, 246, 0.15); color: #60a5fa; border: 1px solid rgba(59, 130, 246, 0.3); }
+  .badge-video { background: rgba(236, 72, 153, 0.15); color: #f472b6; border: 1px solid rgba(236, 72, 153, 0.3); }
+  .badge-text { background: rgba(16, 185, 129, 0.15); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.3); }
+
+  .modality-name {
+    font-weight: 600;
+    font-size: 0.95rem;
+    color: #f1f5f9;
+  }
+
+  .modality-desc {
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+    line-height: 1.45;
+  }
+
+  /* Bullet lists */
+  .bullet-list {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 0.65rem;
+  }
+
+  .bullet-list li {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.65rem;
+    font-size: 0.875rem;
+    color: #cbd5e1;
+    line-height: 1.5;
+  }
+
+  .bullet-icon {
+    flex-shrink: 0;
+    margin-top: 3px;
+    width: 16px;
+    height: 16px;
+    color: #818cf8;
+  }
+
+  /* Law Tags */
+  .laws-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.6rem;
+    margin-top: 0.75rem;
+  }
+
+  .law-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    background: rgba(30, 41, 59, 0.6);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    padding: 0.4rem 0.75rem;
+    border-radius: var(--radius-md);
+    font-size: 0.8rem;
+    color: #e2e8f0;
+    font-weight: 500;
+  }
+
+  /* Consent Checkbox Items */
+  .consent-checklist {
+    display: flex;
+    flex-direction: column;
+    gap: 0.85rem;
+  }
+
+  .consent-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.85rem;
+    background: rgba(15, 23, 42, 0.6);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: var(--radius-md);
+    padding: 1rem 1.15rem;
+    cursor: pointer;
+    transition: var(--transition);
+    user-select: none;
+  }
+
+  .consent-item:hover {
+    background: rgba(30, 41, 59, 0.7);
+    border-color: rgba(99, 102, 241, 0.3);
+  }
+
+  .consent-item.checked {
+    background: var(--accent-emerald-soft);
+    border-color: rgba(16, 185, 129, 0.4);
+  }
+
+  .custom-checkbox {
+    flex-shrink: 0;
+    width: 22px;
+    height: 22px;
+    border-radius: 6px;
+    border: 2px solid #475569;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-top: 1px;
+    transition: var(--transition);
+    background: rgba(15, 23, 42, 0.8);
+  }
+
+  .custom-checkbox svg {
+    opacity: 0;
+    transform: scale(0.5);
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .consent-item.checked .custom-checkbox {
+    background: #10b981;
+    border-color: #10b981;
+    color: #ffffff;
+  }
+
+  .consent-item.checked .custom-checkbox svg {
+    opacity: 1;
+    transform: scale(1);
+  }
+
+  .consent-item-text {
+    font-size: 0.9rem;
+    line-height: 1.45;
+    color: #e2e8f0;
+  }
+
+  /* Minor / Guardian Section */
+  .minor-section-wrap {
+    display: none;
+    border: 1px solid rgba(245, 158, 11, 0.3);
+    background: rgba(245, 158, 11, 0.03);
+    border-radius: var(--radius-lg);
+    padding: 1.75rem;
+    margin-top: 0.5rem;
+    transition: all 0.3s ease;
+  }
+
+  .minor-section-wrap.active {
+    display: block;
+    animation: fadeIn 0.35s ease;
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(-8px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .minor-pill {
+    background: var(--accent-amber-soft);
+    border: 1px solid rgba(245, 158, 11, 0.4);
+    color: #fbbf24;
+  }
+
+  .minor-notice-banner {
+    background: rgba(245, 158, 11, 0.1);
+    border: 1px solid rgba(245, 158, 11, 0.25);
+    border-radius: var(--radius-md);
+    padding: 0.85rem 1rem;
+    font-size: 0.85rem;
+    color: #fde68a;
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    margin-bottom: 1.25rem;
+  }
+
+  /* Action Bar & Buttons */
+  .action-bar {
+    position: sticky;
+    bottom: 1.5rem;
+    background: rgba(15, 23, 42, 0.9);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: var(--radius-lg);
+    padding: 1.25rem 1.75rem;
+    backdrop-filter: blur(16px);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6);
+  }
+
+  @media (max-width: 640px) {
+    .action-bar {
+      flex-direction: column;
+      align-items: stretch;
+    }
+  }
+
+  .progress-info {
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+  }
+
+  .progress-info strong {
+    color: #ffffff;
+  }
+
+  .btn-submit {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.65rem;
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    color: #ffffff;
+    font-size: 1rem;
+    font-weight: 600;
+    font-family: inherit;
+    border: none;
+    border-radius: var(--radius-pill);
+    padding: 0.85rem 2rem;
+    cursor: pointer;
+    transition: var(--transition);
+    box-shadow: 0 4px 15px rgba(16, 185, 129, 0.35);
+  }
+
+  .btn-submit:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(16, 185, 129, 0.45);
+  }
+
+  .btn-submit:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+    box-shadow: none;
+    filter: grayscale(0.5);
+  }
+
+  .error-toast {
+    display: none;
+    background: rgba(244, 63, 94, 0.15);
+    border: 1px solid rgba(244, 63, 94, 0.4);
+    color: #fecdd3;
+    padding: 0.85rem 1.25rem;
+    border-radius: var(--radius-md);
+    font-size: 0.9rem;
+    margin-bottom: 1rem;
+  }
+</style>
+</head>
+<body>
+
+<div class="shell">
+
+  <!-- Header Card -->
+  <header class="header-card">
+    <div class="org-badge">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+      AiSense LLP &bull; SINE IIT Bombay Incubated
+    </div>
+    <h1 class="app-title">MANOVEDH</h1>
+    <h2 class="app-subtitle">INFORMED CONSENT FORM FOR DATA COLLECTION</h2>
+    <p class="purpose-tag">
+      <strong>Research Purpose:</strong> AI-Based Mental Health Screening Model Development
+    </p>
+  </header>
+
+  <!-- Error Toast -->
+  <div id="errorToast" class="error-toast"></div>
+
+  <form id="consentForm" autocomplete="off">
+    {% csrf_token %}
+
+    <!-- Section A: Participant Information -->
+    <section class="section-card">
+      <div class="section-header">
+        <div class="section-pill">A</div>
+        <h3 class="section-title">Participant Information</h3>
+      </div>
+      <div class="form-grid">
+        <div class="form-group">
+          <label class="form-label" for="patient_id">Patient ID / Code <span class="req">*</span></label>
+          <input type="text" id="patient_id" name="patient_id" class="input-control" placeholder="e.g. PID-1049" value="{{ session.participant_code|default:'' }}" required />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Gender <span class="req">*</span></label>
+          <div class="gender-pills">
+            <div class="gender-pill-opt" data-value="Male">Male</div>
+            <div class="gender-pill-opt" data-value="Female">Female</div>
+            <div class="gender-pill-opt" data-value="Other">Other</div>
+            <div class="gender-pill-opt" data-value="Prefer not to say">Prefer not to say</div>
+          </div>
+          <input type="hidden" id="gender" name="gender" value="" />
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="age">Age (Years) <span class="req">*</span></label>
+          <input type="number" id="age" name="age" class="input-control" placeholder="e.g. 24" min="1" max="120" required />
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="consent_record_date">Consent Record Date <span class="req">*</span> <span style="font-size:0.75rem; color:var(--text-muted); font-weight:normal;">(Auto-filled)</span></label>
+          <input type="date" id="consent_record_date" name="consent_record_date" class="input-control" value="{{ today }}" readonly required />
+        </div>
+      </div>
+    </section>
+
+    <!-- Section B: Investigators -->
+    <section class="section-card">
+      <div class="section-header">
+        <div class="section-pill">B</div>
+        <h3 class="section-title">Investigators & Contact</h3>
+      </div>
+      <div style="background: rgba(15, 23, 42, 0.6); border: 1px solid rgba(255,255,255,0.06); border-radius: var(--radius-md); padding: 1.15rem; display: flex; flex-direction: column; gap: 0.4rem;">
+        <div style="font-weight: 600; color: #f8fafc; font-size: 0.95rem;">1. Prof. Santosh Bothe</div>
+        <div style="font-size: 0.85rem; color: #94a3b8;">Principal Investigator & Collaborator, AiSense LLP / SINE IIT Bombay</div>
+        <div style="font-size: 0.85rem; color: #818cf8; margin-top: 0.25rem;">
+          Research inquiry contact: <strong>+91-9371550875</strong>
+        </div>
+      </div>
+    </section>
+
+    <!-- Section C & D: Purpose & Data Modalities -->
+    <section class="section-card">
+      <div class="section-header">
+        <div class="section-pill">C</div>
+        <h3 class="section-title">Purpose of Data Collection</h3>
+      </div>
+      <p style="font-size: 0.875rem; color: #cbd5e1; line-height: 1.6; margin-bottom: 1.5rem;">
+        I understand that my data is being collected for the research project titled <strong>'Manovedh for Mental Health Screening'</strong> conducted by AiSense LLP. The purpose of this data collection is to train and improve AI-based machine learning models for mental health condition screening. This platform and its data collection are for research purposes only.
+      </p>
+
+      <div class="section-header" style="margin-top: 1.25rem;">
+        <div class="section-pill">D</div>
+        <h3 class="section-title">Data Modalities Collected</h3>
+      </div>
+      <div class="modality-grid">
+        <div class="modality-card">
+          <span class="modality-badge badge-voice">Modality 1</span>
+          <div class="modality-name">Voice / Phonation</div>
+          <div class="modality-desc">Sustained phonation sounds recorded as .wav audio to extract acoustic features for voice analysis.</div>
+        </div>
+        <div class="modality-card">
+          <span class="modality-badge badge-video">Modality 2</span>
+          <div class="modality-name">Facial Video</div>
+          <div class="modality-desc">Short video recording of facial expressions while speaking to extract micro-affect dynamics.</div>
+        </div>
+        <div class="modality-card">
+          <span class="modality-badge badge-text">Modality 3</span>
+          <div class="modality-name">Speech Transcript</div>
+          <div class="modality-desc">Spoken statements transcribed to text via STT to analyse linguistic patterns.</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Section E, F & G: Terms, Rights & Legal framework -->
+    <section class="section-card">
+      <div class="section-header">
+        <div class="section-pill">E</div>
+        <h3 class="section-title">How Data Will Be Used</h3>
+      </div>
+      <ul class="bullet-list" style="margin-bottom: 1.5rem;">
+        <li>
+          <svg class="bullet-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg>
+          Bio-signal data (voice, face, text) will be analyzed and published for research without names attached (de-identified format).
+        </li>
+        <li>
+          <svg class="bullet-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg>
+          Data may be published in printed and electronic editions of suitable scientific and medical journals.
+        </li>
+        <li>
+          <svg class="bullet-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg>
+          Material will NOT be used out of context (e.g. never used for commercial advertising or packaging).
+        </li>
+        <li>
+          <svg class="bullet-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg>
+          Stored securely in de-identified format and accessed only by authorized researchers.
+        </li>
+        <li>
+          <svg class="bullet-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg>
+          Data will NOT be sold or shared with third parties for commercial profit.
+        </li>
+      </ul>
+
+      <div class="section-header">
+        <div class="section-pill">F</div>
+        <h3 class="section-title">Your Rights as a Participant</h3>
+      </div>
+      <ul class="bullet-list" style="margin-bottom: 1.5rem;">
+        <li>
+          <svg class="bullet-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+          Participation is completely voluntary.
+        </li>
+        <li>
+          <svg class="bullet-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+          You have the right to request deletion of your data at any time by contacting the PI.
+        </li>
+        <li>
+          <svg class="bullet-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+          Refusing to participate will not affect any service, care, or relationship with AiSense LLP.
+        </li>
+      </ul>
+
+      <div class="section-header">
+        <div class="section-pill">G</div>
+        <h3 class="section-title">Regulatory Framework</h3>
+      </div>
+      <div class="laws-row">
+        <div class="law-chip"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg> DPDP Act 2023</div>
+        <div class="law-chip"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg> IT Act 2000</div>
+        <div class="law-chip"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg> ICMR Ethical Guidelines 2017</div>
+        <div class="law-chip"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg> Indian Contract Act 1872</div>
+      </div>
+    </section>
+
+    <!-- Section H: Declaration & Consent -->
+    <section class="section-card">
+      <div class="section-header">
+        <div class="section-pill">H</div>
+        <h3 class="section-title">Declaration & Consent</h3>
+      </div>
+      <p style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 1.15rem;">
+        I have read and understood the information provided above. I voluntarily agree to participate in this data collection. Please check all boxes below to confirm:
+      </p>
+
+      <div class="consent-checklist">
+        <label class="consent-item">
+          <input type="checkbox" name="agree_voice" id="agree_voice" style="display:none;" required />
+          <div class="custom-checkbox">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5"><polyline points="20 6 9 17 4 12"/></svg>
+          </div>
+          <div class="consent-item-text">
+            I agree to the <strong>Voice / Phonation recording</strong> being collected and used for AI research.
+          </div>
+        </label>
+
+        <label class="consent-item">
+          <input type="checkbox" name="agree_video" id="agree_video" style="display:none;" required />
+          <div class="custom-checkbox">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5"><polyline points="20 6 9 17 4 12"/></svg>
+          </div>
+          <div class="consent-item-text">
+            I agree to the <strong>Facial Video recording</strong> being collected and used for AI research.
+          </div>
+        </label>
+
+        <label class="consent-item">
+          <input type="checkbox" name="agree_transcript" id="agree_transcript" style="display:none;" required />
+          <div class="custom-checkbox">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5"><polyline points="20 6 9 17 4 12"/></svg>
+          </div>
+          <div class="consent-item-text">
+            I agree to the <strong>Speech Transcript (text)</strong> being collected and used for AI research.
+          </div>
+        </label>
+
+        <label class="consent-item">
+          <input type="checkbox" name="agree_publication" id="agree_publication" style="display:none;" required />
+          <div class="custom-checkbox">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5"><polyline points="20 6 9 17 4 12"/></svg>
+          </div>
+          <div class="consent-item-text">
+            I agree to my <strong>anonymised data</strong> being published in scientific journals and research publications.
+          </div>
+        </label>
+
+        <label class="consent-item">
+          <input type="checkbox" name="agree_terms" id="agree_terms" style="display:none;" required />
+          <div class="custom-checkbox">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5"><polyline points="20 6 9 17 4 12"/></svg>
+          </div>
+          <div class="consent-item-text">
+            I confirm I have read and understood this consent form and <strong>agree to all the above terms</strong>.
+          </div>
+        </label>
+      </div>
+    </section>
+
+    <!-- Section H2: Parent / Guardian Consent (Condition if Age < 18) -->
+    <section id="minorSection" class="minor-section-wrap">
+      <div class="section-header">
+        <div class="section-pill minor-pill">H2</div>
+        <h3 class="section-title" style="color: #fde68a;">Participants Below 18 Years — Parent / Guardian Consent</h3>
+      </div>
+      <div class="minor-notice-banner">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+        <span>Participant is under 18 years old. A parent or legal guardian must complete this section.</span>
+      </div>
+
+      <div class="form-grid" style="margin-bottom: 1.25rem;">
+        <div class="form-group">
+          <label class="form-label" for="guardian_name">Parent / Guardian Name <span class="req">*</span></label>
+          <input type="text" id="guardian_name" name="guardian_name" class="input-control" placeholder="Full legal name" />
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="guardian_relationship">Relationship to Participant <span class="req">*</span></label>
+          <input type="text" id="guardian_relationship" name="guardian_relationship" class="input-control" placeholder="e.g. Father, Mother, Legal Guardian" />
+        </div>
+        <div class="form-group" style="grid-column: span 2;">
+          <label class="form-label" for="guardian_contact">Parent / Guardian Contact (Phone or Email) <span class="req">*</span></label>
+          <input type="text" id="guardian_contact" name="guardian_contact" class="input-control" placeholder="e.g. +91 9876543210 or guardian@example.com" />
+        </div>
+      </div>
+
+      <div class="consent-checklist">
+        <label class="consent-item">
+          <input type="checkbox" name="guardian_confirm_parent" id="guardian_confirm_parent" style="display:none;" />
+          <div class="custom-checkbox">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5"><polyline points="20 6 9 17 4 12"/></svg>
+          </div>
+          <div class="consent-item-text">
+            I confirm I am the <strong>parent / legal guardian</strong> of the participant named above.
+          </div>
+        </label>
+
+        <label class="consent-item">
+          <input type="checkbox" name="guardian_confirm_minor" id="guardian_confirm_minor" style="display:none;" />
+          <div class="custom-checkbox">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5"><polyline points="20 6 9 17 4 12"/></svg>
+          </div>
+          <div class="consent-item-text">
+            I confirm the participant is <strong>below 18 years of age</strong>.
+          </div>
+        </label>
+
+        <label class="consent-item">
+          <input type="checkbox" name="guardian_confirm_modalities" id="guardian_confirm_modalities" style="display:none;" />
+          <div class="custom-checkbox">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5"><polyline points="20 6 9 17 4 12"/></svg>
+          </div>
+          <div class="consent-item-text">
+            I give consent on behalf of the participant for <strong>all data modalities</strong> described above (voice, facial video, and transcript).
+          </div>
+        </label>
+
+        <label class="consent-item">
+          <input type="checkbox" name="guardian_confirm_terms" id="guardian_confirm_terms" style="display:none;" />
+          <div class="custom-checkbox">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5"><polyline points="20 6 9 17 4 12"/></svg>
+          </div>
+          <div class="consent-item-text">
+            I confirm I have read and understood this <strong>informed consent form</strong>.
+          </div>
+        </label>
+      </div>
+    </section>
+
+    <!-- Sticky Submission Bar -->
+    <div class="action-bar">
+      <div class="progress-info">
+        <div id="consentStatusText">Please complete participant details and accept all declarations.</div>
+      </div>
+      <button type="submit" id="submitBtn" class="btn-submit" disabled>
+        <span>Accept &amp; Proceed</span>
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+      </button>
+    </div>
+
+  </form>
+</div>
+
+<script>
+(function() {
+  const form = document.getElementById("consentForm");
+  const ageInput = document.getElementById("age");
+  const patientIdInput = document.getElementById("patient_id");
+  const genderInput = document.getElementById("gender");
+  const minorSection = document.getElementById("minorSection");
+  const submitBtn = document.getElementById("submitBtn");
+  const errorToast = document.getElementById("errorToast");
+  const consentStatusText = document.getElementById("consentStatusText");
+  const consentDateInput = document.getElementById("consent_record_date");
+
+  // Ensure consent record date is always auto-filled with current date
+  if (consentDateInput && !consentDateInput.value) {
+    consentDateInput.value = new Date().toISOString().split("T")[0];
+  }
+
+  // Gender Pill Selector
+  document.querySelectorAll(".gender-pill-opt").forEach(pill => {
+    pill.addEventListener("click", () => {
+      document.querySelectorAll(".gender-pill-opt").forEach(p => p.classList.remove("selected"));
+      pill.classList.add("selected");
+      genderInput.value = pill.getAttribute("data-value");
+      checkFormValidity();
+    });
+  });
+
+  // Checkbox items behavior
+  document.querySelectorAll(".consent-item").forEach(item => {
+    const input = item.querySelector('input[type="checkbox"]');
+    item.addEventListener("click", (e) => {
+      e.preventDefault();
+      input.checked = !input.checked;
+      if (input.checked) {
+        item.classList.add("checked");
+      } else {
+        item.classList.remove("checked");
+      }
+      checkFormValidity();
+    });
+  });
+
+  // Age input dynamic minor detection
+  function handleAgeChange() {
+    const ageVal = parseInt(ageInput.value, 10);
+    const isMinor = !isNaN(ageVal) && ageVal > 0 && ageVal < 18;
+    if (isMinor) {
+      minorSection.classList.add("active");
+    } else {
+      minorSection.classList.remove("active");
+    }
+    checkFormValidity();
+  }
+
+  ageInput.addEventListener("input", handleAgeChange);
+  patientIdInput.addEventListener("input", checkFormValidity);
+
+  const guardianInputs = [
+    document.getElementById("guardian_name"),
+    document.getElementById("guardian_relationship"),
+    document.getElementById("guardian_contact")
+  ];
+  guardianInputs.forEach(input => input.addEventListener("input", checkFormValidity));
+
+  function isFormValid() {
+    const patientId = patientIdInput.value.trim();
+    const gender = genderInput.value.trim();
+    const ageVal = parseInt(ageInput.value, 10);
+
+    if (!patientId || !gender || isNaN(ageVal) || ageVal <= 0) {
+      return false;
+    }
+
+    const adultCheckboxes = [
+      document.getElementById("agree_voice"),
+      document.getElementById("agree_video"),
+      document.getElementById("agree_transcript"),
+      document.getElementById("agree_publication"),
+      document.getElementById("agree_terms"),
+    ];
+    const adultPassed = adultCheckboxes.every(cb => cb.checked);
+    if (!adultPassed) return false;
+
+    if (ageVal < 18) {
+      const gName = document.getElementById("guardian_name").value.trim();
+      const gRel = document.getElementById("guardian_relationship").value.trim();
+      const gContact = document.getElementById("guardian_contact").value.trim();
+      if (!gName || !gRel || !gContact) return false;
+
+      const minorCheckboxes = [
+        document.getElementById("guardian_confirm_parent"),
+        document.getElementById("guardian_confirm_minor"),
+        document.getElementById("guardian_confirm_modalities"),
+        document.getElementById("guardian_confirm_terms"),
+      ];
+      if (!minorCheckboxes.every(cb => cb.checked)) return false;
+    }
+
+    return true;
+  }
+
+  function checkFormValidity() {
+    const valid = isFormValid();
+    submitBtn.disabled = !valid;
+    if (valid) {
+      consentStatusText.innerHTML = "<span style='color:#34d399;'>&check; All consent declarations accepted. Ready to proceed.</span>";
+    } else {
+      consentStatusText.textContent = "Please complete all required fields and accept declarations.";
+    }
+  }
+
+  // Form Submit Handler
+  form.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    if (!isFormValid()) {
+      showError("Please complete all required fields and declaration checkboxes.");
+      return;
+    }
+
+    submitBtn.disabled = true;
+    submitBtn.innerHTML = "<span>Saving Consent...</span>";
+    hideError();
+
+    const payload = {
+      patient_id: patientIdInput.value.trim(),
+      gender: genderInput.value.trim(),
+      age: parseInt(ageInput.value, 10),
+      consent_record_date: document.getElementById("consent_record_date").value,
+      agree_voice: document.getElementById("agree_voice").checked,
+      agree_video: document.getElementById("agree_video").checked,
+      agree_transcript: document.getElementById("agree_transcript").checked,
+      agree_publication: document.getElementById("agree_publication").checked,
+      agree_terms: document.getElementById("agree_terms").checked,
+      guardian_name: document.getElementById("guardian_name").value.trim(),
+      guardian_relationship: document.getElementById("guardian_relationship").value.trim(),
+      guardian_contact: document.getElementById("guardian_contact").value.trim(),
+      guardian_confirm_parent: document.getElementById("guardian_confirm_parent").checked,
+      guardian_confirm_minor: document.getElementById("guardian_confirm_minor").checked,
+      guardian_confirm_modalities: document.getElementById("guardian_confirm_modalities").checked,
+      guardian_confirm_terms: document.getElementById("guardian_confirm_terms").checked,
+    };
+
+    const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+
+    try {
+      const response = await fetch("/consent/submit/", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "X-CSRFToken": csrfToken,
+        },
+        body: JSON.stringify(payload),
+      });
+
+      const result = await response.json();
+      if (response.ok && result.ok) {
+        window.location.href = result.redirect || "/questionnaire/";
+      } else {
+        showError(result.error || "Failed to record consent. Please try again.");
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = "<span>Accept &amp; Proceed</span>";
+      }
+    } catch (err) {
+      showError("Network error while submitting consent form. Please try again.");
+      submitBtn.disabled = false;
+      submitBtn.innerHTML = "<span>Accept &amp; Proceed</span>";
+    }
+  });
+
+  function showError(msg) {
+    errorToast.textContent = msg;
+    errorToast.style.display = "block";
+    errorToast.scrollIntoView({ behavior: "smooth", block: "center" });
+  }
+
+  function hideError() {
+    errorToast.style.display = "none";
+  }
+})();
+</script>
+
+</body>
+</html>

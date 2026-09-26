@@ -4,7 +4,7 @@
 {% block title %}Observe &amp; Describe | Manovedh{% endblock %}
 
 {% block extra_css %}
-<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
 <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
 <script>
     tailwind.config = {
@@ -12,11 +12,20 @@
         theme: {
             extend: {
                 colors: {
-                    mindGreen: { DEFAULT: '#0B2B26', deep: '#051F20', light: '#235347', hover: '#163832', accent: '#8EB69B' },
-                    ctaOrange: { DEFAULT: '#163832', hover: '#235347' },
-                    leafBg: '#F2FAF4',
+                    darkBg: '#090d16',
+                    darkCard: 'rgba(17, 24, 39, 0.85)',
+                    darkCardSolid: '#111827',
+                    darkBorder: 'rgba(255, 255, 255, 0.08)',
+                    accentIndigo: '#6366f1',
+                    accentEmerald: '#10b981',
+                    accentAmber: '#f59e0b',
+                    accentRose: '#f43f5e',
+                    accentCyan: '#06b6d4'
                 },
-                fontFamily: { sans: ['Plus Jakarta Sans', 'system-ui', 'sans-serif'] },
+                fontFamily: {
+                    sans: ['Inter', 'system-ui', 'sans-serif'],
+                    display: ['Outfit', 'sans-serif']
+                },
                 animation: {
                     'pulse-slow': 'pulse 2.5s cubic-bezier(0.4, 0, 0.6, 1) infinite',
                     'float': 'float 3s ease-in-out infinite',
@@ -27,7 +36,7 @@
                 keyframes: {
                     float: { '0%, 100%': { transform: 'translateY(0px)' }, '50%': { transform: 'translateY(-6px)' } },
                     soundwave: { '0%, 100%': { height: '8px' }, '50%': { height: '28px' } },
-                    scanLine: { '0%': { top: '10%' }, '100%': { top: '85%' } },
+                    scanLine: { '0%': { top: '8%' }, '100%': { top: '88%' } },
                     pop: { '0%': { transform: 'scale(0.6)', opacity: '0' }, '70%': { transform: 'scale(1.08)' }, '100%': { transform: 'scale(1)', opacity: '1' } }
                 }
             }
@@ -35,16 +44,56 @@
     }
 </script>
 <style>
-    .bg-dot-pattern { background-image: radial-gradient(#B4D3BC 1.7px, transparent 1.7px); background-size: 28px 28px; }
-    .journey-path { stroke-dasharray: 8 8; animation: dashFlow 25s linear infinite; }
-    @keyframes dashFlow { to { stroke-dashoffset: -1000; } }
-    .pulse-ring { box-shadow: 0 0 0 0 rgba(11, 43, 38, 0.45); animation: pulseRing 2.2s infinite; }
-    @keyframes pulseRing { 0% { box-shadow: 0 0 0 0 rgba(11, 43, 38, 0.45); } 70% { box-shadow: 0 0 0 16px rgba(11, 43, 38, 0); } 100% { box-shadow: 0 0 0 0 rgba(11, 43, 38, 0); } }
-    .combined-activity #camera-preview.hidden-feed { display: none; }
-    .combined-activity .timer-circle { transition: stroke-dashoffset 1s linear; }
-    .combined-activity .waveform-bar { animation-play-state: paused; }
-    .combined-activity .waveform-bar.active { animation-play-state: running; }
-    @keyframes pulse-wave { 0%, 100% { height: 6px; } 50% { height: 26px; } }
+    html, body {
+        font-family: 'Inter', sans-serif;
+        background: radial-gradient(circle at 50% 0%, #151c33 0%, #090d16 70%) fixed !important;
+        color: #f8fafc;
+        min-height: 100vh;
+        margin: 0;
+        padding: 0;
+        -webkit-font-smoothing: antialiased;
+    }
+
+    .combined-activity {
+        background: transparent;
+    }
+
+    .journey-path {
+        stroke-dasharray: 8 8;
+        animation: dashFlow 20s linear infinite;
+    }
+    @keyframes dashFlow {
+        to { stroke-dashoffset: -1000; }
+    }
+
+    .pulse-ring-glow {
+        box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.5);
+        animation: pulseRingGlow 2.2s infinite;
+    }
+    @keyframes pulseRingGlow {
+        0% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.5); }
+        70% { box-shadow: 0 0 0 16px rgba(16, 185, 129, 0); }
+        100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
+    }
+
+    .combined-activity #camera-preview.hidden-feed {
+        display: none;
+    }
+
+    .combined-activity .timer-circle {
+        transition: stroke-dashoffset 1s linear;
+    }
+
+    .combined-activity .waveform-bar {
+        animation-play-state: paused;
+    }
+    .combined-activity .waveform-bar.active {
+        animation-play-state: running;
+    }
+    @keyframes pulse-wave {
+        0%, 100% { height: 6px; }
+        50% { height: 26px; }
+    }
     .combined-activity .waveform-bar.active:nth-child(1) { animation: pulse-wave 1.2s ease-in-out infinite; }
     .combined-activity .waveform-bar.active:nth-child(2) { animation: pulse-wave 1.5s ease-in-out infinite 0.2s; }
     .combined-activity .waveform-bar.active:nth-child(3) { animation: pulse-wave 1.0s ease-in-out infinite 0.4s; }
@@ -57,349 +106,369 @@
 {% endblock %}
 
 {% block content %}
-<div class="combined-activity bg-dot-pattern min-h-screen"
+<div class="combined-activity min-h-screen text-slate-100 flex flex-col justify-between py-6 px-4 sm:px-8 max-w-7xl mx-auto w-full relative"
     data-upload-url="{% url 'collection:upload_combined_video' %}"
-  data-process-url="{% url 'collection:process_combined_video' %}"
+    data-process-url="{% url 'collection:process_combined_video' %}"
     data-next-url="{% url 'collection:voice_phonation' %}"
     data-session-id="{{ session.session_id }}">
 
-  <div class="flex-grow flex items-center justify-center p-3 sm:p-6 lg:p-8 w-full relative">
-
-    <!-- VIEW 1: PROGRESS PATH OVERVIEW MAP -->
-    <section class="w-full max-w-6xl mx-auto py-2 transition-all duration-300 block" id="view-map">
-      <div class="relative bg-cream/85 backdrop-blur-md rounded-3xl p-6 sm:p-10 border border-emerald-100/90 shadow-xl overflow-hidden min-h-[500px] flex flex-col justify-between">
-        <div class="absolute -left-12 -bottom-10 w-44 h-44 opacity-10 pointer-events-none text-mindGreen">
-          <svg fill="currentColor" viewBox="0 0 200 200"><path d="M42.8,15.2C55.4,26.5,65.7,40.4,72,56.5C78.4,72.6,80.7,90.9,74.9,105.7C69.1,120.5,55.1,131.7,40.4,141C25.7,150.3,10.3,157.7,-4.9,157.9C-20.1,158,-35.1,151,-48.8,141C-62.4,130.9,-74.7,117.8,-79.8,102.3C-84.9,86.7,-82.9,68.7,-74.8,53.2C-66.8,37.6,-52.7,24.6,-37.8,14.6C-22.9,4.5,-7.2,-2.7,8.2,-1.5C23.6,-0.3,30.3,4,42.8,15.2Z" transform="translate(100 100)"></path></svg>
+  <!-- VIEW 1: PROGRESS PATH OVERVIEW MAP (Frameless full-background design) -->
+  <section class="w-full flex-grow flex flex-col justify-between transition-all duration-300 block" id="view-map">
+    
+    <!-- Top Header Branding -->
+    <div class="flex flex-wrap items-center justify-between gap-4 mb-6 pt-2">
+      <div>
+        <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-xs font-semibold uppercase tracking-wider mb-2">
+          <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+          Modality 2: Observational Screening
         </div>
+        <h1 class="font-display text-2xl sm:text-3xl lg:text-4xl font-bold text-white tracking-tight">Observe &amp; Describe Journey</h1>
+        <p class="text-xs sm:text-sm text-slate-400 mt-1">Complete 4 interactive conversational milestones with live facial &amp; voice analysis.</p>
+      </div>
+      <div class="flex items-center gap-3">
+        <span class="text-xs text-slate-400 font-medium bg-slate-900/60 border border-white/10 px-3.5 py-1.5 rounded-full">Progress: <strong class="text-white" id="map-progress-count">0 of 4 Completed</strong></span>
+      </div>
+    </div>
 
-        <svg class="absolute inset-0 w-full h-full pointer-events-none z-0 hidden lg:block" preserveAspectRatio="none" viewBox="0 0 1000 440">
-          <path d="M 220 140 C 320 230, 270 320, 360 320 C 470 320, 480 170, 640 170 C 720 170, 680 340, 780 340" fill="none" stroke="#B4D3BC" stroke-linecap="round" stroke-width="12"></path>
-          <path class="journey-path" d="M 220 140 C 320 230, 270 320, 360 320 C 470 320, 480 170, 640 170 C 720 170, 680 340, 780 340" fill="none" stroke="#235347" stroke-dasharray="7 9" stroke-linecap="round" stroke-width="4.5"></path>
-        </svg>
+    <!-- Node Roadmap Journey (Directly on deep radial background) -->
+    <div class="relative w-full my-auto py-8">
+      
+      <!-- Connecting Flow Track -->
+      <svg class="absolute inset-0 w-full h-full pointer-events-none z-0 hidden lg:block" preserveAspectRatio="none" viewBox="0 0 1000 320">
+        <path d="M 160 160 C 280 240, 240 280, 360 280 C 470 280, 480 120, 620 120 C 720 120, 680 260, 840 160" fill="none" stroke="rgba(99, 102, 241, 0.2)" stroke-linecap="round" stroke-width="12"></path>
+        <path class="journey-path" d="M 160 160 C 280 240, 240 280, 360 280 C 470 280, 480 120, 620 120 C 720 120, 680 260, 840 160" fill="none" stroke="#6366f1" stroke-linecap="round" stroke-width="4"></path>
+      </svg>
 
-        <div class="relative z-10 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 sm:gap-6 my-auto items-center py-4">
-          <!-- Node 1 -->
-          <div class="group cursor-pointer flex flex-col items-center text-center transform transition duration-300 hover:scale-105" onclick="MCA.startAtStep(1)" role="button" tabindex="0">
-            <div class="relative">
-              <div class="w-36 h-36 sm:w-40 sm:h-40 rounded-full overflow-hidden border-4 border-white shadow-xl ring-4 ring-emerald-300 transition duration-300" id="map-circle-1">
-                <img alt="Step 1 Preview" class="w-full h-full object-cover" src="{{ story_frames.0 }}">
-              </div>
-              <span class="absolute -top-1.5 right-1.5 w-9 h-9 bg-mindGreen text-white font-black rounded-full flex items-center justify-center text-sm border-2 border-white shadow-md" id="map-badge-number-1">1</span>
+      <div class="relative z-10 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 sm:gap-6 items-center">
+        <!-- Node 1 -->
+        <div class="group cursor-pointer flex flex-col items-center text-center transform transition duration-300 hover:scale-105" onclick="MCA.startAtStep(1)" role="button" tabindex="0">
+          <div class="relative">
+            <div class="w-36 h-36 sm:w-40 sm:h-40 rounded-full overflow-hidden border-4 border-slate-800/90 shadow-2xl ring-4 ring-indigo-500/50 transition duration-300 group-hover:ring-indigo-400 bg-slate-900" id="map-circle-1">
+              <img alt="Step 1 Preview" class="w-full h-full object-cover brightness-95 group-hover:brightness-105 transition" src="{{ story_frames.0 }}">
             </div>
-            <div class="mt-3">
-              <h3 class="font-bold text-base sm:text-lg text-mindGreen">Step 1</h3>
-              <p class="text-xs sm:text-sm text-gray-600 font-medium">Observe &amp; Describe</p>
-              <span class="inline-block mt-1 text-[11px] font-semibold px-2.5 py-0.5 rounded-full bg-blue-100 text-blue-800" id="badge-status-1">Ready</span>
-            </div>
+            <span class="absolute -top-1.5 right-1.5 w-9 h-9 bg-indigo-600 text-white font-black rounded-full flex items-center justify-center text-sm border-2 border-slate-900 shadow-lg" id="map-badge-number-1">1</span>
           </div>
-
-          <!-- Node 3 -->
-          <div class="group cursor-pointer flex flex-col items-center text-center transform transition duration-300 hover:scale-105 lg:translate-y-12" onclick="MCA.startAtStep(2)" role="button" tabindex="0">
-            <div class="relative">
-              <div class="w-36 h-36 sm:w-40 sm:h-40 rounded-full overflow-hidden border-4 border-white shadow-sm ring-4 ring-gray-200 opacity-60 transition duration-300" id="map-circle-2">
-                <img alt="Step 3 Preview" class="w-full h-full object-cover" src="{{ story_frames.2 }}">
-              </div>
-              <span class="absolute -top-1.5 right-1.5 w-9 h-9 bg-gray-400 text-white font-black rounded-full flex items-center justify-center text-sm border-2 border-white shadow-md" id="map-badge-number-2">2</span>
-            </div>
-            <div class="mt-3">
-              <h3 class="font-bold text-base sm:text-lg text-mindGreen">Step 2</h3>
-              <p class="text-xs sm:text-sm text-gray-600 font-medium">Think &amp; Reflect</p>
-              <span class="inline-block mt-1 text-[11px] font-semibold px-2.5 py-0.5 rounded-full bg-gray-100 text-gray-500" id="badge-status-2">Locked</span>
-            </div>
-          </div>
-
-          <!-- Node 2 -->
-          <div class="group cursor-pointer flex flex-col items-center text-center transform transition duration-300 hover:scale-105 lg:-translate-y-8" onclick="MCA.startAtStep(3)" role="button" tabindex="0">
-            <div class="relative">
-              <div class="w-36 h-36 sm:w-40 sm:h-40 rounded-full overflow-hidden border-4 border-white shadow-sm ring-4 ring-gray-200 opacity-60 transition duration-300" id="map-circle-3">
-                <img alt="Step 2 Preview" class="w-full h-full object-cover" src="{{ story_frames.1 }}">
-              </div>
-              <span class="absolute -top-1.5 right-1.5 w-9 h-9 bg-gray-400 text-white font-black rounded-full flex items-center justify-center text-sm border-2 border-white shadow-md" id="map-badge-number-3">3</span>
-            </div>
-            <div class="mt-3">
-              <h3 class="font-bold text-base sm:text-lg text-mindGreen">Step 3</h3>
-              <p class="text-xs sm:text-sm text-gray-600 font-medium">Read &amp; Express</p>
-              <span class="inline-block mt-1 text-[11px] font-semibold px-2.5 py-0.5 rounded-full bg-gray-100 text-gray-500" id="badge-status-3">Locked</span>
-            </div>
-          </div>
-
-          <!-- Node 4 -->
-          <div class="group cursor-pointer flex flex-col items-center text-center transform transition duration-300 hover:scale-105 lg:translate-y-14" onclick="MCA.startAtStep(4)" role="button" tabindex="0">
-            <div class="relative">
-              <div class="w-36 h-36 sm:w-40 sm:h-40 rounded-full overflow-hidden border-4 border-white shadow-sm ring-4 ring-gray-200 opacity-60 transition duration-300" id="map-circle-4">
-                <img alt="Step 4 Preview" class="w-full h-full object-cover" src="{{ story_frames.3 }}">
-              </div>
-              <span class="absolute -top-1.5 right-1.5 w-9 h-9 bg-gray-400 text-white font-black rounded-full flex items-center justify-center text-sm border-2 border-white shadow-md" id="map-badge-number-4">4</span>
-            </div>
-            <div class="mt-3">
-              <h3 class="font-bold text-base sm:text-lg text-mindGreen">Step 4</h3>
-              <p class="text-xs sm:text-sm text-gray-600 font-medium">Act &amp; Grow</p>
-              <span class="inline-block mt-1 text-[11px] font-semibold px-2.5 py-0.5 rounded-full bg-gray-100 text-gray-500" id="badge-status-4">Locked</span>
-            </div>
+          <div class="mt-4">
+            <h3 class="font-display font-bold text-base sm:text-lg text-white">Step 1</h3>
+            <p class="text-xs sm:text-sm text-slate-300 font-medium">Observe &amp; Describe</p>
+            <span class="inline-block mt-1.5 text-[11px] font-semibold px-3 py-0.5 rounded-full bg-indigo-500/20 text-indigo-300 border border-indigo-500/30" id="badge-status-1">Ready</span>
           </div>
         </div>
 
-        <div class="relative z-10 flex flex-col sm:flex-row items-center justify-between gap-6 pt-6 border-t border-emerald-100/80 mt-8">
-          <div class="flex items-center space-x-3.5">
-            <div class="w-16 h-16 rounded-full bg-cream border-2 border-amber-300 shadow-md flex items-center justify-center text-3xl animate-float">
-              <svg class="w-8 h-8 text-amber-500" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2l2.4 4.9 5.4.8-3.9 3.8.9 5.4L12 14.8 7.2 16.9l.9-5.4L4.2 7.7l5.4-.8L12 2z"/></svg>
+        <!-- Node 2 -->
+        <div class="group cursor-pointer flex flex-col items-center text-center transform transition duration-300 hover:scale-105 lg:translate-y-12" onclick="MCA.startAtStep(2)" role="button" tabindex="0">
+          <div class="relative">
+            <div class="w-36 h-36 sm:w-40 sm:h-40 rounded-full overflow-hidden border-4 border-slate-800/90 shadow-lg ring-4 ring-slate-700/50 opacity-50 transition duration-300 bg-slate-900" id="map-circle-2">
+              <img alt="Step 2 Preview" class="w-full h-full object-cover brightness-75" src="{{ story_frames.1 }}">
             </div>
-            <div>
-              <div class="text-base font-bold text-mindGreen">Finish</div>
-              <div class="text-xs text-gray-600 font-medium">Complete Journey</div>
+            <span class="absolute -top-1.5 right-1.5 w-9 h-9 bg-slate-700 text-slate-300 font-black rounded-full flex items-center justify-center text-sm border-2 border-slate-900 shadow-md" id="map-badge-number-2">2</span>
+          </div>
+          <div class="mt-4">
+            <h3 class="font-display font-bold text-base sm:text-lg text-slate-300">Step 2</h3>
+            <p class="text-xs sm:text-sm text-slate-400 font-medium">Think &amp; Reflect</p>
+            <span class="inline-block mt-1.5 text-[11px] font-semibold px-3 py-0.5 rounded-full bg-slate-800 text-slate-400 border border-slate-700" id="badge-status-2">Locked</span>
+          </div>
+        </div>
+
+        <!-- Node 3 -->
+        <div class="group cursor-pointer flex flex-col items-center text-center transform transition duration-300 hover:scale-105 lg:-translate-y-8" onclick="MCA.startAtStep(3)" role="button" tabindex="0">
+          <div class="relative">
+            <div class="w-36 h-36 sm:w-40 sm:h-40 rounded-full overflow-hidden border-4 border-slate-800/90 shadow-lg ring-4 ring-slate-700/50 opacity-50 transition duration-300 bg-slate-900" id="map-circle-3">
+              <img alt="Step 3 Preview" class="w-full h-full object-cover brightness-75" src="{{ story_frames.2 }}">
+            </div>
+            <span class="absolute -top-1.5 right-1.5 w-9 h-9 bg-slate-700 text-slate-300 font-black rounded-full flex items-center justify-center text-sm border-2 border-slate-900 shadow-md" id="map-badge-number-3">3</span>
+          </div>
+          <div class="mt-4">
+            <h3 class="font-display font-bold text-base sm:text-lg text-slate-300">Step 3</h3>
+            <p class="text-xs sm:text-sm text-slate-400 font-medium">Read &amp; Express</p>
+            <span class="inline-block mt-1.5 text-[11px] font-semibold px-3 py-0.5 rounded-full bg-slate-800 text-slate-400 border border-slate-700" id="badge-status-3">Locked</span>
+          </div>
+        </div>
+
+        <!-- Node 4 -->
+        <div class="group cursor-pointer flex flex-col items-center text-center transform transition duration-300 hover:scale-105 lg:translate-y-12" onclick="MCA.startAtStep(4)" role="button" tabindex="0">
+          <div class="relative">
+            <div class="w-36 h-36 sm:w-40 sm:h-40 rounded-full overflow-hidden border-4 border-slate-800/90 shadow-lg ring-4 ring-slate-700/50 opacity-50 transition duration-300 bg-slate-900" id="map-circle-4">
+              <img alt="Step 4 Preview" class="w-full h-full object-cover brightness-75" src="{{ story_frames.3 }}">
+            </div>
+            <span class="absolute -top-1.5 right-1.5 w-9 h-9 bg-slate-700 text-slate-300 font-black rounded-full flex items-center justify-center text-sm border-2 border-slate-900 shadow-md" id="map-badge-number-4">4</span>
+          </div>
+          <div class="mt-4">
+            <h3 class="font-display font-bold text-base sm:text-lg text-slate-300">Step 4</h3>
+            <p class="text-xs sm:text-sm text-slate-400 font-medium">Act &amp; Grow</p>
+            <span class="inline-block mt-1.5 text-[11px] font-semibold px-3 py-0.5 rounded-full bg-slate-800 text-slate-400 border border-slate-700" id="badge-status-4">Locked</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Bottom Action Bar -->
+    <div class="flex flex-col sm:flex-row items-center justify-between gap-6 pt-6 border-t border-white/10 mt-6">
+      <div class="flex items-center space-x-3.5">
+        <div class="w-12 h-12 rounded-2xl bg-amber-500/10 border border-amber-500/30 shadow-lg flex items-center justify-center text-xl animate-float text-amber-400">
+          <svg class="w-6 h-6 fill-current" viewBox="0 0 24 24"><path d="M12 2l2.4 4.9 5.4.8-3.9 3.8.9 5.4L12 14.8 7.2 16.9l.9-5.4L4.2 7.7l5.4-.8L12 2z"/></svg>
+        </div>
+        <div>
+          <div class="text-sm font-bold text-white font-display">Observational Milestones</div>
+          <div class="text-xs text-slate-400 font-medium">40 seconds per scene &bull; Natural voice &amp; face analysis</div>
+        </div>
+      </div>
+      <div>
+        <button class="pulse-ring-glow cursor-pointer inline-flex items-center space-x-3 bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-400 hover:to-emerald-500 text-white font-bold text-base px-8 py-3.5 rounded-full shadow-xl shadow-emerald-900/40 transition transform active:scale-95 duration-150" onclick="MCA.startJourney()">
+          <span id="start-btn-label">Start Journey</span>
+          <span class="bg-white/20 p-1.5 rounded-full flex items-center justify-center">
+            <svg class="w-4 h-4 text-white fill-current" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"></path></svg>
+          </span>
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <!-- VIEW 2: INTERACTIVE STEP RUNNER (Seamless full-background layout) -->
+  <section class="w-full flex-grow flex flex-col justify-between transition-all duration-300 hidden" id="view-step">
+    
+    <!-- Top Stepper Navigation Header -->
+    <div class="flex flex-wrap items-center justify-between gap-4 mb-4 pb-3 border-b border-white/10">
+      <div class="flex items-center space-x-3">
+        <button class="cursor-pointer p-2 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800/80 border border-white/10 transition shadow-sm" onclick="MCA.navigateTo('map')" title="Back to Map" aria-label="Back to Map">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M10 19l-7-7m0 0l7-7m-7 7h18" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"></path></svg>
+        </button>
+        <div>
+          <span class="flex items-center gap-2 text-base font-bold text-white font-display" id="step-counter-text">Step 1 of 4</span>
+          <span class="block text-xs font-medium text-slate-400 mt-0.5" id="step-category-subtitle">Observe &amp; Describe</span>
+        </div>
+      </div>
+      
+      <div class="flex items-center space-x-2 sm:space-x-3">
+        <div class="w-8 h-8 rounded-full bg-indigo-600 text-white text-xs font-bold flex items-center justify-center shadow-md ring-2 ring-indigo-400 transition" id="dot-1">1</div>
+        <div class="w-4 sm:w-8 h-[2px] bg-slate-700 rounded-full" id="line-1"></div>
+        <div class="w-8 h-8 rounded-full bg-slate-800 text-slate-400 text-xs font-bold flex items-center justify-center border border-slate-700 transition" id="dot-2">2</div>
+        <div class="w-4 sm:w-8 h-[2px] bg-slate-700 rounded-full" id="line-2"></div>
+        <div class="w-8 h-8 rounded-full bg-slate-800 text-slate-400 text-xs font-bold flex items-center justify-center border border-slate-700 transition" id="dot-3">3</div>
+        <div class="w-4 sm:w-8 h-[2px] bg-slate-700 rounded-full" id="line-3"></div>
+        <div class="w-8 h-8 rounded-full bg-slate-800 text-slate-400 text-xs font-bold flex items-center justify-center border border-slate-700 transition" id="dot-4">4</div>
+      </div>
+    </div>
+
+    <!-- Core Split Grid -->
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-5 items-stretch flex-grow my-auto">
+      
+      <!-- LEFT CARD: Media Prompt & Recording Status -->
+      <div class="lg:col-span-8 bg-slate-900/80 backdrop-blur-xl rounded-2xl p-4 sm:p-6 border border-white/10 flex flex-col justify-between min-h-[520px] shadow-2xl">
+        
+        <div class="relative w-full rounded-xl overflow-hidden shadow-2xl aspect-[16/9] sm:aspect-[16/8.5] bg-slate-950 border border-white/10 flex-grow min-h-[280px]">
+          <img alt="Scene Visual Prompt" class="absolute inset-0 w-full h-full object-contain bg-slate-950 transition-all duration-500" id="scene-image" src="{{ story_frames.0|default:'' }}">
+          <span class="absolute top-3 left-3 bg-black/70 backdrop-blur-md text-slate-200 border border-white/10 text-xs font-semibold px-3 py-1 rounded-full shadow-md z-10" id="scene-tag">Scene 1</span>
+          
+          <div class="absolute top-3 right-3 bg-rose-500/20 border border-rose-500/40 text-rose-300 text-xs font-bold px-3 py-1.5 rounded-full items-center gap-2 animate-pulse hidden z-10" id="recording-timer-pill">
+            <span class="w-2 h-2 rounded-full bg-rose-400 animate-ping"></span>
+            <span id="timer-display">00:40</span>
+          </div>
+          
+          <div class="absolute inset-x-0 bottom-0 p-4 bg-gradient-to-t from-slate-950/95 via-slate-950/70 to-transparent flex flex-col items-center justify-center gap-2 z-20 text-center transition-all" id="start-overlay">
+            <button class="pulse-ring-glow cursor-pointer inline-flex items-center space-x-2.5 bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-400 hover:to-emerald-500 text-white font-bold px-8 py-3 rounded-full text-sm sm:text-base shadow-2xl shadow-emerald-900/50 transition transform hover:scale-[1.02] active:scale-95 duration-150" id="btn-start-recording">
+              <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+              </svg>
+              <span>Start Recording</span>
+            </button>
+            <p class="text-slate-300 text-xs font-medium max-w-md drop-shadow">Observe the scene above, then click to begin your 40-second response</p>
+            <p class="hidden mt-1 text-amber-400 text-xs font-semibold max-w-xs bg-amber-500/10 border border-amber-500/30 p-2 rounded-lg" id="camera-error-hint" role="status" aria-live="polite">Camera isn't available right now. Try again when ready.</p>
+          </div>
+        </div>
+
+        <!-- Question Text -->
+        <div class="py-4 text-center max-w-2xl mx-auto">
+          <h3 class="text-base sm:text-lg lg:text-xl font-medium text-slate-100 leading-snug tracking-tight" id="question-text">Loading prompt...</h3>
+        </div>
+
+        <!-- State: Active Recording Visualizer & Early Advance Button -->
+        <div class="flex flex-col items-center justify-center pt-2 pb-1 min-h-[56px]">
+          <div class="flex flex-col sm:flex-row items-center justify-between w-full max-w-lg gap-3 px-2 hidden" id="recording-state-active">
+            <div class="flex items-center gap-2.5">
+              <div class="flex items-center justify-center gap-1.5 h-7">
+                <div class="w-1 bg-rose-500 rounded-full audio-bar waveform-bar" style="animation-delay: 0.1s"></div>
+                <div class="w-1 bg-rose-500 rounded-full audio-bar waveform-bar" style="animation-delay: 0.3s"></div>
+                <div class="w-1 bg-rose-500 rounded-full audio-bar waveform-bar" style="animation-delay: 0.5s"></div>
+                <div class="w-1 bg-rose-500 rounded-full audio-bar waveform-bar" style="animation-delay: 0.2s"></div>
+                <div class="w-1 bg-rose-500 rounded-full audio-bar waveform-bar" style="animation-delay: 0.4s"></div>
+                <div class="w-1 bg-rose-500 rounded-full audio-bar waveform-bar" style="animation-delay: 0.6s"></div>
+              </div>
+              <span class="text-xs text-rose-400 font-bold tracking-wide uppercase animate-pulse">● Recording Response...</span>
+            </div>
+            <button id="btn-next-step" class="cursor-pointer inline-flex items-center gap-2 bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-400 hover:to-emerald-500 text-white text-xs sm:text-sm font-bold px-4 sm:px-5 py-2 rounded-full shadow-lg shadow-emerald-900/40 transition transform active:scale-95">
+              <span id="btn-next-step-text">Next Step →</span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- RIGHT CARD: Camera HUD & Instructions -->
+      <div class="lg:col-span-4 space-y-4 flex flex-col justify-between">
+        
+        <!-- Camera Proctor HUD Card -->
+        <div class="bg-slate-900/80 backdrop-blur-xl rounded-2xl p-5 border border-white/10 flex flex-col items-center text-center relative overflow-hidden shadow-2xl flex-grow">
+          <div class="relative w-36 h-36 sm:w-40 sm:h-40 rounded-full overflow-hidden p-1 border-2 border-indigo-500/40 bg-slate-950 shadow-2xl my-auto">
+            <video id="camera-preview" autoplay muted playsinline class="w-full h-full rounded-full object-cover hidden-feed"></video>
+            <div id="camera-placeholder" class="absolute inset-0 flex items-center justify-center text-slate-500">
+              <svg class="w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg>
+            </div>
+            <div class="absolute inset-x-4 h-0.5 bg-cyan-400/80 shadow-[0_0_10px_#06b6d4] animate-scan pointer-events-none"></div>
+            <div class="absolute top-2.5 right-2 bg-black/70 backdrop-blur-sm border border-white/10 text-slate-200 text-[10px] font-bold px-2 py-0.5 rounded-full flex items-center gap-1">
+              <span class="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-pulse"></span>
+              <span>Monitoring</span>
             </div>
           </div>
-          <div>
-            <button class="pulse-ring cursor-pointer inline-flex items-center space-x-3 bg-ctaOrange hover:bg-ctaOrange-hover text-white font-bold text-base sm:text-lg px-8 py-3.5 rounded-full shadow-lg transition-transform transform active:scale-95 duration-150" onclick="MCA.startJourney()">
-              <span id="start-btn-label">Start Journey</span>
-              <span class="bg-white/20 p-1.5 rounded-full flex items-center justify-center">
-                <svg class="w-4 h-4 text-white fill-current" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"></path></svg>
+
+          <div class="w-full mt-4 text-left border-t border-white/10 pt-3">
+            <h4 class="text-xs font-bold text-slate-300 tracking-wide uppercase">Camera Check:</h4>
+            <ul class="text-xs text-slate-400 mt-1 space-y-1 list-disc list-inside">
+              <li>Sit facing the camera directly.</li>
+            </ul>
+            <h4 class="text-xs font-bold text-slate-300 tracking-wide uppercase mt-2.5">Face Detected Status:</h4>
+            <div class="flex items-center justify-between text-xs font-semibold text-slate-300 mt-2 bg-slate-950/80 p-2.5 rounded-xl border border-white/5">
+              <span class="flex items-center text-slate-400" id="face-status" aria-live="polite">
+                <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 24 24"><path d="M9.5 16.2l-3.4-3.4L4.7 14.2 9.5 19 19.3 9.2l-1.4-1.4L9.5 16.2z"/></svg>
+                <span id="face-status-text">Waiting...</span>
               </span>
+              <span class="text-slate-600">|</span>
+              <span class="flex items-center text-amber-400">
+                <svg class="w-3.5 h-3.5 mr-1" fill="currentColor" viewBox="0 0 24 24"><path d="M9 20h6v-1.5H9V20zm.6-3.5h4.8a7.5 7.5 0 003.8-6.5c0-3.6-2.9-6.5-6.6-6.1A6 6 0 006 10.5a7.5 7.5 0 003.6 6z"/></svg>
+                Light OK
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Guide Accordion Card -->
+        <div class="bg-slate-900/80 backdrop-blur-xl rounded-2xl p-4 border border-white/10 text-left transition shadow-2xl">
+          <div class="flex items-center justify-between cursor-pointer" onclick="MCA.toggleGuide()">
+            <h4 class="text-sm font-bold text-white tracking-tight flex items-center gap-2 font-display">
+              <span class="w-1.5 h-4 rounded-full bg-indigo-500 inline-block"></span>
+              How it works?
+              <span class="text-xs bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 font-semibold px-2 py-0.5 rounded">Guide</span>
+            </h4>
+            <button class="text-slate-400 hover:text-white" aria-label="Toggle guide">
+              <svg class="w-4 h-4 transform transition-transform" fill="none" id="guide-chevron" stroke="currentColor" viewBox="0 0 24 24">
+                <path d="M19 9l-7 7-7-7" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+              </svg>
             </button>
           </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- VIEW 2: INTERACTIVE STEP RUNNER -->
-    <section class="w-full max-w-6xl mx-auto pt-0 pb-1 transition-all duration-300 hidden" id="view-step">
-      <div class="lg:h-[calc(100dvh-7rem)] lg:flex lg:flex-col">
-      <div class="text-center mb-1 lg:mb-2 mx-auto">
-        <h2 class="text-xl sm:text-2xl font-extrabold text-mindGreen tracking-tight" id="step-category-heading">Observe &amp; Describe</h2>
-      </div>
-
-      <div class="bg-[#E6F5EA]/70 backdrop-blur-md rounded-3xl p-3 sm:p-4 lg:p-5 border border-emerald-100/90 shadow-md lg:flex lg:flex-col lg:flex-1 lg:min-h-0">
-        <!-- Stepper Navigation -->
-        <div class="flex flex-wrap items-center justify-between gap-4 mb-3 pb-3 border-b border-gray-200/70">
-          <div class="flex items-center space-x-3">
-            <button class="cursor-pointer p-2 rounded-xl text-gray-700 hover:text-mindGreen hover:bg-cream transition shadow-sm" onclick="MCA.navigateTo('map')" title="Back to Map" aria-label="Back to Map">
-              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M10 19l-7-7m0 0l7-7m-7 7h18" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"></path></svg>
-            </button>
-            <div>
-              <span class="flex items-center gap-2 text-base font-extrabold text-gray-900" id="step-counter-text">Step 1 of 4</span>
-              <span class="block text-xs font-medium text-gray-600 mt-0.5" id="step-category-subtitle">Observe &amp; Describe</span>
-            </div>
-          </div>
-          <div class="flex items-center space-x-2.5 sm:space-x-4">
-            <div class="w-9 h-9 rounded-full bg-mindGreen text-white text-sm font-bold flex items-center justify-center shadow-md ring-2 ring-emerald-200 transition" id="dot-1">1</div>
-            <div class="w-5 sm:w-8 h-[3px] bg-gray-300 rounded-full" id="line-1"></div>
-            <div class="w-9 h-9 rounded-full bg-mindGreen/10 text-mindGreen text-sm font-bold flex items-center justify-center border-2 border-emerald-200 transition" id="dot-2">2</div>
-            <div class="w-5 sm:w-8 h-[3px] bg-gray-300 rounded-full" id="line-2"></div>
-            <div class="w-9 h-9 rounded-full bg-gray-100 text-gray-500 text-sm font-bold flex items-center justify-center border border-gray-200 transition" id="dot-3">3</div>
-            <div class="w-5 sm:w-8 h-[3px] bg-gray-300 rounded-full" id="line-3"></div>
-            <div class="w-9 h-9 rounded-full bg-gray-100 text-gray-500 text-sm font-bold flex items-center justify-center border border-gray-200 transition" id="dot-4">4</div>
-          </div>
-        </div>
-
-        <!-- Core Split Grid -->
-        <div class="grid grid-cols-1 lg:grid-cols-12 gap-4 md:gap-5 lg:items-stretch lg:flex-1 lg:min-h-0">
-          <!-- LEFT CARD: Media & Prompt -->
-          <div class="lg:col-span-8 bg-cream rounded-3xl p-4 sm:p-5 shadow-sm border border-gray-100 flex flex-col justify-between min-h-[560px] lg:min-h-0">
-            <div class="relative w-full rounded-2xl overflow-hidden shadow-inner aspect-[16/9] sm:aspect-[16/8.5] lg:aspect-auto lg:flex-1 lg:min-h-0 bg-gray-900">
-              <img alt="Scene Visual Prompt" class="w-full h-full object-cover transition-all duration-500 hidden" id="scene-image" src="">
-              <span class="absolute top-3 left-3 bg-black/60 backdrop-blur-md text-white text-xs font-semibold px-3 py-1 rounded-full" id="scene-tag">Platform Scene</span>
-              <div class="absolute top-3 right-3 bg-rose-600/90 text-white text-xs font-bold px-3 py-1.5 rounded-full items-center gap-2 animate-pulse hidden" id="recording-timer-pill">
-                <span class="w-2 h-2 rounded-full bg-white animate-ping"></span>
-                <span id="timer-display">00:40</span>
-              </div>
-              <div class="absolute inset-0 flex flex-col items-center justify-center gap-4 z-10 px-6 text-center" id="start-overlay">
-                <button class="cursor-pointer inline-flex items-center space-x-2.5 bg-ctaOrange hover:bg-ctaOrange-hover text-white font-bold px-8 py-3.5 rounded-full text-base shadow-lg shadow-orange-200 transition transform hover:scale-[1.02] active:scale-95 duration-150" id="btn-start-recording">
-                  <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
-                  </svg>
-                  <span>Start Recording</span>
-                </button>
-                <p class="text-gray-100 text-xs sm:text-sm font-medium max-w-xs">Click to reveal the scene and start your 40-second response</p>
-                <p class="hidden mt-3 text-amber-300 text-xs sm:text-sm font-semibold max-w-xs" id="camera-error-hint" role="status" aria-live="polite">Camera isn't available right now. Try again when ready.</p>
-              </div>
-            </div>
-
-            <div class="py-2 sm:py-3 text-center max-w-2xl mx-auto">
-              <h3 class="text-base sm:text-lg lg:text-xl font-bold text-gray-900 leading-snug tracking-tight" id="question-text">Loading prompt...</h3>
-            </div>
-
-            <div class="flex flex-col items-center justify-center pt-1 pb-2">
-              <!-- State: Active Recording -->
-              <div class="flex flex-col items-center w-full max-w-sm hidden" id="recording-state-active">
-                <div class="flex items-center justify-center gap-1.5 h-8 mb-2">
-                  <div class="w-1.5 bg-rose-500 rounded-full audio-bar waveform-bar" style="animation-delay: 0.1s"></div>
-                  <div class="w-1.5 bg-rose-500 rounded-full audio-bar waveform-bar" style="animation-delay: 0.3s"></div>
-                  <div class="w-1.5 bg-rose-500 rounded-full audio-bar waveform-bar" style="animation-delay: 0.5s"></div>
-                  <div class="w-1.5 bg-rose-500 rounded-full audio-bar waveform-bar" style="animation-delay: 0.2s"></div>
-                  <div class="w-1.5 bg-rose-500 rounded-full audio-bar waveform-bar" style="animation-delay: 0.4s"></div>
-                  <div class="w-1.5 bg-rose-500 rounded-full audio-bar waveform-bar" style="animation-delay: 0.6s"></div>
-                  <div class="w-1.5 bg-rose-500 rounded-full audio-bar waveform-bar" style="animation-delay: 0.25s"></div>
-                  <div class="w-1.5 bg-rose-500 rounded-full audio-bar waveform-bar" style="animation-delay: 0.45s"></div>
-                </div>
-                <span class="text-xs text-rose-600 font-bold mt-2.5 tracking-wide uppercase animate-pulse">● Listening carefully...</span>
-              </div>
-            </div>
-          </div>
-
-          <!-- RIGHT CARD: Camera & Guide -->
-          <div class="lg:col-span-4 space-y-3 lg:flex lg:flex-col lg:h-full">
-            <!-- Camera Proctor Card -->
-            <div class="bg-cream rounded-3xl p-3 sm:p-4 lg:p-5 shadow-sm border border-gray-100 flex flex-col items-center text-center relative overflow-hidden lg:flex-1 lg:min-h-0">
-              <div class="relative w-32 h-32 sm:w-36 sm:h-36 lg:w-40 lg:h-40 rounded-full overflow-hidden p-1 border-2 border-emerald-200 bg-emerald-50 shadow-inner">
-                <video id="camera-preview" autoplay muted playsinline class="w-full h-full rounded-full object-cover hidden-feed"></video>
-                <div id="camera-placeholder" class="absolute inset-0 flex items-center justify-center text-gray-400">
-                  <svg class="w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg>
-                </div>
-                <div class="absolute inset-x-4 h-0.5 bg-emerald-400/80 shadow-[0_0_8px_#8EB69B] animate-scan pointer-events-none"></div>
-                <div class="absolute top-2.5 right-2 bg-black/60 backdrop-blur-sm text-white text-[10px] font-bold px-2 py-0.5 rounded-full flex items-center gap-1">
-                  <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
-                  <span>Monitoring</span>
-                </div>
-              </div>
-              <div class="w-full mt-2.5 text-left border-t border-gray-100 pt-2">
-                <h4 class="text-xs font-bold text-gray-800 tracking-wide uppercase">Camera Check:</h4>
-                <ul class="text-xs text-gray-600 mt-1 space-y-1 list-disc list-inside">
-                  <li>Sit facing the camera directly.</li>
-                </ul>
-                <h4 class="text-xs font-bold text-gray-800 tracking-wide uppercase mt-2.5">Face Detected Status:</h4>
-                <div class="flex items-center justify-between text-xs font-semibold text-gray-700 mt-2 bg-emerald-50/70 p-2 rounded-xl border border-emerald-100">
-                  <span class="flex items-center text-gray-500" id="face-status" aria-live="polite">
-                    <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 24 24"><path d="M9.5 16.2l-3.4-3.4L4.7 14.2 9.5 19 19.3 9.2l-1.4-1.4L9.5 16.2z"/></svg>
-                    <span id="face-status-text">Waiting...</span>
-                  </span>
-                  <span class="text-gray-300">|</span>
-                  <span class="flex items-center text-amber-700">
-                    <svg class="w-3.5 h-3.5 mr-1" fill="currentColor" viewBox="0 0 24 24"><path d="M9 20h6v-1.5H9V20zm.6-3.5h4.8a7.5 7.5 0 003.8-6.5c0-3.6-2.9-6.5-6.6-6.1A6 6 0 006 10.5a7.5 7.5 0 003.6 6z"/></svg>
-                    Light OK
-                  </span>
-                </div>
-              </div>
-            </div>
-
-            <!-- Guide Card -->
-            <div class="bg-cream rounded-3xl p-4 shadow-sm border border-gray-100 text-left transition lg:shrink-0">
-              <div class="flex items-center justify-between cursor-pointer" onclick="MCA.toggleGuide()">
-                <h4 class="text-sm font-bold text-gray-900 tracking-tight flex items-center gap-2">
-                  <span class="w-1.5 h-4 rounded-full bg-mindGreen inline-block"></span>
-                  How it works?
-                  <span class="text-xs bg-emerald-100 text-emerald-800 font-semibold px-2 py-0.5 rounded">Guide</span>
-                </h4>
-                <button class="text-gray-400 hover:text-mindGreen" aria-label="Toggle guide">
-                  <svg class="w-4 h-4 transform transition-transform" fill="none" id="guide-chevron" stroke="currentColor" viewBox="0 0 24 24">
-                    <path d="M19 9l-7 7-7-7" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
-                  </svg>
-                </button>
-              </div>
-              <div class="mt-3 text-xs text-gray-600 space-y-2.5 transition-all" id="guide-content">
-                <li class="flex items-start">
-                  <span class="w-1.5 h-1.5 rounded-full bg-mindGreen mt-1.5 mr-2 shrink-0"></span>
-                  <span>Look at the image carefully.</span>
-                </li>
-                <li class="flex items-start">
-                  <span class="w-1.5 h-1.5 rounded-full bg-mindGreen mt-1.5 mr-2 shrink-0"></span>
-                  <span>Think about your response.</span>
-                </li>
-                <li class="flex items-start">
-                  <span class="w-1.5 h-1.5 rounded-full bg-mindGreen mt-1.5 mr-2 shrink-0"></span>
-                  <span>Click on the <strong class="text-gray-900">START</strong> button and record your response</span>
-                </li>
-              </div>
-            </div>
+          <div class="mt-3 text-xs text-slate-300 space-y-2.5 transition-all" id="guide-content">
+            <li class="flex items-start">
+              <span class="w-1.5 h-1.5 rounded-full bg-indigo-400 mt-1.5 mr-2 shrink-0"></span>
+              <span>Look at the image carefully.</span>
+            </li>
+            <li class="flex items-start">
+              <span class="w-1.5 h-1.5 rounded-full bg-indigo-400 mt-1.5 mr-2 shrink-0"></span>
+              <span>Think about your response.</span>
+            </li>
+            <li class="flex items-start">
+              <span class="w-1.5 h-1.5 rounded-full bg-indigo-400 mt-1.5 mr-2 shrink-0"></span>
+              <span>Click <strong class="text-emerald-400">START</strong> and speak naturally into your microphone.</span>
+            </li>
           </div>
         </div>
       </div>
-      </div>
-    </section>
-  </div>
+    </div>
+  </section>
 
-  <!-- Upload progress overlay -->
-  <div class="hidden fixed inset-0 bg-black/60 backdrop-blur-sm z-50 items-center justify-center" id="upload-overlay">
-    <div class="bg-cream rounded-3xl max-w-sm w-full p-8 text-center shadow-2xl">
-      <div class="w-16 h-16 mx-auto rounded-full bg-emerald-100 flex items-center justify-center mb-4">
-        <svg class="w-8 h-8 text-mindGreen animate-pulse" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg>
+  <!-- Upload Progress Overlay -->
+  <div class="hidden fixed inset-0 bg-black/80 backdrop-blur-md z-50 items-center justify-center p-4" id="upload-overlay">
+    <div class="bg-slate-900 border border-white/10 rounded-3xl max-w-sm w-full p-8 text-center shadow-2xl">
+      <div class="w-16 h-16 mx-auto rounded-full bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center mb-4">
+        <svg class="w-8 h-8 text-emerald-400 animate-pulse" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg>
       </div>
-      <h3 class="text-lg font-bold text-mindGreen mb-1">Uploading your responses</h3>
-      <p class="text-sm text-gray-600">Please keep this tab open.</p>
-      <div class="w-full bg-gray-200 rounded-full h-2 mt-6 overflow-hidden">
-        <div class="h-full bg-mindGreen rounded-full transition-all" id="upload-progress-bar" style="width:0%"></div>
+      <h3 class="text-lg font-bold text-white font-display mb-1">Saving your responses</h3>
+      <p class="text-sm text-slate-400">Please keep this browser window open...</p>
+      <div class="w-full bg-slate-800 rounded-full h-2.5 mt-6 overflow-hidden border border-white/5">
+        <div class="h-full bg-gradient-to-r from-emerald-500 to-indigo-500 rounded-full transition-all" id="upload-progress-bar" style="width:0%"></div>
       </div>
-      <p class="text-xs text-gray-600 mt-3" id="upload-progress-label" role="alert">0%</p>
+      <p class="text-xs text-slate-400 mt-3 font-semibold" id="upload-progress-label" role="alert">0%</p>
     </div>
   </div>
 
-  <!-- Failure / retry modal -->
-  <div class="hidden fixed inset-0 bg-black/60 backdrop-blur-sm z-50 items-center justify-center p-4" id="modal-failure">
-    <div class="bg-cream rounded-3xl max-w-md w-full p-6 sm:p-8 text-center shadow-2xl border-4 border-amber-100 transform transition-all duration-300 scale-95" id="failure-box">
-      <div class="w-16 h-16 mx-auto rounded-full bg-amber-100 flex items-center justify-center mb-4" id="failure-icon"></div>
-      <h3 class="text-lg font-bold text-gray-800 mb-2" id="failure-title">Something went wrong</h3>
-      <p class="text-sm text-gray-600 leading-relaxed mb-6" id="failure-message">Please try again.</p>
+  <!-- Failure / Retry Modal -->
+  <div class="hidden fixed inset-0 bg-black/80 backdrop-blur-md z-50 items-center justify-center p-4" id="modal-failure">
+    <div class="bg-slate-900 border border-white/10 rounded-3xl max-w-md w-full p-6 sm:p-8 text-center shadow-2xl transform transition-all duration-300 scale-95" id="failure-box">
+      <div class="w-16 h-16 mx-auto rounded-full bg-amber-500/10 border border-amber-500/30 flex items-center justify-center mb-4 text-amber-400" id="failure-icon"></div>
+      <h3 class="text-lg font-bold text-white font-display mb-2" id="failure-title">Something went wrong</h3>
+      <p class="text-sm text-slate-400 leading-relaxed mb-6" id="failure-message">Please try again.</p>
       <div class="flex flex-col gap-2.5">
-        <button class="cursor-pointer inline-flex items-center justify-center gap-2 w-full py-3 rounded-full bg-ctaOrange hover:bg-ctaOrange-hover text-white font-bold text-sm shadow-md transition transform active:scale-95" id="btn-failure-retry">
+        <button class="cursor-pointer inline-flex items-center justify-center gap-2 w-full py-3.5 rounded-full bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-400 hover:to-emerald-500 text-white font-bold text-sm shadow-lg shadow-emerald-900/40 transition transform active:scale-95" id="btn-failure-retry">
           <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg>
           Try Again
         </button>
-        <button class="cursor-pointer w-full py-3 rounded-full bg-gray-100 hover:bg-gray-200 text-gray-800 font-bold text-sm transition" id="btn-failure-close">Close</button>
+        <button class="cursor-pointer w-full py-3 rounded-full bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold text-sm border border-white/5 transition" id="btn-failure-close">Close</button>
       </div>
     </div>
   </div>
 
   <!-- Completion Modal -->
-  <div class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden" id="modal-completion">
-    <div class="bg-cream rounded-3xl max-w-md w-full p-6 sm:p-8 text-center shadow-2xl border-4 border-emerald-100 transform transition-all duration-300 scale-95" id="modal-box">
-      <div class="w-24 h-24 mx-auto rounded-full bg-amber-100 text-amber-600 flex items-center justify-center border-4 border-amber-200 animate-bounce mb-4 shadow-md">
-        <svg class="w-12 h-12" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2l2.4 4.9 5.4.8-3.9 3.8.9 5.4L12 14.8 7.2 16.9l.9-5.4L4.2 7.7l5.4-.8L12 2z"/></svg>
+  <div class="fixed inset-0 bg-black/80 backdrop-blur-md z-50 flex items-center justify-center p-4 hidden" id="modal-completion">
+    <div class="bg-slate-900 border border-white/10 rounded-3xl max-w-md w-full p-6 sm:p-8 text-center shadow-2xl transform transition-all duration-300 scale-95" id="modal-box">
+      <div class="w-20 h-20 mx-auto rounded-full bg-amber-500/10 text-amber-400 flex items-center justify-center border-2 border-amber-500/30 animate-bounce mb-4 shadow-xl">
+        <svg class="w-10 h-10" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2l2.4 4.9 5.4.8-3.9 3.8.9 5.4L12 14.8 7.2 16.9l.9-5.4L4.2 7.7l5.4-.8L12 2z"/></svg>
       </div>
-      <span class="px-3 py-1 bg-emerald-100 text-emerald-800 text-xs font-black uppercase tracking-widest rounded-full">Journey Complete!</span>
-      <h3 class="text-2xl sm:text-3xl font-black text-mindGreen mt-2.5" id="completion-title">Splendid Job!</h3>
-      <p class="text-gray-600 text-sm mt-1.5 leading-relaxed">You successfully completed all 4 observational speaking milestones with high fluency!</p>
+      <span class="px-3 py-1 bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-xs font-black uppercase tracking-widest rounded-full">Journey Complete</span>
+      <h3 class="text-2xl sm:text-3xl font-black font-display text-white mt-2.5" id="completion-title">Splendid Job!</h3>
+      <p class="text-slate-400 text-sm mt-1.5 leading-relaxed">You successfully completed all 4 observational speaking milestones with high fluency!</p>
+      
       <div class="grid grid-cols-3 gap-2.5 my-6">
-        <div class="bg-emerald-50/70 p-3 rounded-2xl border border-emerald-100">
-          <span class="text-[11px] text-gray-600 font-bold block uppercase tracking-wider">Total XP</span>
-          <span class="text-xl font-black text-emerald-700" id="modal-xp">+200 XP</span>
+        <div class="bg-slate-800/80 p-3 rounded-2xl border border-white/5">
+          <span class="text-[11px] text-slate-400 font-bold block uppercase tracking-wider">Total XP</span>
+          <span class="text-lg sm:text-xl font-black text-emerald-400" id="modal-xp">+200 XP</span>
         </div>
-        <div class="bg-amber-50/70 p-3 rounded-2xl border border-amber-100">
-          <span class="text-[11px] text-gray-600 font-bold block uppercase tracking-wider">Fluency</span>
-          <span class="flex items-center justify-center gap-0.5 text-amber-500 mt-1">
+        <div class="bg-slate-800/80 p-3 rounded-2xl border border-white/5">
+          <span class="text-[11px] text-slate-400 font-bold block uppercase tracking-wider">Fluency</span>
+          <span class="flex items-center justify-center gap-0.5 text-amber-400 mt-1">
             <svg class="w-4 h-4 fill-current" viewBox="0 0 24 24"><path d="M12 2l2.4 4.9 5.4.8-3.9 3.8.9 5.4L12 14.8 7.2 16.9l.9-5.4L4.2 7.7l5.4-.8L12 2z"/></svg>
             <svg class="w-4 h-4 fill-current" viewBox="0 0 24 24"><path d="M12 2l2.4 4.9 5.4.8-3.9 3.8.9 5.4L12 14.8 7.2 16.9l.9-5.4L4.2 7.7l5.4-.8L12 2z"/></svg>
             <svg class="w-4 h-4 fill-current" viewBox="0 0 24 24"><path d="M12 2l2.4 4.9 5.4.8-3.9 3.8.9 5.4L12 14.8 7.2 16.9l.9-5.4L4.2 7.7l5.4-.8L12 2z"/></svg>
           </span>
         </div>
-        <div class="bg-teal-50/70 p-3 rounded-2xl border border-teal-100">
-          <span class="text-[11px] text-gray-600 font-bold block uppercase tracking-wider">Accuracy</span>
-          <span class="text-xl font-black text-mindGreen">100%</span>
+        <div class="bg-slate-800/80 p-3 rounded-2xl border border-white/5">
+          <span class="text-[11px] text-slate-400 font-bold block uppercase tracking-wider">Accuracy</span>
+          <span class="text-lg sm:text-xl font-black text-indigo-400">100%</span>
         </div>
       </div>
+
       <div class="mb-6 text-left">
-        <span class="text-xs font-bold text-gray-600 uppercase tracking-wider block mb-2">Badges Unlocked:</span>
+        <span class="text-xs font-bold text-slate-400 uppercase tracking-wider block mb-2">Badges Unlocked:</span>
         <div class="flex flex-wrap gap-2">
-          <span class="inline-flex items-center gap-1 bg-emerald-100 text-emerald-900 text-xs font-semibold px-2.5 py-1 rounded-lg">
-            <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2C8.7 2 6 4.7 6 8v5.2C4.8 14.5 4 16 4 17.6c0 2.4 1.6 4.4 3.9 4.4h8.2c2.3 0 3.9-2 3.9-4.4 0-1.6-.8-3.1-2-4.4V8c0-3.3-2.7-6-6-6zm-3 6c0-1.7 1.3-3 3-3s3 1.3 3 3H9z"/></svg>
+          <span class="inline-flex items-center gap-1 bg-emerald-500/10 border border-emerald-500/30 text-emerald-300 text-xs font-semibold px-2.5 py-1 rounded-lg">
+            <svg class="w-3.5 h-3.5 text-emerald-400" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2C8.7 2 6 4.7 6 8v5.2C4.8 14.5 4 16 4 17.6c0 2.4 1.6 4.4 3.9 4.4h8.2c2.3 0 3.9-2 3.9-4.4 0-1.6-.8-3.1-2-4.4V8c0-3.3-2.7-6-6-6zm-3 6c0-1.7 1.3-3 3-3s3 1.3 3 3H9z"/></svg>
             Keen Observer
           </span>
-          <span class="inline-flex items-center gap-1 bg-blue-100 text-blue-900 text-xs font-semibold px-2.5 py-1 rounded-lg">
-            <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24"><path d="M13 2L4 14h6l-1 8 9-12h-6l1-8z"/></svg>
+          <span class="inline-flex items-center gap-1 bg-indigo-500/10 border border-indigo-500/30 text-indigo-300 text-xs font-semibold px-2.5 py-1 rounded-lg">
+            <svg class="w-3.5 h-3.5 text-indigo-400" fill="currentColor" viewBox="0 0 24 24"><path d="M13 2L4 14h6l-1 8 9-12h-6l1-8z"/></svg>
             Quick Thinker
           </span>
-          <span class="inline-flex items-center gap-1 bg-purple-100 text-purple-900 text-xs font-semibold px-2.5 py-1 rounded-lg">
-            <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24"><path d="M20 4H4a2 2 0 00-2 2v12a2 2 0 002 2h16a2 2 0 002-2V6a2 2 0 00-2-2zm-4 8l-6 4V8l6 4z"/></svg>
+          <span class="inline-flex items-center gap-1 bg-purple-500/10 border border-purple-500/30 text-purple-300 text-xs font-semibold px-2.5 py-1 rounded-lg">
+            <svg class="w-3.5 h-3.5 text-purple-400" fill="currentColor" viewBox="0 0 24 24"><path d="M20 4H4a2 2 0 00-2 2v12a2 2 0 002 2h16a2 2 0 002-2V6a2 2 0 00-2-2zm-4 8l-6 4V8l6 4z"/></svg>
             Fluent Speaker
           </span>
         </div>
       </div>
+
       <div class="flex flex-col gap-2.5">
-        <button class="cursor-pointer inline-flex items-center justify-center gap-2 w-full py-3.5 rounded-full bg-ctaOrange hover:bg-ctaOrange-hover text-white font-bold text-sm shadow-md transition transform active:scale-95" id="btn-restart-journey">
+        <button class="cursor-pointer inline-flex items-center justify-center gap-2 w-full py-3.5 rounded-full bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-400 hover:to-emerald-500 text-white font-bold text-sm shadow-lg shadow-emerald-900/40 transition transform active:scale-95" id="btn-restart-journey">
           <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg>
           Play Journey Again
         </button>
-        <button class="cursor-pointer w-full py-3 rounded-full bg-gray-100 hover:bg-gray-200 text-gray-800 font-bold text-sm transition" id="btn-back-map">Back to Progress Path</button>
+        <button class="cursor-pointer w-full py-3 rounded-full bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold text-sm border border-white/5 transition" id="btn-back-map">Back to Progress Path</button>
       </div>
     </div>
   </div>
 
   <!-- XP Toast -->
-  <div class="fixed bottom-6 right-6 bg-mindGreen text-white px-5 py-3.5 rounded-2xl shadow-xl border border-emerald-400 flex items-center gap-3 transform translate-y-24 opacity-0 transition-all duration-300 z-50 pointer-events-none" id="xp-toast" role="status" aria-live="polite">
-    <div class="w-9 h-9 rounded-full bg-amber-400 flex items-center justify-center text-amber-900 shadow">
-      <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2l2.4 4.9 5.4.8-3.9 3.8.9 5.4L12 14.8 7.2 16.9l.9-5.4L4.2 7.7l5.4-.8L12 2z"/></svg>
+  <div class="fixed bottom-6 right-6 bg-slate-900 text-white px-5 py-3.5 rounded-2xl shadow-2xl border border-emerald-500/40 flex items-center gap-3 transform translate-y-24 opacity-0 transition-all duration-300 z-50 pointer-events-none" id="xp-toast" role="status" aria-live="polite">
+    <div class="w-10 h-10 rounded-full bg-amber-500/20 border border-amber-500/40 flex items-center justify-center text-amber-400 shadow">
+      <svg class="w-5 h-5 fill-current" viewBox="0 0 24 24"><path d="M12 2l2.4 4.9 5.4.8-3.9 3.8.9 5.4L12 14.8 7.2 16.9l.9-5.4L4.2 7.7l5.4-.8L12 2z"/></svg>
     </div>
     <div>
-      <div class="text-xs font-bold text-emerald-300" id="xp-toast-title">+50 XP Earned!</div>
-      <div class="text-sm font-black" id="xp-toast-body">Great observation &amp; fluency!</div>
+      <div class="text-xs font-bold text-emerald-400" id="xp-toast-title">+50 XP Earned!</div>
+      <div class="text-sm font-bold text-white" id="xp-toast-body">Great observation &amp; fluency!</div>
     </div>
   </div>
 </div>
@@ -409,6 +478,6 @@
 {% endblock %}
 
 {% block scripts %}
-<script src="{% static 'js/camera_error.js' %}"></script>
-<script src="{% static 'js/combined_activity.js' %}"></script>
+<script src="{% static 'js/camera_error.js' %}?v=3.0"></script>
+<script src="{% static 'js/combined_activity.js' %}?v=3.0"></script>
 {% endblock %}
