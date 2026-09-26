@@ -11,8 +11,8 @@ class CollectionSessionAdmin(admin.ModelAdmin):
 
 @admin.register(ConsentRecord)
 class ConsentRecordAdmin(admin.ModelAdmin):
-    list_display = ("patient_id", "gender", "age", "is_minor", "consent_record_date", "created_at")
-    search_fields = ("patient_id", "guardian_name", "session__session_id")
+    list_display = ("patient_id", "participant_email", "gender", "age", "is_minor", "consent_record_date", "created_at")
+    search_fields = ("patient_id", "participant_email", "guardian_name", "session__session_id")
     list_filter = ("is_minor", "consent_record_date")
     readonly_fields = ("created_at", "ip_address", "user_agent")
 

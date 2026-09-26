@@ -1,3 +1,4 @@
+import hashlib
 import json
 import random
 import threading
@@ -18,6 +19,18 @@ from .services.fusion_processing import process_fusion_session
 
 
 STORY_IMAGE_DIR = Path(__file__).resolve().parent.parent / "static" / "images" / "activities" / "story"
+
+
+def generate_participant_id_from_email(email: str) -> str:
+    """Derive a stable, short, opaque Participant ID from a Gmail address.
+
+    Format: PID-XXXXXXXX  (8 uppercase hex chars)
+    The raw email is NOT encoded in the ID — only a SHA-256 hash is used,
+    making it safe to display publicly while remaining deterministic.
+    """
+    normalized = email.strip().lower()
+    digest = hashlib.sha256(normalized.encode()).hexdigest()[:8].upper()
+    return f"PID-{digest}"
 
 
 def pick_story_frames():
@@ -83,13 +96,21 @@ def submit_consent(request):
     else:
         data = request.POST.dict()
 
-    patient_id = str(data.get("patient_id", "")).strip()
+    participant_email = str(data.get("participant_email", "")).strip().lower()
+
+    # Validate that a proper Gmail address was provided
+    if not participant_email:
+        return JsonResponse({"ok": False, "error": "A Gmail address is required."}, status=400)
+    if not participant_email.endswith("@gmail.com"):
+        return JsonResponse({"ok": False, "error": "Please enter a valid Gmail address (must end with @gmail.com)."}, status=400)
+
+    # Auto-generate the Participant ID server-side from the Gmail (client value is never trusted)
+    patient_id = generate_participant_id_from_email(participant_email)
+
     gender = str(data.get("gender", "")).strip()
     age_raw = data.get("age")
     consent_date_raw = data.get("consent_record_date", "")
 
-    if not patient_id:
-        return JsonResponse({"ok": False, "error": "Patient ID / Participant code is required."}, status=400)
     if not gender:
         return JsonResponse({"ok": False, "error": "Gender selection is required."}, status=400)
     try:
@@ -168,6 +189,7 @@ def submit_consent(request):
         session=session,
         defaults={
             "patient_id": patient_id,
+            "participant_email": participant_email,
             "gender": gender,
             "age": age,
             "consent_record_date": consent_date,

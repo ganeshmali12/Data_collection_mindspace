@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>MindSpace — Mental Health Screening</title>
+<title>MindSpace — Participant Questionnaire</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Fraunces:ital,wght@0,300;0,400;1,300&display=swap" rel="stylesheet"/>
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -359,20 +359,7 @@
     outline-offset: 2px;
   }
 
-  /* ── Sensitive notice ── */
-  .sensitive-notice {
-    background: rgba(240,101,149,0.06);
-    border: 1px solid rgba(240,101,149,0.15);
-    border-radius: var(--radius-sm);
-    padding: 12px 14px;
-    font-size: 12px;
-    color: var(--section-cssrs);
-    line-height: 1.6;
-    margin-bottom: 1.25rem;
-    display: flex;
-    gap: 10px;
-    align-items: flex-start;
-  }
+
 
   /* ── Results ── */
   .result-hero {
@@ -569,7 +556,7 @@
       </div>
       <span class="logo-name">MindSpace</span>
     </div>
-    <span class="step-indicator" id="step-indicator">Screening</span>
+    <span class="step-indicator" id="step-indicator">Questionnaire</span>
   </div>
 
   <!-- Progress -->
@@ -638,17 +625,17 @@ async function saveQuestionnaire(scores, flags) {
 const SECTIONS = [
   {
     id: 'phq9',
-    name: 'Depression',
+    name: 'Daily Mood & Outlook',
     color: 'var(--section-phq)',
     soft: 'var(--section-phq-soft)',
-    instruction: 'Over the last 2 weeks, how often have you been bothered by the following?',
+    instruction: 'Over the last 2 weeks, how often have you felt or experienced the following?',
     type: 'freq',
     scale: ['Not at all','Several days','More than half','Nearly every day'],
     values: [0,1,2,3],
     cutoff: 10, max: 27,
     questions: [
       'Little interest or pleasure in doing things',
-      'Feeling down, depressed, or hopeless',
+      'Feeling down, low, or hopeless',
       'Trouble falling or staying asleep, or sleeping too much',
       'Feeling tired or having little energy',
       'Poor appetite or overeating',
@@ -660,16 +647,16 @@ const SECTIONS = [
   },
   {
     id: 'gad7',
-    name: 'Anxiety',
+    name: 'Peace of Mind & Ease',
     color: 'var(--section-gad)',
     soft: 'var(--section-gad-soft)',
-    instruction: 'Over the last 2 weeks, how often have you been bothered by the following?',
+    instruction: 'Over the last 2 weeks, how often have you felt or experienced the following?',
     type: 'freq',
     scale: ['Not at all','Several days','More than half','Nearly every day'],
     values: [0,1,2,3],
     cutoff: 10, max: 21,
     questions: [
-      'Feeling nervous, anxious, or on edge',
+      'Feeling nervous, uneasy, or on edge',
       'Not being able to stop or control worrying',
       'Worrying too much about different things',
       'Trouble relaxing',
@@ -680,7 +667,7 @@ const SECTIONS = [
   },
   {
     id: 'pss4',
-    name: 'Stress',
+    name: 'Daily Balance & Routine',
     color: 'var(--section-pss)',
     soft: 'var(--section-pss-soft)',
     instruction: 'In the last month, how often have you felt the following?',
@@ -698,7 +685,7 @@ const SECTIONS = [
   },
   {
     id: 'mdq7',
-    name: 'Mood',
+    name: 'Energy & Activity Patterns',
     color: 'var(--section-mdq)',
     soft: 'var(--section-mdq-soft)',
     instruction: 'Has there ever been a period when you were not your usual self and the following was true?',
@@ -718,7 +705,7 @@ const SECTIONS = [
   },
   {
     id: 'cssrs',
-    name: 'Wellbeing',
+    name: 'General Reflections',
     color: 'var(--section-cssrs)',
     soft: 'var(--section-cssrs-soft)',
     instruction: 'Please answer honestly. Your responses are completely confidential.',
@@ -776,11 +763,7 @@ function render(direction = 'initial') {
     backBtn.style.visibility = cur > 0 ? 'visible' : 'hidden';
   }
 
-  let sensitiveHtml = s.suicidal ? `
-    <div class="sensitive-notice">
-      <svg width="16" height="16" viewBox="0 0 16 16" fill="none" style="flex-shrink:0;margin-top:1px"><circle cx="8" cy="8" r="7" stroke="currentColor" stroke-width="1.2"/><path d="M8 5v4M8 11v.5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
-      These questions are sensitive. There are no right or wrong answers. If you are in distress, please reach out to iCall at 9152987821.
-    </div>` : '';
+
 
   let optionsHtml = '';
   if (s.type === 'freq') {
@@ -820,7 +803,6 @@ function render(direction = 'initial') {
       <span class="dot" style="background:${s.color}"></span>
       ${s.name}
     </span>
-    ${sensitiveHtml}
     <div class="q-card ${animClass}">
       <p class="instruction-text">${s.instruction}</p>
       <p class="q-text">${q.text}</p>

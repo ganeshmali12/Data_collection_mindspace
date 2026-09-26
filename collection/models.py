@@ -42,7 +42,8 @@ class CollectionSession(models.Model):
 
 class ConsentRecord(models.Model):
     session = models.OneToOneField(CollectionSession, on_delete=models.CASCADE, related_name="consent")
-    patient_id = models.CharField(max_length=100)
+    patient_id = models.CharField(max_length=100)  # auto-generated from Gmail (e.g. PID-A3F29C11)
+    participant_email = models.EmailField(max_length=254, blank=True)  # Gmail address supplied on consent form
     gender = models.CharField(max_length=30)
     age = models.PositiveIntegerField()
     consent_record_date = models.DateField()
