@@ -26,7 +26,7 @@ def pca_payload(response):
     return response
 
 
-from .audio_cleaner import build_audio_filter_chain, combine_and_clean_captures
+from .audio_cleaner import build_audio_filter_chain, clean_audio_file, combine_and_clean_captures
 
 
 def combine_audio(captures):
@@ -34,6 +34,9 @@ def combine_audio(captures):
     Combines phonation audio captures while applying bandpass filtering,
     spectral noise suppression, and normalization.
     """
+    if len(captures) == 1:
+        return clean_audio_file(captures[0].file.path, target_sr=16000)
+
     try:
         return combine_and_clean_captures(captures, target_sr=16000)
     except Exception as exc:
@@ -63,10 +66,10 @@ def combine_audio(captures):
 
 def process_voice_session(session):
     captures = list(
-        session.media_captures.filter(kind="phonation_audio").order_by("created_at")[:7]
+        session.media_captures.filter(kind="phonation_audio").order_by("created_at")
     )
-    if len(captures) < 7:
-        raise ValueError(f"Seven phonation recordings are required. Found {len(captures)}.")
+    if not captures:
+        raise ValueError("Phonation audio recording is required.")
 
     result, _ = AnalysisResult.objects.update_or_create(
         session=session,
@@ -75,7 +78,11 @@ def process_voice_session(session):
     )
     combined_path = ""
     try:
-        combined_path = combine_audio(captures)
+        if len(captures) == 1:
+            combined_path = clean_audio_file(captures[0].file.path, target_sr=16000)
+        else:
+            combined_path = combine_audio(captures)
+
         with open(combined_path, "rb") as audio_file:
             extraction = extract_features(audio_file)
         raw_features = feature_payload(extraction)

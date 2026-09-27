@@ -13,9 +13,7 @@
   let soundTasks = [];
   let REQUIRED_HOLD_MS = 750;
   let VOICE_THRESHOLD = 15;
-  const AUTO_SUBMIT_AFTER_HOLD = true;
-  const AUTO_CONTINUE_NEXT_SOUND = true;
-  const NEXT_SOUND_DELAY_MS = 900;
+  const NEXT_SOUND_DELAY_MS = 800;
 
   const currentSound = document.getElementById("currentSound");
   const speakPrompt = document.getElementById("speakPrompt");
@@ -58,25 +56,24 @@
   let mediaRecorder = null;
   let chunks = [];
   let audioBlob = null;
+  let soundMarkers = [];
 
   let audioContext = null;
   let analyser = null;
   let dataArray = null;
   let animationId = null;
 
-  let holdStart = null;
   let holdMs = 0;
   let maxVoice = 0;
   let baselineNoise = 0;
 
-  let holdCompleted = false;
-  let autoSubmitPending = false;
   let isSubmitting = false;
-
+  let isTransitioning = false;
+  let sessionActive = false;
 
   async function loadPhonationSounds() {
     startBtn.disabled = true;
-    setStatus("Loading phonation sounds from admin configuration...");
+    setStatus("Loading phonation sounds from configuration...");
 
     try {
       const response = await fetch(config.soundsUrl, {
@@ -148,7 +145,7 @@
     pipelineState.textContent = "Waiting";
 
     Object.values(pipelineSteps).forEach(function (step) {
-      step.classList.remove("active", "done");
+      if (step) step.classList.remove("active", "done");
     });
   }
 
@@ -167,25 +164,35 @@
     }
   }
 
-  function resetMeters() {
-    holdStart = null;
+  function resetHoldMeter() {
     holdMs = 0;
     maxVoice = 0;
-    audioBlob = null;
-    chunks = [];
+    accumulatedHoldMs = 0;
+    lastVoiceTime = 0;
+    lastFrameTime = performance.now();
 
-    holdCompleted = false;
-    autoSubmitPending = false;
-    isSubmitting = false;
-
-    voiceFill.style.width = "0%";
-    voicePercent.textContent = "0%";
     holdFill.style.width = "0%";
     holdPercent.textContent = "0%";
     ringProgress.style.strokeDashoffset = "628.319";
-
     currentSound.classList.remove("listening", "success");
+  }
+
+  function resetMeters() {
+    chunks = [];
+    audioBlob = null;
+    soundMarkers = [];
+    index = 0;
+    completed = 0;
+    streak = 0;
+    isSubmitting = false;
+    isTransitioning = false;
+    sessionActive = false;
+
+    voiceFill.style.width = "0%";
+    voicePercent.textContent = "0%";
+    resetHoldMeter();
     resetPipelineUi();
+    if (submitBtn) submitBtn.disabled = true;
   }
 
   function renderChips() {
@@ -212,14 +219,13 @@
       completedText.textContent = "0 / 0 completed";
       startBtn.disabled = true;
       renderChips();
-      resetMeters();
       return;
     }
 
     const t = task();
 
-    REQUIRED_HOLD_MS = Number(t.required_hold_ms || 1500);
-    VOICE_THRESHOLD = Number(t.voice_threshold || 32);
+    REQUIRED_HOLD_MS = Number(t.required_hold_ms || 750);
+    VOICE_THRESHOLD = Number(t.voice_threshold || 15);
 
     if (thresholdMarker) {
       thresholdMarker.style.left = Math.max(0, Math.min(100, VOICE_THRESHOLD)) + "%";
@@ -228,7 +234,7 @@
     missionText.textContent = `Mission ${index + 1} of ${soundTasks.length}`;
     currentSound.textContent = t.label;
     speakPrompt.textContent = t.say || t.prompt || t.label;
-    setStatus(`${t.help || "Press Start Activity once. Manovedh will capture sounds automatically."} Voice threshold: ${VOICE_THRESHOLD}%, hold: ${REQUIRED_HOLD_MS} ms.`);
+    setStatus(`${t.help || "Hold the shown sound steadily."} Hold target: ${REQUIRED_HOLD_MS} ms.`);
     streakText.textContent = `Streak: ${streak}`;
     scoreText.textContent = completed;
 
@@ -238,25 +244,25 @@
     completedText.textContent = `${completed} / ${soundTasks.length} completed`;
 
     renderChips();
-    resetMeters();
+    resetHoldMeter();
   }
 
-  async function startSound() {
+  async function startPhonationSession() {
     resetMeters();
-    setStatus("Listening... hold the shown vocal sound until the circle completes.");
+    renderTask();
+    setStatus("Session started: Continuous recording active. Pronounce each sound in sequence.");
 
     startBtn.disabled = true;
     stopBtn.disabled = false;
-    submitBtn.disabled = true;
+    if (submitBtn) submitBtn.disabled = true;
+    sessionActive = true;
+    setPipelineStep("record", "active");
 
     try {
       if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
         throw new Error("Microphone API is not available. Use http://127.0.0.1:8000 or HTTPS.");
       }
 
-      // Create AudioContext BEFORE awaiting getUserMedia so it stays
-      // within the user gesture. Chrome suspends AudioContexts created
-      // after an await, causing getByteTimeDomainData to return silence.
       audioContext = new (window.AudioContext || window.webkitAudioContext)();
       analyser = audioContext.createAnalyser();
       analyser.fftSize = 2048;
@@ -272,7 +278,6 @@
           }
         });
       } catch (_) {
-        // Fallback to default audio constraint if strict constraints fail on older devices
         audioStream = await navigator.mediaDevices.getUserMedia({ audio: true });
       }
       stream = audioStream;
@@ -297,29 +302,18 @@
         }
       };
 
-      mediaRecorder.onstop = function () {
+      mediaRecorder.onstop = async function () {
         audioBlob = new Blob(chunks, { type: "audio/webm" });
-
-        if (holdMs >= Math.min(REQUIRED_HOLD_MS, 400) || holdCompleted || maxVoice >= VOICE_THRESHOLD) {
-          submitBtn.disabled = false;
-          currentSound.classList.add("success");
-
-          if (autoSubmitPending && AUTO_SUBMIT_AFTER_HOLD) {
-            setStatus("Uploading to backend pipeline...");
-            setTimeout(function () {
-              submitSound();
-            }, 300);
-          } else {
-            setStatus("Sound recorded. Submit for backend pipeline.");
-          }
+        if (completed >= soundTasks.length) {
+          await uploadSingleVoiceSession();
         } else {
-          submitBtn.disabled = true;
+          setStatus("Session stopped early. Click Start Activity to re-record.");
           startBtn.disabled = false;
-          setStatus("Hold time too short. Speak clearly into the microphone and try again.");
+          stopBtn.disabled = true;
         }
       };
 
-      mediaRecorder.start();
+      mediaRecorder.start(250); // Slice chunks every 250ms
 
       lastVoiceTime = 0;
       accumulatedHoldMs = 0;
@@ -327,12 +321,9 @@
       monitorVoice();
 
     } catch (error) {
-      // Clean up AudioContext if getUserMedia or setup failed
       if (audioContext && audioContext.state !== "closed") {
         try { audioContext.close(); } catch (_) {}
         audioContext = null;
-        analyser = null;
-        dataArray = null;
       }
       if (stream) {
         stream.getTracks().forEach(track => track.stop());
@@ -341,7 +332,8 @@
 
       startBtn.disabled = false;
       stopBtn.disabled = true;
-      setStatus("Microphone permission failed: " + error.message);
+      sessionActive = false;
+      setStatus("Microphone error: " + error.message);
     }
   }
 
@@ -350,14 +342,18 @@
   let lastFrameTime = 0;
 
   function monitorVoice() {
-    if (!analyser || !dataArray || holdCompleted) {
+    if (!analyser || !dataArray || !sessionActive) {
+      return;
+    }
+
+    if (isTransitioning) {
+      animationId = requestAnimationFrame(monitorVoice);
       return;
     }
 
     analyser.getByteTimeDomainData(dataArray);
 
     let sum = 0;
-
     for (let i = 0; i < dataArray.length; i++) {
       const value = (dataArray[i] - 128) / 128;
       sum += value * value;
@@ -380,10 +376,8 @@
       accumulatedHoldMs += delta;
       currentSound.classList.add("listening");
     } else if (now - lastVoiceTime < 350 && accumulatedHoldMs > 0) {
-      // Grace period: voice dipped briefly (natural breath / pitch shift), preserve progress
       currentSound.classList.add("listening");
     } else {
-      // Silence beyond grace period: decay gently rather than instant reset
       accumulatedHoldMs = Math.max(0, accumulatedHoldMs - delta * 0.4);
       currentSound.classList.remove("listening");
     }
@@ -399,84 +393,104 @@
     ringProgress.style.strokeDashoffset = dashOffset;
 
     if (holdProgress >= 100) {
-      holdCompleted = true;
-      autoSubmitPending = true;
-
-      holdFill.style.width = "100%";
-      holdPercent.textContent = "100%";
-      ringProgress.style.strokeDashoffset = "0";
-      currentSound.classList.add("success");
-
-      setStatus(`Great hold completed! Sound captured successfully. Submitting...`);
-
-      stopSound(true);
+      onSoundHoldComplete();
       return;
     }
 
     animationId = requestAnimationFrame(monitorVoice);
   }
 
-  function stopSound(autoSubmit = false) {
-    try {
-      if (animationId) {
-        cancelAnimationFrame(animationId);
-        animationId = null;
-      }
+  function onSoundHoldComplete() {
+    const t = task();
+    completed = Math.min(soundTasks.length, completed + 1);
+    streak += 1;
 
-      if (mediaRecorder && mediaRecorder.state !== "inactive") {
-        autoSubmitPending = autoSubmit;
-        mediaRecorder.stop();
-      }
+    soundMarkers.push({
+      sound_id: t.sound_id,
+      label: t.label,
+      hold_ms: holdMs,
+      completed_at: performance.now()
+    });
 
-      if (stream) {
-        stream.getTracks().forEach(track => track.stop());
-        stream = null;
-      }
+    holdFill.style.width = "100%";
+    holdPercent.textContent = "100%";
+    ringProgress.style.strokeDashoffset = "0";
+    currentSound.classList.add("success");
 
-      if (audioContext && audioContext.state !== "closed") {
-        audioContext.close();
-        audioContext = null;
-      }
-    } catch (error) {
-      setStatus("Stop failed: " + error.message);
+    rawFeatureCount.textContent = `${completed}/${soundTasks.length}`;
+
+    if (index + 1 >= soundTasks.length) {
+      // All 7 sounds completed!
+      setStatus("All sounds captured in single session recording! Finalizing audio...");
+      isTransitioning = true;
+      sessionActive = false;
+      stopPhonationSession(true);
+      return;
+    }
+
+    // Advance to next sound while recording continues smoothly
+    isTransitioning = true;
+    setStatus(`Sound "${t.label}" done! Get ready for next sound...`);
+
+    setTimeout(function () {
+      index += 1;
+      renderTask();
+      isTransitioning = false;
+      animationId = requestAnimationFrame(monitorVoice);
+    }, NEXT_SOUND_DELAY_MS);
+  }
+
+  function stopPhonationSession(finished = false) {
+    sessionActive = false;
+    isTransitioning = false;
+
+    if (animationId) {
+      cancelAnimationFrame(animationId);
+      animationId = null;
+    }
+
+    if (mediaRecorder && mediaRecorder.state !== "inactive") {
+      mediaRecorder.stop();
+    }
+
+    if (stream) {
+      stream.getTracks().forEach(track => track.stop());
+      stream = null;
+    }
+
+    if (audioContext && audioContext.state !== "closed") {
+      try { audioContext.close(); } catch (_) {}
+      audioContext = null;
     }
 
     stopBtn.disabled = true;
-
-    if (!autoSubmit) {
+    if (!finished) {
       startBtn.disabled = false;
     }
   }
 
-  async function submitSound() {
+  async function uploadSingleVoiceSession() {
     if (isSubmitting) return;
 
     if (!audioBlob) {
-      setStatus("No audio found. Record again.");
+      setStatus("No session audio available. Please record again.");
       startBtn.disabled = false;
       return;
     }
 
     isSubmitting = true;
-    submitBtn.disabled = true;
     startBtn.disabled = true;
     stopBtn.disabled = true;
 
-    setStatus("Saving this sound...");
-    pipelineState.textContent = "Saving";
+    setStatus("Uploading single session audio to backend pipeline...");
+    pipelineState.textContent = "Uploading";
     setPipelineStep("record", "done");
 
-    const t = task();
-
     const formData = new FormData();
-    formData.append("audio", audioBlob, `phonation-${index + 1}-${t.prompt || t.label}.webm`);
-    formData.append("sound_id", t.sound_id || "");
-    formData.append("expected_label", t.label);
-    formData.append("expected_prompt", t.prompt);
-    formData.append("accepted_values", JSON.stringify(t.accepted || []));
-    formData.append("volume_score", String(maxVoice));
-    formData.append("hold_ms", String(holdMs));
-    formData.append("baseline_noise_level", String(baselineNoise));
+    formData.append("audio", audioBlob, "phonation_session_master.webm");
+    formData.append("sound_id", "session-master");
+    formData.append("total_sounds", String(soundTasks.length));
+    formData.append("markers", JSON.stringify(soundMarkers));
 
     try {
       const response = await fetch(config.uploadUrl, {
@@ -489,80 +503,23 @@
 
       const data = await response.json();
 
-      if (!response.ok || !data.ok || data.passed === false) {
-        throw new Error(data.reason || data.error || "Sound save failed.");
+      if (!response.ok || !data.ok) {
+        throw new Error(data.error || "Single audio upload failed.");
       }
 
-      rawFeatureCount.textContent = `${data.completed_sound_count || completed + 1}/${soundTasks.length}`;
-      pcaFeatureCount.textContent = "Pending";
-      pipelineState.textContent = "Saved";
-
-      completed = Math.min(soundTasks.length, completed + 1);
-      streak += 1;
-      index += 1;
-      isSubmitting = false;
-      autoSubmitPending = false;
-      holdCompleted = false;
-
-      const progress = Math.round((completed / soundTasks.length) * 100);
-      activityProgress.style.width = `${progress}%`;
-      progressPercent.textContent = `${progress}%`;
-      completedText.textContent = `${completed} / ${soundTasks.length} completed`;
-
-      if (index >= soundTasks.length) {
-        setStatus("All configured sounds saved. Combining audio and running voice analysis...");
-        isSubmitting = false;
-        autoSubmitPending = false;
-        holdCompleted = false;
-        startBtn.disabled = true;
-        stopBtn.disabled = true;
-        submitBtn.disabled = true;
-        await completeVoicePhonation();
-        return;
-      }
-
-      setStatus(`Sound ${completed} saved. Loading sound ${index + 1}...`);
-      renderTask();
-
-      if (AUTO_CONTINUE_NEXT_SOUND) {
-        startBtn.disabled = true;
-        stopBtn.disabled = true;
-        submitBtn.disabled = true;
-
-        window.setTimeout(function () {
-          if (index < soundTasks.length) {
-            startSound();
-          }
-        }, NEXT_SOUND_DELAY_MS);
-      } else {
-        startBtn.disabled = false;
-      }
+      pipelineState.textContent = "Processing";
+      setStatus("Audio uploaded. Starting single-file voice extraction & scoring...");
+      await completeVoicePhonation();
 
     } catch (error) {
-      streak = 0;
       isSubmitting = false;
-      autoSubmitPending = false;
-      holdCompleted = false;
-
       pipelineState.textContent = "Failed";
-      setStatus("Backend failed: " + error.message);
-
-      if (index < soundTasks.length) {
-        startBtn.disabled = false;
-      } else {
-        startBtn.disabled = true;
-      }
-      stopBtn.disabled = true;
-      submitBtn.disabled = true;
+      setStatus("Upload failed: " + error.message);
+      startBtn.disabled = false;
     }
   }
 
   async function completeVoicePhonation() {
-    startBtn.disabled = true;
-    stopBtn.disabled = true;
-    submitBtn.disabled = true;
-
-    pipelineState.textContent = "Combining";
     setPipelineStep("extract", "active");
 
     try {
@@ -576,16 +533,15 @@
       const data = await response.json();
 
       if (!response.ok || !data.ok) {
-        throw new Error(data.error || "Voice completion failed.");
+        throw new Error(data.error || "Voice processing failed.");
       }
 
-      setStatus("Combined voice processing started. Finalizing results...");
+      setStatus("Voice feature extraction underway. Finalizing results...");
       pollVoiceStatus();
 
     } catch (error) {
       pipelineState.textContent = "Failed";
       setStatus("Processing note: " + error.message + " — checking status...");
-      // Auto-poll status regardless since voice may have already saved
       setTimeout(pollVoiceStatus, 2000);
     }
   }
@@ -630,11 +586,11 @@
     }
   }
 
-  if (startBtn) startBtn.addEventListener("click", startSound);
+  if (startBtn) startBtn.addEventListener("click", startPhonationSession);
   if (stopBtn) stopBtn.addEventListener("click", function () {
-    stopSound(false);
+    stopPhonationSession(false);
   });
-  if (submitBtn) submitBtn.addEventListener("click", submitSound);
+  if (submitBtn) submitBtn.addEventListener("click", uploadSingleVoiceSession);
 
   loadPhonationSounds();
 })();
