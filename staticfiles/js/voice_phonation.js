@@ -262,10 +262,28 @@
       analyser.fftSize = 2048;
       dataArray = new Uint8Array(analyser.fftSize);
 
-      stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      let audioStream = null;
+      try {
+        audioStream = await navigator.mediaDevices.getUserMedia({
+          audio: {
+            echoCancellation: true,
+            noiseSuppression: false,
+            autoGainControl: false
+          }
+        });
+      } catch (_) {
+        // Fallback to default audio constraint if strict constraints fail on older devices
+        audioStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      }
+      stream = audioStream;
 
       const source = audioContext.createMediaStreamSource(stream);
-      source.connect(analyser);
+      const highpassFilter = audioContext.createBiquadFilter();
+      highpassFilter.type = "highpass";
+      highpassFilter.frequency.setValueAtTime(80, audioContext.currentTime);
+
+      source.connect(highpassFilter);
+      highpassFilter.connect(analyser);
 
       mediaRecorder = new MediaRecorder(stream, {
         mimeType: MediaRecorder.isTypeSupported("audio/webm;codecs=opus")

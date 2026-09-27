@@ -26,23 +26,39 @@ def pca_payload(response):
     return response
 
 
+from .audio_cleaner import build_audio_filter_chain, combine_and_clean_captures
+
+
 def combine_audio(captures):
-    output_path = tempfile.NamedTemporaryFile(delete=False, suffix=".wav").name
-    command = ["ffmpeg", "-y"]
-    for capture in captures:
-        command.extend(["-i", capture.file.path])
-    inputs = "".join(f"[{index}:a]" for index in range(len(captures)))
-    command.extend([
-        "-filter_complex", f"{inputs}concat=n={len(captures)}:v=0:a=1[out]",
-        "-map", "[out]", "-ar", "16000", "-ac", "1", output_path,
-    ])
+    """
+    Combines phonation audio captures while applying bandpass filtering,
+    spectral noise suppression, and normalization.
+    """
     try:
-        subprocess.run(command, check=True, capture_output=True, text=True)
-        return output_path
-    except FileNotFoundError as exc:
-        raise RuntimeError("FFmpeg is required to combine phonation audio.") from exc
-    except subprocess.CalledProcessError as exc:
-        raise RuntimeError("Could not combine phonation recordings.") from exc
+        return combine_and_clean_captures(captures, target_sr=16000)
+    except Exception as exc:
+        logger_error = str(exc)
+        # Fallback to direct FFmpeg concatenation with filter chain if needed
+        output_path = tempfile.NamedTemporaryFile(delete=False, suffix=".wav").name
+        command = ["ffmpeg", "-y"]
+        for capture in captures:
+            command.extend(["-i", capture.file.path])
+        inputs = "".join(f"[{index}:a]" for index in range(len(captures)))
+        filter_chain = build_audio_filter_chain(lowcut=80, highcut=8000, enable_denoise=True, enable_silence_trim=False)
+        command.extend([
+            "-filter_complex", f"{inputs}concat=n={len(captures)}:v=0:a=1[out]",
+            "-map", "[out]",
+            "-af", filter_chain,
+            "-ar", "16000", "-ac", "1", output_path,
+        ])
+        try:
+            subprocess.run(command, check=True, capture_output=True, text=True)
+            return output_path
+        except FileNotFoundError as fnf_exc:
+            raise RuntimeError("FFmpeg is required to combine phonation audio.") from fnf_exc
+        except subprocess.CalledProcessError as sub_exc:
+            raise RuntimeError(f"Could not combine phonation recordings: {logger_error}") from sub_exc
+
 
 
 def process_voice_session(session):
