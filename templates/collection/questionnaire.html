@@ -751,8 +751,8 @@ function render(direction = 'initial') {
   const pct = Math.max(2, Math.round(((cur + 1) / total) * 100));
 
   document.getElementById('prog-fill').style.width = pct + '%';
-  document.getElementById('prog-fill').style.background = s.color;
-  document.getElementById('section-name').textContent = s.name || 'Questionnaire';
+  document.getElementById('prog-fill').style.background = 'var(--accent)';
+  document.getElementById('section-name').textContent = 'Questionnaire';
   document.getElementById('pct-text').textContent = pct + '%';
   document.getElementById('step-indicator').textContent = `${cur+1} of ${total}`;
   const errMsg = document.getElementById('err-msg');
@@ -799,10 +799,6 @@ function render(direction = 'initial') {
   const animClass = direction === 'backward' ? 'slide-in-left' : (direction === 'forward' ? 'slide-in-right' : 'slide-in-right');
 
   document.getElementById('main-area').innerHTML = `
-    <span class="section-pill" style="background:${s.soft};color:${s.color};border-color:${s.color}40;">
-      <span class="dot" style="background:${s.color}"></span>
-      ${s.name}
-    </span>
     <div class="q-card ${animClass}">
       <p class="instruction-text">${s.instruction}</p>
       <p class="q-text">${q.text}</p>
