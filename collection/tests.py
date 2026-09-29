@@ -36,11 +36,46 @@ class ConsentFlowTests(TestCase):
         self.assertEqual(ConsentRecord.objects.count(), 1)
         consent = ConsentRecord.objects.first()
         self.assertEqual(consent.patient_id, "PID-101")
+        self.assertEqual(consent.participant_email, "")
         self.assertFalse(consent.is_minor)
 
         # Now accessing questionnaire is allowed
         questionnaire_res = self.client.get("/questionnaire/")
         self.assertEqual(questionnaire_res.status_code, 200)
+
+    def test_consent_with_valid_gmail(self):
+        payload = {
+            "participant_email": "testuser@gmail.com",
+            "gender": "Male",
+            "age": 30,
+            "consent_record_date": "2026-09-24",
+            "agree_voice": True,
+            "agree_video": True,
+            "agree_transcript": True,
+            "agree_publication": True,
+            "agree_terms": True,
+        }
+        res = self.client.post("/consent/submit/", data=json.dumps(payload), content_type="application/json")
+        self.assertEqual(res.status_code, 200)
+        self.assertTrue(res.json()["ok"])
+        consent = ConsentRecord.objects.filter(participant_email="testuser@gmail.com").first()
+        self.assertIsNotNone(consent)
+        self.assertTrue(consent.patient_id.startswith("PID-"))
+
+    def test_consent_with_invalid_email_fails(self):
+        payload = {
+            "participant_email": "testuser@yahoo.com",
+            "gender": "Male",
+            "age": 30,
+            "agree_voice": True,
+            "agree_video": True,
+            "agree_transcript": True,
+            "agree_publication": True,
+            "agree_terms": True,
+        }
+        res = self.client.post("/consent/submit/", data=json.dumps(payload), content_type="application/json")
+        self.assertEqual(res.status_code, 400)
+        self.assertIn("valid Gmail address", res.json()["error"])
 
     def test_minor_consent_requires_guardian_details(self):
         payload = {

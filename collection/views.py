@@ -96,16 +96,20 @@ def submit_consent(request):
     else:
         data = request.POST.dict()
 
+    session = get_collection_session(request)
     participant_email = str(data.get("participant_email", "")).strip().lower()
 
-    # Validate that a proper Gmail address was provided
-    if not participant_email:
-        return JsonResponse({"ok": False, "error": "A Gmail address is required."}, status=400)
-    if not participant_email.endswith("@gmail.com"):
-        return JsonResponse({"ok": False, "error": "Please enter a valid Gmail address (must end with @gmail.com)."}, status=400)
-
-    # Auto-generate the Participant ID server-side from the Gmail (client value is never trusted)
-    patient_id = generate_participant_id_from_email(participant_email)
+    # Validate Gmail address if provided (optional)
+    if participant_email:
+        if not participant_email.endswith("@gmail.com"):
+            return JsonResponse({"ok": False, "error": "Please enter a valid Gmail address (must end with @gmail.com)."}, status=400)
+        patient_id = generate_participant_id_from_email(participant_email)
+    else:
+        client_patient_id = str(data.get("patient_id", "")).strip()
+        if client_patient_id:
+            patient_id = client_patient_id
+        else:
+            patient_id = f"PID-{session.session_id.hex[:8].upper()}"
 
     gender = str(data.get("gender", "")).strip()
     age_raw = data.get("age")
