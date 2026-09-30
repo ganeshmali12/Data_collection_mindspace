@@ -4,7 +4,7 @@
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>MindSpace — Participant Questionnaire</title>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Fraunces:ital,wght@0,300;0,400;1,300&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Noto+Sans+Devanagari:wght@400;500;600;700&family=Fraunces:ital,wght@0,300;0,400;1,300&display=swap" rel="stylesheet"/>
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -37,7 +37,7 @@
   }
 
   body {
-    font-family: 'Inter', sans-serif;
+    font-family: 'Inter', 'Noto Sans Devanagari', sans-serif;
     background: var(--bg);
     color: var(--text-primary);
     min-height: 100vh;
@@ -50,7 +50,7 @@
 
   .shell {
     width: 100%;
-    max-width: 620px;
+    max-width: 640px;
   }
 
   /* ── Header ── */
@@ -58,7 +58,9 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
-    margin-bottom: 2rem;
+    margin-bottom: 1.5rem;
+    gap: 12px;
+    flex-wrap: wrap;
   }
   .logo {
     display: flex;
@@ -79,15 +81,43 @@
     color: var(--text-primary);
     letter-spacing: -0.3px;
   }
-  .step-indicator {
+
+  /* ── Language Selector ── */
+  .lang-switcher {
+    display: inline-flex;
+    align-items: center;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-pill);
+    padding: 3px;
+    gap: 2px;
+  }
+  .lang-btn {
+    background: transparent;
+    border: none;
+    color: var(--text-secondary);
+    font-family: 'Inter', 'Noto Sans Devanagari', sans-serif;
     font-size: 12px;
-    color: var(--text-muted);
-    font-weight: 400;
-    letter-spacing: 0.3px;
+    font-weight: 500;
+    padding: 5px 11px;
+    border-radius: var(--radius-pill);
+    cursor: pointer;
+    transition: all 0.18s cubic-bezier(0.4, 0, 0.2, 1);
+    line-height: 1.2;
+  }
+  .lang-btn:hover {
+    color: var(--text-primary);
+    background: rgba(255, 255, 255, 0.08);
+  }
+  .lang-btn.active {
+    background: var(--accent);
+    color: #ffffff;
+    font-weight: 600;
+    box-shadow: 0 2px 8px rgba(107, 142, 255, 0.35);
   }
 
   /* ── Progress ── */
-  .progress-wrap { margin-bottom: 2rem; }
+  .progress-wrap { margin-bottom: 1.75rem; }
   .progress-meta {
     display: flex;
     justify-content: space-between;
@@ -100,10 +130,12 @@
     color: var(--text-muted);
     text-transform: uppercase;
     letter-spacing: 0.8px;
+    font-family: 'Inter', 'Noto Sans Devanagari', sans-serif;
   }
   .progress-pct {
     font-size: 12px;
     color: var(--text-muted);
+    font-weight: 500;
   }
   .progress-track {
     height: 3px;
@@ -114,26 +146,7 @@
   .progress-fill {
     height: 100%;
     border-radius: 2px;
-    transition: width 0.5s cubic-bezier(0.4,0,0.2,1), background 0.4s;
-  }
-
-  /* ── Section pill ── */
-  .section-pill {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    padding: 5px 12px;
-    border-radius: var(--radius-pill);
-    font-size: 11px;
-    font-weight: 500;
-    letter-spacing: 0.4px;
-    margin-bottom: 1.25rem;
-    border: 1px solid transparent;
-    transition: var(--transition);
-  }
-  .section-pill .dot {
-    width: 6px; height: 6px;
-    border-radius: 50%;
+    transition: width 0.4s cubic-bezier(0.4,0,0.2,1), background 0.4s;
   }
 
   /* ── Question card ── */
@@ -176,22 +189,36 @@
     to   { opacity: 0; transform: translateX(28px); }
   }
 
+  .section-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 3px 9px;
+    border-radius: var(--radius-pill);
+    font-size: 11px;
+    font-weight: 600;
+    margin-bottom: 0.9rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    font-family: 'Inter', 'Noto Sans Devanagari', sans-serif;
+  }
+
   .instruction-text {
-    font-size: 13px;
+    font-size: 13.5px;
     color: var(--text-muted);
     margin-bottom: 1.25rem;
     line-height: 1.6;
-    font-style: italic;
+    font-family: 'Inter', 'Noto Sans Devanagari', sans-serif;
   }
 
   .q-text {
-    font-family: 'Fraunces', serif;
+    font-family: 'Fraunces', 'Noto Sans Devanagari', serif;
     font-size: 19px;
-    font-weight: 300;
-    line-height: 1.5;
+    font-weight: 400;
+    line-height: 1.55;
     color: var(--text-primary);
     margin-bottom: 1.75rem;
-    letter-spacing: -0.2px;
+    letter-spacing: -0.1px;
   }
 
   /* ── Options ── */
@@ -208,8 +235,8 @@
   .options-yesno {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: 10px;
-    max-width: 280px;
+    gap: 12px;
+    max-width: 320px;
   }
 
   .opt {
@@ -223,14 +250,14 @@
     border-radius: var(--radius-sm);
     background: transparent;
     color: var(--text-secondary);
-    font-family: 'Inter', sans-serif;
+    font-family: 'Inter', 'Noto Sans Devanagari', sans-serif;
     font-size: 12px;
     font-weight: 400;
     cursor: pointer;
     transition: all 0.18s cubic-bezier(0.4,0,0.2,1);
     text-align: center;
-    line-height: 1.3;
-    min-height: 68px;
+    line-height: 1.35;
+    min-height: 72px;
     user-select: none;
   }
   .opt:hover {
@@ -263,7 +290,7 @@
     border-radius: var(--radius-sm);
     background: transparent;
     color: var(--text-secondary);
-    font-family: 'Inter', sans-serif;
+    font-family: 'Inter', 'Noto Sans Devanagari', sans-serif;
     font-size: 14px;
     font-weight: 500;
     cursor: pointer;
@@ -328,7 +355,7 @@
     border-radius: var(--radius-sm);
     background: transparent;
     color: var(--text-secondary);
-    font-family: 'Inter', sans-serif;
+    font-family: 'Inter', 'Noto Sans Devanagari', sans-serif;
     font-size: 14px;
     cursor: pointer;
     transition: var(--transition);
@@ -337,29 +364,18 @@
   .btn-back:hover { border-color: var(--border-active); color: var(--text-primary); }
   .btn-back:invisible { visibility: hidden; }
 
-  .btn-next {
-    padding: 12px 28px;
-    border: none;
-    border-radius: var(--radius-sm);
-    background: var(--accent);
-    color: #fff;
-    font-family: 'Inter', sans-serif;
-    font-size: 14px;
+  .step-indicator {
+    font-size: 12px;
+    color: var(--text-muted);
     font-weight: 500;
-    cursor: pointer;
-    transition: var(--transition);
-    display: flex; align-items: center; gap: 8px;
-    margin-left: auto;
+    letter-spacing: 0.3px;
+    font-family: 'Inter', 'Noto Sans Devanagari', sans-serif;
   }
-  .btn-next:hover { background: #5a7df0; transform: translateY(-1px); }
-  .btn-next:active { transform: translateY(0); }
 
   button:focus-visible {
     outline: 3px solid rgba(107,142,255,0.55);
     outline-offset: 2px;
   }
-
-
 
   /* ── Results ── */
   .result-hero {
@@ -377,81 +393,26 @@
     letter-spacing: 1.2px;
     color: var(--text-muted);
     margin-bottom: 0.75rem;
-    font-weight: 500;
+    font-weight: 600;
   }
   .result-primary-name {
-    font-family: 'Fraunces', serif;
-    font-size: 36px;
-    font-weight: 300;
+    font-family: 'Fraunces', 'Noto Sans Devanagari', serif;
+    font-size: 28px;
+    font-weight: 400;
     color: var(--text-primary);
     letter-spacing: -0.5px;
-    text-transform: capitalize;
     margin-bottom: 0.5rem;
-  }
-  .result-flags-row {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 6px;
-    justify-content: center;
-    margin-top: 1rem;
-  }
-  .result-flag-pill {
-    padding: 4px 12px;
-    border-radius: var(--radius-pill);
-    font-size: 11px;
-    font-weight: 500;
-    border: 1px solid;
-  }
-
-  .result-scores { display: flex; flex-direction: column; gap: 10px; margin-bottom: 1.25rem; }
-  .score-row {
-    background: var(--bg-card);
-    border: 1px solid var(--border);
-    border-radius: var(--radius-sm);
-    padding: 1rem 1.25rem;
-    animation: slideIn 0.3s cubic-bezier(0.4,0,0.2,1);
-  }
-  .score-row-top {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 8px;
-  }
-  .score-row-name { font-size: 13px; font-weight: 500; color: var(--text-primary); }
-  .score-badge {
-    font-size: 11px;
-    font-weight: 500;
-    padding: 3px 10px;
-    border-radius: var(--radius-pill);
-    border: 1px solid;
-  }
-  .score-bar-track {
-    height: 4px;
-    background: rgba(255,255,255,0.05);
-    border-radius: 2px;
-    overflow: hidden;
-  }
-  .score-bar-fill {
-    height: 100%;
-    border-radius: 2px;
-    transition: width 0.8s cubic-bezier(0.4,0,0.2,1) 0.1s;
-  }
-  .score-nums {
-    display: flex;
-    justify-content: space-between;
-    margin-top: 5px;
-    font-size: 11px;
-    color: var(--text-muted);
   }
 
   .disclaimer {
-    font-size: 11px;
+    font-size: 12px;
     color: var(--text-muted);
     line-height: 1.7;
     text-align: center;
     padding: 1rem;
     border-top: 1px solid var(--border);
     margin-top: 1rem;
+    font-family: 'Inter', 'Noto Sans Devanagari', sans-serif;
   }
 
   @media (max-width: 600px) {
@@ -466,16 +427,10 @@
     .shell { max-width: 100%; }
 
     .header {
-      align-items: flex-start;
-      margin-bottom: 1.5rem;
+      margin-bottom: 1.25rem;
     }
 
-    .step-indicator {
-      padding-top: 8px;
-      text-align: right;
-    }
-
-    .progress-wrap { margin-bottom: 1.5rem; }
+    .progress-wrap { margin-bottom: 1.25rem; }
 
     .q-card {
       padding: 1.25rem;
@@ -492,8 +447,7 @@
 
     .opt,
     .opt-yn,
-    .btn-back,
-    .btn-next {
+    .btn-back {
       min-height: 48px;
     }
 
@@ -506,38 +460,21 @@
       grid-template-columns: repeat(2, minmax(0, 1fr));
     }
 
-    .sensitive-notice {
-      font-size: 11px;
-      padding: 11px 12px;
-    }
-
     .nav { padding-top: 0.25rem; }
     .btn-back { padding: 12px 16px; }
-    .btn-next { padding: 12px 18px; }
 
     .result-hero {
       padding: 2rem 1rem 1.5rem;
     }
 
-    .result-primary-name { font-size: 28px; }
-
-    .score-row-top,
-    .score-nums {
-      align-items: flex-start;
-      gap: 8px;
-      flex-wrap: wrap;
-    }
-
-    .score-nums span:last-child { margin-left: auto; }
+    .result-primary-name { font-size: 24px; }
   }
 
   @media (max-width: 360px) {
     .logo-name { font-size: 16px; }
-    .step-indicator { font-size: 11px; }
     .q-card { padding: 1rem; }
     .q-text { font-size: 16px; }
-    .btn-back,
-    .btn-next { padding-left: 12px; padding-right: 12px; }
+    .btn-back { padding-left: 12px; padding-right: 12px; }
   }
 </style>
 </head>
@@ -556,17 +493,23 @@
       </div>
       <span class="logo-name">MindSpace</span>
     </div>
-    <span class="step-indicator" id="step-indicator">Questionnaire</span>
+
+    <!-- Language Selector Pill -->
+    <div class="lang-switcher" id="lang-switcher">
+      <button type="button" class="lang-btn active" data-lang="en" onclick="setLanguage('en')">English</button>
+      <button type="button" class="lang-btn" data-lang="hi" onclick="setLanguage('hi')">हिंदी</button>
+      <button type="button" class="lang-btn" data-lang="mr" onclick="setLanguage('mr')">मराठी</button>
+    </div>
   </div>
 
   <!-- Progress -->
   <div class="progress-wrap">
     <div class="progress-meta">
-      <span class="progress-section-name" id="section-name">Questionnaire</span>
-      <span class="progress-pct" id="pct-text">0%</span>
+      <span class="progress-section-name" id="section-name">Mood & Outlook</span>
+      <span class="step-indicator" id="step-indicator">Question 1 of 30</span>
     </div>
     <div class="progress-track">
-      <div class="progress-fill" id="prog-fill" style="width:2%;background:var(--accent)"></div>
+      <div class="progress-fill" id="prog-fill" style="width:3%;background:var(--accent)"></div>
     </div>
   </div>
 
@@ -574,13 +517,13 @@
   <div id="main-area"></div>
 
   <!-- Error -->
-  <div class="err-msg" id="err-msg">← Please select an answer before continuing.</div>
+  <div class="err-msg" id="err-msg"></div>
 
   <!-- Nav -->
   <div class="nav" id="nav-bar">
     <button class="btn-back" id="btn-back" onclick="prev()">
       <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M8.5 2.5L4 7l4.5 4.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
-      Back
+      <span id="btn-back-label">Back</span>
     </button>
   </div>
 
@@ -596,140 +539,369 @@ function getCookie(name) {
   return '';
 }
 
-async function saveQuestionnaire(scores, flags) {
-  const answerMap = {};
-  allQ.forEach((question, index) => {
-    answerMap[String(index + 1)] = {
-      question: question.text,
-      value: answers[index]
-    };
-  });
+// Current language state (en | hi | mr)
+let currentLang = localStorage.getItem('mindspace_questionnaire_lang') || 'en';
 
-  const response = await fetch('{% url "collection:submit_questionnaire" %}', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'X-CSRFToken': getCookie('csrftoken')
-    },
-    body: JSON.stringify({ answers: answerMap, scores, flags })
-  });
-
-  const data = await response.json();
-  if (!response.ok || !data.ok) {
-    throw new Error(data.error || 'Could not save questionnaire.');
+const UI_TEXT = {
+  en: {
+    back: 'Back',
+    questionCount: (c, t) => `Question ${c} of ${t}`,
+    completeHeader: 'Thank you',
+    completeTitle: 'Your responses are saved',
+    completeSubtitle: 'Next, you will complete a short activity using your camera and voice.',
+    preparing: 'Preparing the next activity...',
+    saveError: 'We could not save your responses. Please try again.',
+    errMsg: '← Please select an answer before continuing.'
+  },
+  hi: {
+    back: 'पीछे',
+    questionCount: (c, t) => `प्रश्न ${c} / ${t}`,
+    completeHeader: 'धन्यवाद',
+    completeTitle: 'आपके उत्तर सहेज लिए गए हैं',
+    completeSubtitle: 'इसके बाद, आप अपने कैमरे और आवाज़ का उपयोग करके एक छोटी गतिविधि पूरी करेंगे।',
+    preparing: 'अगली गतिविधि तैयार की जा रही है...',
+    saveError: 'उत्तर सहेजे नहीं जा सके। कृपया पुनः प्रयास करें।',
+    errMsg: '← कृपया आगे बढ़ने से पहले एक उत्तर चुनें।'
+  },
+  mr: {
+    back: 'मागे',
+    questionCount: (c, t) => `प्रश्न ${c} / ${t}`,
+    completeHeader: 'धन्यवाद',
+    completeTitle: 'तुमची उत्तरे जतन केली आहेत',
+    completeSubtitle: 'यानंतर, आपण कॅमेरा आणि आवाजाचा वापर करून एक लहान क्रिया पूर्ण कराल.',
+    preparing: 'पुढील कृती तयार करत आहे...',
+    saveError: 'उत्तरे जतन करता आली नाहीत. कृपया पुन्हा प्रयत्न करा.',
+    errMsg: '← कृपया पुढे जाण्यापूर्वी एक पर्याय निवडा.'
   }
-
-  return data;
-}
+};
 
 const SECTIONS = [
   {
     id: 'phq9',
-    name: 'Daily Mood & Outlook',
+    name: {
+      en: 'Daily Mood & Outlook',
+      hi: 'दैनिक मनोदशा और दृष्टिकोण',
+      mr: 'दैनिक मनःस्थिती आणि दृष्टिकोन'
+    },
+    shortName: {
+      en: 'Mood & Outlook',
+      hi: 'मनोदशा',
+      mr: 'मनःस्थिती'
+    },
     color: 'var(--section-phq)',
     soft: 'var(--section-phq-soft)',
-    instruction: 'Over the last 2 weeks, how often have you felt or experienced the following?',
+    instruction: {
+      en: 'Over the last 2 weeks, how often have you felt or experienced the following?',
+      hi: 'निर्देश: पिछले 2 हफ़्तों में, निम्नलिखित समस्याओं से आपको कितनी बार परेशानी हुई?',
+      mr: 'सूचना: गेल्या 2 आठवड्यांमध्ये, खालील समस्यांमुळे तुम्हाला किती वेळा त्रास झाला?'
+    },
     type: 'freq',
-    scale: ['Never', 'Sometimes', 'Often (Most days)', 'Almost always'],
+    scale: {
+      en: ['Never', 'Sometimes', 'Often (Most days)', 'Almost always'],
+      hi: ['बिल्कुल नहीं', 'कुछ दिन', 'आधे से ज़्यादा दिन', 'लगभग हर रोज़'],
+      mr: ['अजिबात नाही', 'काही दिवस', 'निम्म्याहून अधिक दिवस', 'जवळजवळ रोज']
+    },
     values: [0,1,2,3],
     cutoff: 10, max: 27,
     questions: [
-      'Little interest or pleasure in doing things',
-      'Feeling down, low, or hopeless',
-      'Trouble falling or staying asleep, or sleeping too much',
-      'Feeling tired or having little energy',
-      'Poor appetite or overeating',
-      'Feeling bad about yourself — or that you are a failure or have let yourself or your family down',
-      'Trouble concentrating on things, such as reading or watching television',
-      'Moving or speaking so slowly that other people could have noticed, or being fidgety and restless',
-      'Thoughts that you would be better off dead, or of hurting yourself in some way'
+      {
+        en: 'Little interest or pleasure in doing things',
+        hi: 'किसी भी काम में रुचि या आनंद न आना।',
+        mr: 'कोणत्याही गोष्टीत रस किंवा आनंद वाटणे कमी झाले आहे.'
+      },
+      {
+        en: 'Feeling down, low, or hopeless',
+        hi: 'मन उदास, निराश या बेहद हताश महसूस होना।',
+        mr: 'उदास, निराश किंवा हताश वाटत आहे.'
+      },
+      {
+        en: 'Trouble falling or staying asleep, or sleeping too much',
+        hi: 'नींद न आना, बार-बार नींद टूटना या बहुत ज़्यादा सोना।',
+        mr: 'झोप न लागणे, रात्री वारंवार जाग येणे किंवा खूप जास्त झोपणे.'
+      },
+      {
+        en: 'Feeling tired or having little energy',
+        hi: 'थकान महसूस होना या बिल्कुल ऊर्जा न होना।',
+        mr: 'थकवा जाणवणे किंवा अजिबात ऊर्जा नसणे.'
+      },
+      {
+        en: 'Poor appetite or overeating',
+        hi: 'भूख न लगना या बहुत ज़्यादा खाना।',
+        mr: 'भूक न लागणे किंवा जास्त खाणे.'
+      },
+      {
+        en: 'Feeling bad about yourself — or that you are a failure or have let yourself or your family down',
+        hi: 'खुद के बारे में बुरा लगना — खुद को असफल समझना या परिवार को निराश करने का एहसास होना।',
+        mr: 'स्वतःबद्दल वाईट वाटणे — स्वतःला अपयशी समजणे किंवा कुटुंबाला निराश केल्यासारखे वाटणे.'
+      },
+      {
+        en: 'Trouble concentrating on things, such as reading or watching television',
+        hi: 'किसी चीज़ पर ध्यान लगाने में परेशानी होना, जैसे पढ़ना या टीवी देखना।',
+        mr: 'एखाद्या गोष्टीवर लक्ष केंद्रित करण्यात अडचण येणे, जसे की वाचन किंवा टीव्ही पाहणे.'
+      },
+      {
+        en: 'Moving or speaking so slowly that other people could have noticed, or being fidgety and restless',
+        hi: 'इतना धीरे-धीरे बोलना या हिलना-डुलना कि दूसरों को ध्यान आए — या इसके उलट बहुत बेचैन होना।',
+        mr: 'इतरांना दिसेल इतक्या हळूहळू बोलणे किंवा हालचाल करणे — किंवा उलट, अस्वस्थपणे सतत हालचाल करणे.'
+      },
+      {
+        en: 'Thoughts that you would be better off dead, or of hurting yourself in some way',
+        hi: 'यह सोचना कि मर जाना बेहतर होगा, या खुद को नुकसान पहुँचाने के विचार आना।',
+        mr: 'मेल्यावर बरे होईल असे वाटणे किंवा स्वतःला दुखवण्याचे विचार येणे.'
+      }
     ]
   },
   {
     id: 'gad7',
-    name: 'Peace of Mind & Ease',
+    name: {
+      en: 'Peace of Mind & Ease',
+      hi: 'मन की शांति और सहजता',
+      mr: 'मनाची शांतता आणि सहजता'
+    },
+    shortName: {
+      en: 'Peace of Mind',
+      hi: 'मन की शांति',
+      mr: 'मनाची शांतता'
+    },
     color: 'var(--section-gad)',
     soft: 'var(--section-gad-soft)',
-    instruction: 'Over the last 2 weeks, how often have you felt or experienced the following?',
+    instruction: {
+      en: 'Over the last 2 weeks, how often have you felt or experienced the following?',
+      hi: 'निर्देश: पिछले 2 हफ़्तों में, निम्नलिखित समस्याओं से आपको कितनी बार परेशानी हुई?',
+      mr: 'सूचना: गेल्या 2 आठवड्यांमध्ये, खालील समस्यांमुळे तुम्हाला किती वेळा त्रास झाला?'
+    },
     type: 'freq',
-    scale: ['Never', 'Sometimes', 'Often (Most days)', 'Almost always'],
+    scale: {
+      en: ['Never', 'Sometimes', 'Often (Most days)', 'Almost always'],
+      hi: ['बिल्कुल नहीं', 'कुछ दिन', 'आधे से ज़्यादा दिन', 'लगभग हर रोज़'],
+      mr: ['अजिबात नाही', 'काही दिवस', 'निम्म्याहून अधिक दिवस', 'जवळजवळ रोज']
+    },
     values: [0,1,2,3],
     cutoff: 10, max: 21,
     questions: [
-      'Feeling nervous, uneasy, or on edge',
-      'Not being able to stop or control worrying',
-      'Worrying too much about different things',
-      'Trouble relaxing',
-      'Being so restless that it is hard to sit still',
-      'Becoming easily annoyed or irritable',
-      'Feeling afraid, as if something awful might happen'
+      {
+        en: 'Feeling nervous, uneasy, or on edge',
+        hi: 'घबराहट, बेचैनी या बहुत ज़्यादा तनाव महसूस होना।',
+        mr: 'नर्व्हस, अस्वस्थ किंवा काळजीत असल्यासारखे वाटणे.'
+      },
+      {
+        en: 'Not being able to stop or control worrying',
+        hi: 'चिंता करना बंद न कर पाना या उस पर काबू न रख पाना।',
+        mr: 'काळजी करणे थांबवता न येणे किंवा त्यावर नियंत्रण ठेवता न येणे.'
+      },
+      {
+        en: 'Worrying too much about different things',
+        hi: 'अलग-अलग बातों की बहुत ज़्यादा चिंता करना।',
+        mr: 'वेगवेगळ्या गोष्टींबद्दल खूप जास्त काळजी करणे.'
+      },
+      {
+        en: 'Trouble relaxing',
+        hi: 'आराम करने में परेशानी होना।',
+        mr: 'शांत राहण्यात अडचण येणे.'
+      },
+      {
+        en: 'Being so restless that it is hard to sit still',
+        hi: 'इतनी बेचैनी होना कि एक जगह बैठना मुश्किल हो जाए।',
+        mr: 'इतके अस्वस्थ वाटणे की एका जागी बसणे ही कठीण होणे.'
+      },
+      {
+        en: 'Becoming easily annoyed or irritable',
+        hi: 'जल्दी चिड़चिड़ाना या गुस्सा आना।',
+        mr: 'लवकर चिडचिड होणे किंवा रागावणे.'
+      },
+      {
+        en: 'Feeling afraid, as if something awful might happen',
+        hi: 'कुछ बुरा होने का डर लगना।',
+        mr: 'काहीतरी वाईट घडणार आहे असे भीती वाटणे.'
+      }
     ]
   },
   {
     id: 'pss4',
-    name: 'Daily Balance & Routine',
+    name: {
+      en: 'Daily Balance & Routine',
+      hi: 'दैनिक संतुलन और दिनचर्या',
+      mr: 'दैनिक समतोल आणि दिनचर्या'
+    },
+    shortName: {
+      en: 'Balance & Routine',
+      hi: 'दैनिक संतुलन',
+      mr: 'दैनिक समतोल'
+    },
     color: 'var(--section-pss)',
     soft: 'var(--section-pss-soft)',
-    instruction: 'In the last month, how often have you felt the following?',
+    instruction: {
+      en: 'In the last month, how often have you felt the following?',
+      hi: 'निर्देश: पिछले एक महीने में आपको कितनी बार ऐसा लगा?',
+      mr: 'सूचना: गेल्या एका महिन्यात, तुम्हाला किती वेळा असे वाटले?'
+    },
     type: 'freq5',
-    scale: ['Never','Almost never','Sometimes','Fairly often','Very often'],
+    scale: {
+      en: ['Never', 'Almost never', 'Sometimes', 'Fairly often', 'Very often'],
+      hi: ['कभी नहीं', 'बहुत कम', 'कभी-कभी', 'अक्सर', 'हमेशा'],
+      mr: ['कधीच नाही', 'क्वचित', 'कधीकधी', 'बऱ्याचदा', 'नेहमी']
+    },
     values: [0,1,2,3,4],
     reverse: [1,2],
     cutoff: 9, max: 16,
     questions: [
-      'Felt unable to control the important things in your life',
-      'Felt confident about your ability to handle personal problems',
-      'Felt that things were going your way',
-      'Felt difficulties were piling up so high that you could not overcome them'
+      {
+        en: 'Felt unable to control the important things in your life',
+        hi: 'जीवन की ज़रूरी चीज़ों पर नियंत्रण न रख पाना।',
+        mr: 'आयुष्यातील महत्त्वाच्या गोष्टींवर नियंत्रण ठेवता येत नाही असे वाटले.'
+      },
+      {
+        en: 'Felt confident about your ability to handle personal problems',
+        hi: 'व्यक्तिगत समस्याओं को संभालने की क्षमता पर भरोसा होना।',
+        mr: 'वैयक्तिक समस्या हाताळण्याची क्षमता आपल्यात आहे असा आत्मविश्वास वाटला.'
+      },
+      {
+        en: 'Felt that things were going your way',
+        hi: 'सब कुछ अपनी इच्छा के अनुसार होता महसूस होना।',
+        mr: 'सगळ्या गोष्टी आपल्या इच्छेप्रमाणे होत आहेत असे वाटले.'
+      },
+      {
+        en: 'Felt difficulties were piling up so high that you could not overcome them',
+        hi: 'मुश्किलें इतनी बढ़ गई हैं कि उन पर काबू पाना संभव नहीं लग रहा।',
+        mr: 'अडचणी इतक्या वाढल्या आहेत की त्यावर मात करणे शक्य नाही असे वाटले.'
+      }
     ]
   },
   {
     id: 'mdq7',
-    name: 'Energy & Activity Patterns',
+    name: {
+      en: 'Energy & Activity Patterns',
+      hi: 'ऊर्जा और गतिविधि के तरीके',
+      mr: 'ऊर्जा आणि क्रियाशीलता'
+    },
+    shortName: {
+      en: 'Energy & Activity',
+      hi: 'ऊर्जा और गतिविधि',
+      mr: 'ऊर्जा आणि क्रियाशीलता'
+    },
     color: 'var(--section-mdq)',
     soft: 'var(--section-mdq-soft)',
-    instruction: 'Has there ever been a period when you were not your usual self and the following was true?',
+    instruction: {
+      en: 'Has there ever been a period when you were not your usual self and the following was true?',
+      hi: 'निर्देश: क्या कभी ऐसा समय आया जब आप अपने सामान्य स्वभाव से अलग थे और...',
+      mr: 'सूचना: कधी असा काळ आला होता का जेव्हा तुम्ही नेहमीसारखे नव्हते आणि...'
+    },
     type: 'yesno',
-    scale: ['No','Yes'],
+    scale: {
+      en: ['No', 'Yes'],
+      hi: ['नहीं', 'हाँ'],
+      mr: ['नाही', 'हो']
+    },
     values: [0,1],
     cutoff: 5, max: 7,
     questions: [
-      'You felt so good or hyper that others thought you were not your normal self',
-      'You were so irritable you shouted at people or started fights',
-      'You felt much more self-confident than usual',
-      'You needed much less sleep than usual and did not really miss it',
-      'You were much more talkative or spoke much faster than usual',
-      'You had much more energy than usual',
-      'You did things that were unusual for you or got you into trouble'
+      {
+        en: 'You felt so good or hyper that others thought you were not your normal self',
+        hi: 'आप इतने उत्साहित या हाइपर थे कि दूसरों को लगा आप सामान्य नहीं हैं।',
+        mr: 'तुम्ही इतके उत्साहित किंवा हायपर होता की इतरांना वाटले तुम्ही नेहमीसारखे नाही.'
+      },
+      {
+        en: 'You were so irritable you shouted at people or started fights',
+        hi: 'आप इतने चिड़चिड़े थे कि चिल्लाए या झगड़े।',
+        mr: 'तुम्ही इतके चिडलेले होता की ओरडलात किंवा भांडणे झाली.'
+      },
+      {
+        en: 'You felt much more self-confident than usual',
+        hi: 'आपको सामान्य से बहुत ज़्यादा आत्मविश्वास महसूस हुआ।',
+        mr: 'तुम्हाला नेहमीपेक्षा खूप जास्त आत्मविश्वास वाटला.'
+      },
+      {
+        en: 'You needed much less sleep than usual and did not really miss it',
+        hi: 'सामान्य से बहुत कम नींद आई और उसकी कमी भी नहीं लगी।',
+        mr: 'नेहमीपेक्षा खूप कमी झोप लागली तरी त्याची उणीव भासली नाही.'
+      },
+      {
+        en: 'You were much more talkative or spoke much faster than usual',
+        hi: 'सामान्य से बहुत ज़्यादा या बहुत तेज़ बोले।',
+        mr: 'नेहमीपेक्षा जास्त बोललात किंवा खूप वेगाने बोललात.'
+      },
+      {
+        en: 'You had much more energy than usual',
+        hi: 'सामान्य से बहुत ज़्यादा ऊर्जा थी।',
+        mr: 'नेहमीपेक्षा खूप जास्त ऊर्जा होती.'
+      },
+      {
+        en: 'You did things that were unusual for you or got you into trouble',
+        hi: 'कुछ ऐसा किया जो आपके लिए असामान्य था या जिससे परेशानी हुई।',
+        mr: 'असे काही केले जे तुमच्यासाठी असामान्य होते किंवा ज्यामुळे अडचण निर्माण झाली.'
+      }
     ]
   },
   {
     id: 'cssrs',
-    name: 'General Reflections',
+    name: {
+      en: 'General Reflections',
+      hi: 'सामान्य विचार और भावनाएं',
+      mr: 'सामान्य विचार आणि भावना'
+    },
+    shortName: {
+      en: 'General Reflections',
+      hi: 'सामान्य विचार',
+      mr: 'सामान्य विचार'
+    },
     color: 'var(--section-cssrs)',
     soft: 'var(--section-cssrs-soft)',
-    instruction: 'Please answer honestly. Your responses are completely confidential.',
+    instruction: {
+      en: 'Please answer honestly. Your responses are completely confidential.',
+      hi: 'निर्देश: कृपया ईमानदारी से उत्तर दें। आपके उत्तर पूरी तरह गोपनीय हैं।',
+      mr: 'सूचना: कृपया प्रामाणिकपणे उत्तर द्या. तुमची उत्तरे पूर्णपणे गोपनीय आहेत.'
+    },
     type: 'yesno',
-    scale: ['No','Yes'],
+    scale: {
+      en: ['No', 'Yes'],
+      hi: ['नहीं', 'हाँ'],
+      mr: ['नाही', 'हो']
+    },
     values: [0,1],
     cutoff: 1, max: 3,
     suicidal: true,
     questions: [
-      'Have you wished you were dead or wished you could go to sleep and not wake up?',
-      'Have you had thoughts of killing yourself?',
-      'Have you ever thought about how you might do this?'
+      {
+        en: 'Have you wished you were dead or wished you could go to sleep and not wake up?',
+        hi: 'क्या आपने कभी यह चाहा कि काश मैं मर जाता, या सो जाता और उठता ही नहीं?',
+        mr: 'तुम्हाला कधी असे वाटले का की मेलो तर बरे होईल किंवा झोपेत गेलो आणि उठलोच नाही तर चांगले होईल?'
+      },
+      {
+        en: 'Have you had thoughts of killing yourself?',
+        hi: 'क्या आपके मन में कभी खुद को खत्म करने के विचार आए?',
+        mr: 'तुम्हाला कधी स्वतःला संपवण्याचे विचार आले का?'
+      },
+      {
+        en: 'Have you ever thought about how you might do this?',
+        hi: 'क्या आपने कभी यह सोचा कि यह कैसे किया जा सकता है?',
+        mr: 'तुम्ही कधी असा विचार केला का की हे कसे करता येईल?'
+      }
     ]
   }
 ];
 
 let allQ = [];
 SECTIONS.forEach((s, si) => {
-  s.questions.forEach((q, qi) => allQ.push({ sec: si, qi, text: q }));
+  s.questions.forEach((q, qi) => allQ.push({ sec: si, qi, textObj: q, text: q.en }));
 });
 
 let answers = new Array(allQ.length).fill(null);
 let cur = 0;
 let isTransitioning = false;
+
+function setLanguage(lang) {
+  if (!UI_TEXT[lang]) return;
+  currentLang = lang;
+  localStorage.setItem('mindspace_questionnaire_lang', lang);
+
+  // Update switcher buttons state
+  document.querySelectorAll('.lang-btn').forEach(btn => {
+    btn.classList.toggle('active', btn.getAttribute('data-lang') === lang);
+  });
+
+  // Re-render current question with selected language
+  render('none');
+}
 
 function getSectionScore(si) {
   const s = SECTIONS[si];
@@ -748,27 +920,45 @@ function render(direction = 'initial') {
   const q = allQ[cur];
   const s = SECTIONS[q.sec];
   const total = allQ.length;
-  const pct = Math.max(2, Math.round(((cur + 1) / total) * 100));
+  const pct = Math.max(3, Math.round(((cur + 1) / total) * 100));
+  const ui = UI_TEXT[currentLang] || UI_TEXT.en;
+
+  // Language buttons highlight
+  document.querySelectorAll('.lang-btn').forEach(btn => {
+    btn.classList.toggle('active', btn.getAttribute('data-lang') === currentLang);
+  });
 
   document.getElementById('prog-fill').style.width = pct + '%';
-  document.getElementById('prog-fill').style.background = 'var(--accent)';
-  document.getElementById('section-name').textContent = 'Questionnaire';
-  document.getElementById('pct-text').textContent = pct + '%';
-  document.getElementById('step-indicator').textContent = `${cur+1} of ${total}`;
-  const errMsg = document.getElementById('err-msg');
-  if (errMsg) errMsg.style.display = 'none';
+  document.getElementById('prog-fill').style.background = s.color || 'var(--accent)';
+  
+  const sectionLabel = (s.shortName && s.shortName[currentLang]) ? s.shortName[currentLang] : (s.shortName ? s.shortName.en : 'Questionnaire');
+  document.getElementById('section-name').textContent = sectionLabel;
+  document.getElementById('step-indicator').textContent = ui.questionCount(cur + 1, total);
 
   const backBtn = document.getElementById('btn-back');
+  const backLabel = document.getElementById('btn-back-label');
   if (backBtn) {
     backBtn.style.visibility = cur > 0 ? 'visible' : 'hidden';
   }
+  if (backLabel) {
+    backLabel.textContent = ui.back;
+  }
 
+  const errMsg = document.getElementById('err-msg');
+  if (errMsg) {
+    errMsg.style.display = 'none';
+    errMsg.textContent = ui.errMsg;
+  }
 
+  const activeScale = (s.scale && s.scale[currentLang]) ? s.scale[currentLang] : s.scale.en;
+  const activeInstruction = (s.instruction && s.instruction[currentLang]) ? s.instruction[currentLang] : s.instruction.en;
+  const activeQuestionText = (q.textObj && q.textObj[currentLang]) ? q.textObj[currentLang] : q.textObj.en;
+  const fullSectionTitle = (s.name && s.name[currentLang]) ? s.name[currentLang] : s.name.en;
 
   let optionsHtml = '';
   if (s.type === 'freq') {
     optionsHtml = `<div class="options-freq">`;
-    s.scale.forEach((label, i) => {
+    activeScale.forEach((label, i) => {
       const sel = answers[cur] === s.values[i] ? 'selected' : '';
       optionsHtml += `<button type="button" class="opt ${sel}" onclick="selectAnswer(${s.values[i]}, this)">
         <span class="opt-num">${s.values[i]}</span>
@@ -778,7 +968,7 @@ function render(direction = 'initial') {
     optionsHtml += `</div>`;
   } else if (s.type === 'freq5') {
     optionsHtml = `<div class="options-freq-5">`;
-    s.scale.forEach((label, i) => {
+    activeScale.forEach((label, i) => {
       const sel = answers[cur] === s.values[i] ? 'selected' : '';
       optionsHtml += `<button type="button" class="opt ${sel}" onclick="selectAnswer(${s.values[i]}, this)">
         <span class="opt-num">${s.values[i]}</span>
@@ -788,7 +978,7 @@ function render(direction = 'initial') {
     optionsHtml += `</div>`;
   } else {
     optionsHtml = `<div class="options-yesno">`;
-    s.scale.forEach((label, i) => {
+    activeScale.forEach((label, i) => {
       const val = s.values[i];
       const sel = answers[cur] === val ? (val === 1 && s.suicidal ? 'selected selected-yes' : 'selected') : '';
       optionsHtml += `<button type="button" class="opt-yn ${sel}" onclick="selectAnswer(${val}, this)">${label}</button>`;
@@ -796,12 +986,20 @@ function render(direction = 'initial') {
     optionsHtml += `</div>`;
   }
 
-  const animClass = direction === 'backward' ? 'slide-in-left' : (direction === 'forward' ? 'slide-in-right' : 'slide-in-right');
+  let animClass = '';
+  if (direction === 'backward') {
+    animClass = 'slide-in-left';
+  } else if (direction === 'forward' || direction === 'initial') {
+    animClass = 'slide-in-right';
+  }
 
   document.getElementById('main-area').innerHTML = `
     <div class="q-card ${animClass}">
-      <p class="instruction-text">${s.instruction}</p>
-      <p class="q-text">${q.text}</p>
+      <div class="section-tag" style="background:${s.soft}; color:${s.color}; border: 1px solid ${s.color}33;">
+        ${fullSectionTitle}
+      </div>
+      <p class="instruction-text">${activeInstruction}</p>
+      <p class="q-text">${activeQuestionText}</p>
       ${optionsHtml}
     </div>
   `;
@@ -813,7 +1011,7 @@ function selectAnswer(val, buttonElement) {
 
   answers[cur] = val;
 
-  // Immediate visual highlight on the clicked button
+  // Immediate visual feedback
   const container = buttonElement ? buttonElement.closest('.options-freq, .options-freq-5, .options-yesno') : null;
   if (container) {
     container.classList.add('options-disabled');
@@ -829,7 +1027,7 @@ function selectAnswer(val, buttonElement) {
     }
   }
 
-  // Smooth slide out then auto-advance to next question
+  // Smooth slide out and auto-advance
   setTimeout(() => {
     const card = document.querySelector('.q-card');
     if (card) {
@@ -866,14 +1064,49 @@ function prev() {
   }, 180);
 }
 
+async function saveQuestionnaire(scores, flags) {
+  const answerMap = {};
+  allQ.forEach((question, index) => {
+    answerMap[String(index + 1)] = {
+      question: question.textObj.en,
+      question_localized: question.textObj[currentLang] || question.textObj.en,
+      language: currentLang,
+      value: answers[index]
+    };
+  });
+
+  const response = await fetch('{% url "collection:submit_questionnaire" %}', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'X-CSRFToken': getCookie('csrftoken')
+    },
+    body: JSON.stringify({
+      answers: answerMap,
+      scores,
+      flags,
+      language: currentLang
+    })
+  });
+
+  const data = await response.json();
+  if (!response.ok || !data.ok) {
+    throw new Error(data.error || 'Could not save questionnaire.');
+  }
+
+  return data;
+}
+
 async function finishQuestionnaire() {
+  const ui = UI_TEXT[currentLang] || UI_TEXT.en;
   document.getElementById('prog-fill').style.width = '100%';
   document.getElementById('prog-fill').style.background = 'var(--accent)';
-  document.getElementById('section-name').textContent = 'Complete';
-  document.getElementById('pct-text').textContent = '100%';
+  document.getElementById('section-name').textContent = '100%';
   document.getElementById('step-indicator').textContent = 'Complete';
   document.getElementById('nav-bar').style.display = 'none';
-  document.getElementById('err-msg').style.display = 'none';
+  document.getElementById('lang-switcher').style.display = 'none';
+  const errMsg = document.getElementById('err-msg');
+  if (errMsg) errMsg.style.display = 'none';
 
   let flags = [];
   let scores = {};
@@ -887,12 +1120,12 @@ async function finishQuestionnaire() {
 
   document.getElementById('main-area').innerHTML = `
     <div class="result-hero">
-      <p class="result-hero-label">Thank you</p>
-      <p class="result-primary-name">Your responses are saved</p>
-      <p style="font-size:13px;color:var(--text-secondary);margin-top:0.75rem">Next, you will complete a short activity using your camera and voice.</p>
+      <p class="result-hero-label">${ui.completeHeader}</p>
+      <p class="result-primary-name">${ui.completeTitle}</p>
+      <p style="font-size:13.5px;color:var(--text-secondary);margin-top:0.75rem;line-height:1.5;">${ui.completeSubtitle}</p>
     </div>
     <div class="disclaimer">
-      Preparing the next activity...
+      ${ui.preparing}
     </div>
   `;
 
@@ -902,12 +1135,14 @@ async function finishQuestionnaire() {
   } catch (error) {
     const notice = document.createElement('p');
     notice.className = 'disclaimer';
-    notice.textContent = 'We could not save your responses. Please try again.';
+    notice.style.color = 'var(--section-phq)';
+    notice.textContent = ui.saveError;
     document.getElementById('main-area').appendChild(notice);
   }
 }
 
-render();
+// Initial render
+render('initial');
 </script>
 </body>
 </html>
