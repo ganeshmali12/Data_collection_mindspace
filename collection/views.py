@@ -12,7 +12,14 @@ from django.utils import timezone
 from django.views.decorators.csrf import ensure_csrf_cookie
 from django.views.decorators.http import require_POST
 
-from .models import CollectionSession, ConsentRecord, MediaCapture, QuestionnaireResponse
+from .models import (
+    CollectionSession,
+    ConsentRecord,
+    GuardianConsent,
+    MediaCapture,
+    ParticipantIdentity,
+    QuestionnaireResponse,
+)
 from .services.combined_processing import process_combined_capture
 from .services.voice_processing import process_voice_session
 from .services.fusion_processing import process_fusion_session
@@ -189,7 +196,7 @@ def submit_consent(request):
     ip_address = get_client_ip(request)
     user_agent = request.META.get("HTTP_USER_AGENT", "")[:500]
 
-    ConsentRecord.objects.update_or_create(
+    consent_record, _ = ConsentRecord.objects.update_or_create(
         session=session,
         defaults={
             "patient_id": patient_id,
@@ -215,6 +222,30 @@ def submit_consent(request):
         },
     )
 
+    ParticipantIdentity.objects.update_or_create(
+        session=session,
+        defaults={
+            "patient_id": patient_id,
+            "participant_email": participant_email,
+            "ip_address": ip_address,
+            "user_agent": user_agent,
+        },
+    )
+
+    if is_minor:
+        GuardianConsent.objects.update_or_create(
+            consent=consent_record,
+            defaults={
+                "guardian_name": guardian_name,
+                "guardian_relationship": guardian_relationship,
+                "guardian_contact": guardian_contact,
+                "confirm_parent": guardian_confirm_parent,
+                "confirm_minor": guardian_confirm_minor,
+                "confirm_modalities": guardian_confirm_modalities,
+                "confirm_terms": guardian_confirm_terms,
+            },
+        )
+
     return JsonResponse({
         "ok": True,
         "message": "Consent recorded successfully.",
@@ -239,9 +270,19 @@ def upload_combined_video(request):
     video = request.FILES.get("video")
     if not video:
         return JsonResponse({"ok": False, "error": "No video received."}, status=400)
+    duration_raw = request.POST.get("duration_seconds", "")
+    duration_val = None
+    try:
+        duration_val = float(duration_raw) if duration_raw else None
+    except (ValueError, TypeError):
+        pass
+
     capture = MediaCapture.objects.create(
-        session=get_collection_session(request), kind="combined_video", file=video,
-        metadata={"duration_seconds": request.POST.get("duration_seconds", "")},
+        session=get_collection_session(request),
+        kind="combined_video",
+        file=video,
+        duration_seconds=duration_val,
+        metadata={"duration_seconds": duration_raw},
     )
     session = capture.session
     session.status = "processing"
@@ -313,9 +354,21 @@ def upload_voice_phonation(request):
     audio = request.FILES.get("audio")
     if not audio:
         return JsonResponse({"ok": False, "error": "No audio received."}, status=400)
+    sound_id = request.POST.get("sound_id", "")
+    hold_raw = request.POST.get("hold_ms", "")
+    hold_val = None
+    try:
+        hold_val = int(hold_raw) if hold_raw else None
+    except (ValueError, TypeError):
+        pass
+
     capture = MediaCapture.objects.create(
-        session=get_collection_session(request), kind="phonation_audio", file=audio,
-        metadata={"sound_id": request.POST.get("sound_id", ""), "hold_ms": request.POST.get("hold_ms", "")},
+        session=get_collection_session(request),
+        kind="phonation_audio",
+        file=audio,
+        sound_code=sound_id,
+        hold_ms=hold_val,
+        metadata={"sound_id": sound_id, "hold_ms": hold_raw},
     )
     return JsonResponse({"ok": True, "capture_id": capture.pk, "passed": True})
 

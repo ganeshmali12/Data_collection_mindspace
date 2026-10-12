@@ -10,6 +10,9 @@ from .models import AnalysisResult, CollectionSession, MediaCapture
 
 class CombinedProcessingTests(TestCase):
     def setUp(self):
+        self.thread_patcher = patch("threading.Thread.start", autospec=True, side_effect=lambda t: t.run())
+        self.thread_patcher.start()
+        self.addCleanup(self.thread_patcher.stop)
         self.client.post(
             "/consent/submit/",
             data=json.dumps({

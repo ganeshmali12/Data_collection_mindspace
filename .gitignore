@@ -21,6 +21,8 @@ coverage.xml
 .pytest_cache/
 test_db.sqlite3
 data_collection.sqlite3
+*.sqlite3
+mindspace_collection*
 
 collection.log
 dev.log

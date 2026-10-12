@@ -4,7 +4,16 @@ from io import BytesIO
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.test import TestCase
 
-from .models import CollectionSession, ConsentRecord, MediaCapture, QuestionnaireResponse
+from .models import (
+    AnalysisResult,
+    AnalysisResultCapture,
+    CollectionSession,
+    ConsentRecord,
+    GuardianConsent,
+    MediaCapture,
+    ParticipantIdentity,
+    QuestionnaireResponse,
+)
 
 
 class ConsentFlowTests(TestCase):
@@ -176,3 +185,58 @@ class CollectionFlowTests(TestCase):
     def test_missing_upload_is_rejected(self):
         response = self.client.post("/screening/combined/upload/")
         self.assertEqual(response.status_code, 400)
+
+    def test_participant_identity_and_guardian_consent_created_properly(self):
+        minor_payload = {
+            "participant_email": "minoruser@gmail.com",
+            "gender": "Female",
+            "age": 15,
+            "consent_record_date": "2026-09-24",
+            "agree_voice": True,
+            "agree_video": True,
+            "agree_transcript": True,
+            "agree_publication": True,
+            "agree_terms": True,
+            "guardian_name": "Jane Doe",
+            "guardian_relationship": "Mother",
+            "guardian_contact": "+1234567890",
+            "guardian_confirm_parent": True,
+            "guardian_confirm_minor": True,
+            "guardian_confirm_modalities": True,
+            "guardian_confirm_terms": True,
+        }
+        res = self.client.post("/consent/submit/", data=json.dumps(minor_payload), content_type="application/json")
+        self.assertEqual(res.status_code, 200)
+
+        # Verify ParticipantIdentity is created
+        identity = ParticipantIdentity.objects.get(participant_email="minoruser@gmail.com")
+        self.assertTrue(identity.patient_id.startswith("PID-"))
+
+        # Verify GuardianConsent is created
+        guardian = GuardianConsent.objects.get(guardian_name="Jane Doe")
+        self.assertEqual(guardian.guardian_relationship, "Mother")
+        self.assertEqual(guardian.consent.age, 15)
+
+    def test_media_capture_typed_columns_populated(self):
+        # Combined video with duration
+        video = SimpleUploadedFile("sample.webm", b"videodata", content_type="video/webm")
+        res = self.client.post("/screening/combined/upload/", {"video": video, "duration_seconds": "45.5"})
+        self.assertEqual(res.status_code, 200)
+        capture = MediaCapture.objects.get(kind="combined_video")
+        self.assertEqual(capture.duration_seconds, 45.5)
+
+        # Phonation audio with sound_code and hold_ms
+        audio = SimpleUploadedFile("audio.webm", b"audiodata", content_type="audio/webm")
+        res2 = self.client.post("/screening/voice/upload/", {"audio": audio, "sound_id": "local-2", "hold_ms": "3000"})
+        self.assertEqual(res2.status_code, 200)
+        audio_cap = MediaCapture.objects.get(kind="phonation_audio")
+        self.assertEqual(audio_cap.sound_code, "local-2")
+        self.assertEqual(audio_cap.hold_ms, 3000)
+
+    def test_analysis_result_unique_constraint_enforced(self):
+        from django.db import IntegrityError
+        session = CollectionSession.objects.create()
+        AnalysisResult.objects.create(session=session, modality="face", status="completed")
+        with self.assertRaises(IntegrityError):
+            AnalysisResult.objects.create(session=session, modality="face", status="pending")
+

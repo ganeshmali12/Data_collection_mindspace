@@ -4,8 +4,19 @@ import tempfile
 
 from django.utils import timezone
 
-from ..models import AnalysisResult, MediaCapture
+from ..models import AnalysisResult, AnalysisResultCapture, MediaCapture
 from .voice_api import extract_features, process_pca, score_features
+
+
+def extract_numeric_score(scoring):
+    if isinstance(scoring, dict):
+        for key in ("risk_score", "score", "prediction_score", "confidence_score"):
+            val = scoring.get(key)
+            if isinstance(val, (int, float)):
+                return float(val)
+    elif isinstance(scoring, (int, float)):
+        return float(scoring)
+    return None
 
 
 def feature_payload(response):
@@ -76,6 +87,13 @@ def process_voice_session(session):
         modality="voice",
         defaults={"capture": captures[0], "status": "processing", "error_message": "", "started_at": timezone.now()},
     )
+    for cap in captures:
+        role = f"phonation_{cap.sound_code}" if cap.sound_code else "phonation_audio"
+        AnalysisResultCapture.objects.get_or_create(
+            analysis_result=result,
+            capture=cap,
+            defaults={"role": role},
+        )
     combined_path = ""
     try:
         if len(captures) == 1:
@@ -91,9 +109,10 @@ def process_voice_session(session):
         scoring = score_features(components)
         result.raw_response = {"extraction": extraction, "pca": pca, "scoring": scoring}
         result.normalized_result = scoring if isinstance(scoring, dict) else {"value": scoring}
+        result.risk_score = extract_numeric_score(scoring)
         result.status = "completed"
         result.completed_at = timezone.now()
-        result.save(update_fields=["raw_response", "normalized_result", "status", "completed_at", "updated_at"])
+        result.save(update_fields=["raw_response", "normalized_result", "risk_score", "status", "completed_at", "updated_at"])
         session.status = "processing"
         session.current_step = "multimodal_processing"
         session.save(update_fields=["status", "current_step", "updated_at"])
