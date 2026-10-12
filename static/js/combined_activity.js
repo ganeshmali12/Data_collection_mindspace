@@ -28,6 +28,7 @@
   }
 
   var STEP_SECONDS = 40;
+  var MIN_STEP_SECONDS = 20;
 
   // ---- State ----
   var state = {
@@ -212,7 +213,28 @@
   }
 
   // ---- Step Advancing (Continuous Recording Flow) ----
+  function updateNextButtonState() {
+    if (!btnNextStep || !btnNextStepText) return;
+    var isLastStep = (state.currentStep === state.totalSteps - 1);
+    if (state.recordedSeconds < MIN_STEP_SECONDS) {
+      var remaining = MIN_STEP_SECONDS - state.recordedSeconds;
+      btnNextStep.disabled = true;
+      btnNextStep.className = "cursor-not-allowed opacity-60 inline-flex items-center gap-2 bg-slate-800 text-slate-400 border border-slate-700 text-xs sm:text-sm font-bold px-4 sm:px-5 py-2 rounded-full shadow transition";
+      btnNextStepText.textContent = isLastStep ? ("Finish in " + remaining + "s...") : ("Next in " + remaining + "s...");
+    } else {
+      btnNextStep.disabled = false;
+      btnNextStep.className = "cursor-pointer inline-flex items-center gap-2 bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-400 hover:to-emerald-500 text-white text-xs sm:text-sm font-bold px-4 sm:px-5 py-2 rounded-full shadow-lg shadow-emerald-900/40 transition transform active:scale-95";
+      btnNextStepText.textContent = isLastStep ? "Finish Activity ✓" : "Next Step →";
+    }
+  }
+
   function advanceToNextStep(autoTriggered) {
+    if (!autoTriggered && state.recordedSeconds < MIN_STEP_SECONDS) {
+      var remaining = MIN_STEP_SECONDS - state.recordedSeconds;
+      showToast("Minimum 20s required", "Please speak for at least 20 seconds (" + remaining + "s remaining)");
+      return;
+    }
+
     state.completedSteps[state.currentStep + 1] = true;
     state.totalXP += 50;
 
@@ -258,15 +280,11 @@
         }
       }
 
-      // Update Next button label on step 4
-      if (btnNextStepText) {
-        btnNextStepText.textContent = (state.currentStep === state.totalSteps - 1) ? "Finish Activity ✓" : "Next Step →";
-      }
-
-      // Reset timer for the next step without stopping the recorder
+      // Reset timer and 20s validation for the next step
       state.recordingTimer = STEP_SECONDS;
       state.recordedSeconds = 0;
       updateTimerDisplay();
+      updateNextButtonState();
     } else {
       // Step 4 finished -> submit all responses and continue to next page
       showToast("Activity Complete! +200 XP", "Saving video and moving to next activity...");
@@ -285,6 +303,7 @@
     state.recordedSeconds++;
     state.totalRecordedSeconds++;
     updateTimerDisplay();
+    updateNextButtonState();
     if (state.recordingTimer <= 0) {
       advanceToNextStep(true);
     }
@@ -436,6 +455,7 @@
       showRecordingState("active");
       if (recordingTimerPill) recordingTimerPill.classList.remove("hidden");
       updateTimerDisplay();
+      updateNextButtonState();
       document.querySelectorAll(".waveform-bar").forEach(function (bar) { bar.classList.add("active"); });
       state.timerInterval = setInterval(stepTimerTick, 1000);
       return;
@@ -453,6 +473,7 @@
     showRecordingState("active");
     if (recordingTimerPill) recordingTimerPill.classList.remove("hidden");
     updateTimerDisplay();
+    updateNextButtonState();
     document.querySelectorAll(".waveform-bar").forEach(function (bar) { bar.classList.add("active"); });
 
     state.timerInterval = setInterval(stepTimerTick, 1000);
@@ -486,6 +507,7 @@
     state.recordingTimer = STEP_SECONDS;
     state.recordedSeconds = 0;
     recordingTimerPill.classList.add("hidden");
+    updateNextButtonState();
     showRecordingState("initial");
   }
 

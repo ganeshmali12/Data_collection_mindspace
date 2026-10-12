@@ -1,3 +1,4 @@
+import hashlib
 import json
 import random
 import threading
@@ -11,13 +12,32 @@ from django.utils import timezone
 from django.views.decorators.csrf import ensure_csrf_cookie
 from django.views.decorators.http import require_POST
 
-from .models import CollectionSession, ConsentRecord, MediaCapture, QuestionnaireResponse
+from .models import (
+    CollectionSession,
+    ConsentRecord,
+    GuardianConsent,
+    MediaCapture,
+    ParticipantIdentity,
+    QuestionnaireResponse,
+)
 from .services.combined_processing import process_combined_capture
 from .services.voice_processing import process_voice_session
 from .services.fusion_processing import process_fusion_session
 
 
 STORY_IMAGE_DIR = Path(__file__).resolve().parent.parent / "static" / "images" / "activities" / "story"
+
+
+def generate_participant_id_from_email(email: str) -> str:
+    """Derive a stable, short, opaque Participant ID from a Gmail address.
+
+    Format: PID-XXXXXXXX  (8 uppercase hex chars)
+    The raw email is NOT encoded in the ID — only a SHA-256 hash is used,
+    making it safe to display publicly while remaining deterministic.
+    """
+    normalized = email.strip().lower()
+    digest = hashlib.sha256(normalized.encode()).hexdigest()[:8].upper()
+    return f"PID-{digest}"
 
 
 def pick_story_frames():
@@ -83,13 +103,25 @@ def submit_consent(request):
     else:
         data = request.POST.dict()
 
-    patient_id = str(data.get("patient_id", "")).strip()
+    session = get_collection_session(request)
+    participant_email = str(data.get("participant_email", "")).strip().lower()
+
+    # Validate Gmail address if provided (optional)
+    if participant_email:
+        if not participant_email.endswith("@gmail.com"):
+            return JsonResponse({"ok": False, "error": "Please enter a valid Gmail address (must end with @gmail.com)."}, status=400)
+        patient_id = generate_participant_id_from_email(participant_email)
+    else:
+        client_patient_id = str(data.get("patient_id", "")).strip()
+        if client_patient_id:
+            patient_id = client_patient_id
+        else:
+            patient_id = f"PID-{session.session_id.hex[:8].upper()}"
+
     gender = str(data.get("gender", "")).strip()
     age_raw = data.get("age")
     consent_date_raw = data.get("consent_record_date", "")
 
-    if not patient_id:
-        return JsonResponse({"ok": False, "error": "Patient ID / Participant code is required."}, status=400)
     if not gender:
         return JsonResponse({"ok": False, "error": "Gender selection is required."}, status=400)
     try:
@@ -164,10 +196,11 @@ def submit_consent(request):
     ip_address = get_client_ip(request)
     user_agent = request.META.get("HTTP_USER_AGENT", "")[:500]
 
-    ConsentRecord.objects.update_or_create(
+    consent_record, _ = ConsentRecord.objects.update_or_create(
         session=session,
         defaults={
             "patient_id": patient_id,
+            "participant_email": participant_email,
             "gender": gender,
             "age": age,
             "consent_record_date": consent_date,
@@ -188,6 +221,30 @@ def submit_consent(request):
             "user_agent": user_agent,
         },
     )
+
+    ParticipantIdentity.objects.update_or_create(
+        session=session,
+        defaults={
+            "patient_id": patient_id,
+            "participant_email": participant_email,
+            "ip_address": ip_address,
+            "user_agent": user_agent,
+        },
+    )
+
+    if is_minor:
+        GuardianConsent.objects.update_or_create(
+            consent=consent_record,
+            defaults={
+                "guardian_name": guardian_name,
+                "guardian_relationship": guardian_relationship,
+                "guardian_contact": guardian_contact,
+                "confirm_parent": guardian_confirm_parent,
+                "confirm_minor": guardian_confirm_minor,
+                "confirm_modalities": guardian_confirm_modalities,
+                "confirm_terms": guardian_confirm_terms,
+            },
+        )
 
     return JsonResponse({
         "ok": True,
@@ -213,9 +270,19 @@ def upload_combined_video(request):
     video = request.FILES.get("video")
     if not video:
         return JsonResponse({"ok": False, "error": "No video received."}, status=400)
+    duration_raw = request.POST.get("duration_seconds", "")
+    duration_val = None
+    try:
+        duration_val = float(duration_raw) if duration_raw else None
+    except (ValueError, TypeError):
+        pass
+
     capture = MediaCapture.objects.create(
-        session=get_collection_session(request), kind="combined_video", file=video,
-        metadata={"duration_seconds": request.POST.get("duration_seconds", "")},
+        session=get_collection_session(request),
+        kind="combined_video",
+        file=video,
+        duration_seconds=duration_val,
+        metadata={"duration_seconds": duration_raw},
     )
     session = capture.session
     session.status = "processing"
@@ -276,7 +343,7 @@ def phonation_sound_config(request):
     sounds = [
         {"sound_id": f"local-{index}", "label": label, "prompt": label, "say": label,
          "help": "Hold the sound steadily until the circle completes.", "order": index,
-         "required_hold_ms": 750, "voice_threshold": 15, "accepted": []}
+         "required_hold_ms": 3000, "voice_threshold": 40, "accepted": []}
         for index, label in enumerate(["आ", "ई", "ऊ", "ए", "ओ", "अ", "म्"], start=1)
     ]
     return JsonResponse({"ok": True, "sounds": sounds})
@@ -287,9 +354,21 @@ def upload_voice_phonation(request):
     audio = request.FILES.get("audio")
     if not audio:
         return JsonResponse({"ok": False, "error": "No audio received."}, status=400)
+    sound_id = request.POST.get("sound_id", "")
+    hold_raw = request.POST.get("hold_ms", "")
+    hold_val = None
+    try:
+        hold_val = int(hold_raw) if hold_raw else None
+    except (ValueError, TypeError):
+        pass
+
     capture = MediaCapture.objects.create(
-        session=get_collection_session(request), kind="phonation_audio", file=audio,
-        metadata={"sound_id": request.POST.get("sound_id", ""), "hold_ms": request.POST.get("hold_ms", "")},
+        session=get_collection_session(request),
+        kind="phonation_audio",
+        file=audio,
+        sound_code=sound_id,
+        hold_ms=hold_val,
+        metadata={"sound_id": sound_id, "hold_ms": hold_raw},
     )
     return JsonResponse({"ok": True, "capture_id": capture.pk, "passed": True})
 

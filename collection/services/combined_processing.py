@@ -4,9 +4,20 @@ import tempfile
 
 from django.utils import timezone
 
-from ..models import AnalysisResult, CollectionSession, MediaCapture
+from ..models import AnalysisResult, AnalysisResultCapture, CollectionSession, MediaCapture
 from .face_api import extract_features, get_session_vector, score_features
 from .text_api import extract_parameters, score_parameters, transcribe_audio
+
+
+def extract_numeric_score(scoring):
+    if isinstance(scoring, dict):
+        for key in ("risk_score", "score", "prediction_score", "confidence_score"):
+            val = scoring.get(key)
+            if isinstance(val, (int, float)):
+                return float(val)
+    elif isinstance(scoring, (int, float)):
+        return float(scoring)
+    return None
 
 
 def feature_payload(response):
@@ -47,6 +58,11 @@ def process_combined_capture(capture_id, transcript=""):
         modality="face",
         defaults={"capture": capture, "status": "processing", "error_message": "", "started_at": timezone.now()},
     )
+    AnalysisResultCapture.objects.get_or_create(
+        analysis_result=face_result,
+        capture=capture,
+        defaults={"role": "video"},
+    )
 
     try:
         with capture.file.open("rb") as video_file:
@@ -60,9 +76,10 @@ def process_combined_capture(capture_id, transcript=""):
             "scoring": scoring,
         }
         face_result.normalized_result = scoring if isinstance(scoring, dict) else {"value": scoring}
+        face_result.risk_score = extract_numeric_score(scoring)
         face_result.status = "completed"
         face_result.completed_at = timezone.now()
-        face_result.save(update_fields=["raw_response", "normalized_result", "status", "completed_at", "updated_at"])
+        face_result.save(update_fields=["raw_response", "normalized_result", "risk_score", "status", "completed_at", "updated_at"])
     except Exception as exc:
         face_result.status = "failed"
         face_result.error_message = str(exc)
@@ -72,6 +89,11 @@ def process_combined_capture(capture_id, transcript=""):
         session=session,
         modality="text",
         defaults={"capture": capture, "status": "processing", "transcript": transcript, "error_message": "", "started_at": timezone.now()},
+    )
+    AnalysisResultCapture.objects.get_or_create(
+        analysis_result=text_result,
+        capture=capture,
+        defaults={"role": "video"},
     )
     try:
         transcription_response = {}
@@ -100,16 +122,18 @@ def process_combined_capture(capture_id, transcript=""):
         text_result.transcript = transcript
         text_result.raw_response = {"transcription": transcription_response, "extraction": extraction, "scoring": scoring}
         text_result.normalized_result = scoring if isinstance(scoring, dict) else {"value": scoring}
+        text_result.risk_score = extract_numeric_score(scoring)
         text_result.status = "completed"
         text_result.completed_at = timezone.now()
-        text_result.save(update_fields=["transcript", "raw_response", "normalized_result", "status", "completed_at", "updated_at"])
+        text_result.save(update_fields=["transcript", "raw_response", "normalized_result", "risk_score", "status", "completed_at", "updated_at"])
     except Exception as exc:
         text_result.transcript = transcript
         text_result.raw_response = {"extraction": {"features": {"data": {}}}, "error": str(exc)}
         text_result.normalized_result = {"score": 0.0}
+        text_result.risk_score = 0.0
         text_result.status = "completed"
         text_result.completed_at = timezone.now()
-        text_result.save(update_fields=["transcript", "raw_response", "normalized_result", "status", "completed_at", "updated_at"])
+        text_result.save(update_fields=["transcript", "raw_response", "normalized_result", "risk_score", "status", "completed_at", "updated_at"])
 
     session.status = "capture"
     session.current_step = "voice_phonation"

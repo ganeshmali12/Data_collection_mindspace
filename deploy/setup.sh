@@ -117,6 +117,11 @@ else
     echo -e "${GREEN}✓ Existing .env file found. Preserving current configuration.${NC}"
 fi
 
+# Export environment variables for compose
+set -a
+[ -f "${ROOT_DIR}/.env" ] && . "${ROOT_DIR}/.env"
+set +a
+
 # 5. Prepare Storage Directories & Permissions
 echo -e "${YELLOW}[4/6] Setting up media and static storage directories...${NC}"
 mkdir -p "${ROOT_DIR}/media" "${ROOT_DIR}/staticfiles"
@@ -129,9 +134,11 @@ ${DOCKER_COMPOSE} -f "${ROOT_DIR}/docker-compose.yml" down || true
 ${DOCKER_COMPOSE} -f "${ROOT_DIR}/docker-compose.yml" up --build -d
 
 echo -e "Waiting for PostgreSQL database to become healthy..."
+DB_CHECK_USER="${DB_USER:-mindspace_user}"
+DB_CHECK_NAME="${DB_NAME:-mindspace_collection}"
 MAX_WAIT=30
 WAITED=0
-until docker exec mindspace-data-collection-postgres pg_isready -U mindspace_user -d mindspace_collection &> /dev/null || [ $WAITED -ge $MAX_WAIT ]; do
+until docker exec mindspace-data-collection-postgres pg_isready -U "${DB_CHECK_USER}" -d "${DB_CHECK_NAME}" &> /dev/null || [ $WAITED -ge $MAX_WAIT ]; do
     sleep 2
     WAITED=$((WAITED+2))
     echo -n "."
@@ -143,6 +150,7 @@ if [ $WAITED -ge $MAX_WAIT ]; then
 else
     echo -e "${GREEN}✓ Database is healthy and accepting connections.${NC}"
 fi
+
 
 # 7. Run Migrations & Collect Static Files
 echo -e "${YELLOW}[6/6] Applying database migrations and collecting static assets...${NC}"

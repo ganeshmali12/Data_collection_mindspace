@@ -1,7 +1,18 @@
 from django.utils import timezone
 
-from ..models import AnalysisResult
+from ..models import AnalysisResult, AnalysisResultCapture
 from .fusion_api import score_fusion
+
+
+def extract_numeric_score(scoring):
+    if isinstance(scoring, dict):
+        for key in ("risk_score", "score", "prediction_score", "confidence_score"):
+            val = scoring.get(key)
+            if isinstance(val, (int, float)):
+                return float(val)
+    elif isinstance(scoring, (int, float)):
+        return float(scoring)
+    return None
 
 
 def nested_features(payload, keys):
@@ -104,9 +115,19 @@ def process_fusion_session(session):
         scoring = score_fusion(features)
         fusion.raw_response = {"features": features, "scoring": scoring}
         fusion.normalized_result = scoring if isinstance(scoring, dict) else {"value": scoring}
+        fusion.risk_score = extract_numeric_score(scoring)
         fusion.status = "completed"
         fusion.completed_at = timezone.now()
-        fusion.save(update_fields=["raw_response", "normalized_result", "status", "completed_at", "updated_at"])
+        fusion.save(update_fields=["raw_response", "normalized_result", "risk_score", "status", "completed_at", "updated_at"])
+
+        # Link all captures used in the session for complete multimodal lineage
+        for cap in session.media_captures.all():
+            AnalysisResultCapture.objects.get_or_create(
+                analysis_result=fusion,
+                capture=cap,
+                defaults={"role": f"fusion_{cap.kind}"},
+            )
+
         session.status = "completed"
         session.current_step = "completed"
         session.save(update_fields=["status", "current_step", "updated_at"])
