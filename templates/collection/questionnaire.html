@@ -495,10 +495,15 @@
     </div>
 
     <!-- Language Selector Pill -->
-    <div class="lang-switcher" id="lang-switcher">
-      <button type="button" class="lang-btn active" data-lang="en" onclick="setLanguage('en')">English</button>
-      <button type="button" class="lang-btn" data-lang="hi" onclick="setLanguage('hi')">हिंदी</button>
-      <button type="button" class="lang-btn" data-lang="mr" onclick="setLanguage('mr')">मराठी</button>
+    <div style="display:flex;align-items:center;gap:12px;">
+      <a href="{% url 'collection:activity_hub' %}" style="font-size:12px;color:var(--text-secondary);text-decoration:none;padding:5px 10px;border-radius:20px;border:1px solid rgba(255,255,255,0.08);background:rgba(255,255,255,0.02);">
+        ← Activities Hub
+      </a>
+      <div class="lang-switcher" id="lang-switcher">
+        <button type="button" class="lang-btn active" data-lang="en" onclick="setLanguage('en')">English</button>
+        <button type="button" class="lang-btn" data-lang="hi" onclick="setLanguage('hi')">हिंदी</button>
+        <button type="button" class="lang-btn" data-lang="mr" onclick="setLanguage('mr')">मराठी</button>
+      </div>
     </div>
   </div>
 
@@ -1131,7 +1136,7 @@ async function finishQuestionnaire() {
 
   try {
     await saveQuestionnaire(scores, flags);
-    window.location.href = '{% url "collection:combined_activity" %}';
+    window.location.href = '{% url "collection:activity_hub" %}';
   } catch (error) {
     const notice = document.createElement('p');
     notice.className = 'disclaimer';

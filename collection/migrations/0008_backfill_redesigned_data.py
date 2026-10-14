@@ -9,9 +9,12 @@ def backfill_data(apps, schema_editor):
 
     for consent in ConsentRecord.objects.all():
         if not ParticipantIdentity.objects.filter(session=consent.session).exists():
+            candidate_id = consent.patient_id or f"PID-{str(consent.session.session_id)[:8].upper()}"
+            if ParticipantIdentity.objects.filter(patient_id=candidate_id).exists():
+                candidate_id = f"{candidate_id}-{str(consent.session.session_id)[:8].upper()}"
             ParticipantIdentity.objects.create(
                 session=consent.session,
-                patient_id=consent.patient_id,
+                patient_id=candidate_id,
                 participant_email=consent.participant_email,
                 ip_address=consent.ip_address,
                 user_agent=consent.user_agent,

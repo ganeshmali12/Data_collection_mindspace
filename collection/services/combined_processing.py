@@ -136,6 +136,17 @@ def process_combined_capture(capture_id, transcript=""):
         text_result.save(update_fields=["transcript", "raw_response", "normalized_result", "risk_score", "status", "completed_at", "updated_at"])
 
     session.status = "capture"
-    session.current_step = "voice_phonation"
+    session.current_step = "combined_video"
     session.save(update_fields=["status", "current_step", "updated_at"])
+
+    # If voice phonation was already finished prior to this video,
+    # trigger multimodal fusion now that face and text are ready.
+    has_voice = session.analysis_results.filter(modality="voice", status="completed").exists()
+    if has_voice and face_result.status == "completed" and text_result.status == "completed":
+        try:
+            from .fusion_processing import process_fusion_session
+            process_fusion_session(session)
+        except Exception:
+            pass
+
     return session

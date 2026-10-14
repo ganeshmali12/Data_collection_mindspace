@@ -109,7 +109,7 @@
 <div class="combined-activity min-h-screen text-slate-100 flex flex-col justify-between py-6 px-4 sm:px-8 max-w-7xl mx-auto w-full relative"
     data-upload-url="{% url 'collection:upload_combined_video' %}"
     data-process-url="{% url 'collection:process_combined_video' %}"
-    data-next-url="{% url 'collection:voice_phonation' %}"
+    data-next-url="{% url 'collection:activity_hub' %}"
     data-session-id="{{ session.session_id }}">
 
   <!-- VIEW 1: PROGRESS PATH OVERVIEW MAP (Frameless full-background design) -->
@@ -126,6 +126,9 @@
         <p class="text-xs sm:text-sm text-slate-400 mt-1">Complete 4 interactive conversational milestones with live facial &amp; voice analysis.</p>
       </div>
       <div class="flex items-center gap-3">
+        <a href="{% url 'collection:activity_hub' %}" class="inline-flex items-center gap-1.5 text-xs text-slate-400 hover:text-white bg-slate-900/60 hover:bg-slate-800/80 border border-white/10 px-3.5 py-1.5 rounded-full transition">
+          ← Activities Hub
+        </a>
         <span class="text-xs text-slate-400 font-medium bg-slate-900/60 border border-white/10 px-3.5 py-1.5 rounded-full">Progress: <strong class="text-white" id="map-progress-count">0 of 4 Completed</strong></span>
       </div>
     </div>
@@ -452,11 +455,14 @@
       </div>
 
       <div class="flex flex-col gap-2.5">
-        <button class="cursor-pointer inline-flex items-center justify-center gap-2 w-full py-3.5 rounded-full bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-400 hover:to-emerald-500 text-white font-bold text-sm shadow-lg shadow-emerald-900/40 transition transform active:scale-95" id="btn-restart-journey">
+        <a href="{% url 'collection:activity_hub' %}" class="cursor-pointer inline-flex items-center justify-center gap-2 w-full py-3.5 rounded-full bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-400 hover:to-emerald-500 text-white font-bold text-sm shadow-lg shadow-emerald-900/40 transition transform active:scale-95">
+          Continue to Activities Hub →
+        </a>
+        <button class="cursor-pointer inline-flex items-center justify-center gap-2 w-full py-3 rounded-full bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold text-sm border border-white/5 transition" id="btn-restart-journey">
           <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg>
           Play Journey Again
         </button>
-        <button class="cursor-pointer w-full py-3 rounded-full bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold text-sm border border-white/5 transition" id="btn-back-map">Back to Progress Path</button>
+        <button class="cursor-pointer w-full py-2.5 rounded-full bg-transparent hover:bg-slate-800/50 text-slate-400 hover:text-slate-200 font-medium text-xs transition" id="btn-back-map">Review Story Progress Path</button>
       </div>
     </div>
   </div>

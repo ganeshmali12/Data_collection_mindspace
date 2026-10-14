@@ -8,6 +8,7 @@ urlpatterns = [
     path("", views.home, name="home"),
     path("consent/", views.consent_view, name="consent"),
     path("consent/submit/", views.submit_consent, name="submit_consent"),
+    path("activities/", views.activity_hub, name="activity_hub"),
     path("questionnaire/", views.questionnaire, name="questionnaire"),
     path("questionnaire/submit/", views.submit_questionnaire, name="submit_questionnaire"),
     path("screening/combined/", views.combined_activity, name="combined_activity"),

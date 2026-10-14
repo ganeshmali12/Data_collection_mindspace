@@ -69,7 +69,7 @@ def home(request):
         consented_at__isnull=False,
         consent__isnull=False,
     ).exists():
-        return redirect("collection:questionnaire")
+        return redirect("collection:activity_hub")
     return redirect("collection:consent")
 
 
@@ -249,7 +249,67 @@ def submit_consent(request):
     return JsonResponse({
         "ok": True,
         "message": "Consent recorded successfully.",
-        "redirect": reverse("collection:questionnaire"),
+        "redirect": reverse("collection:activity_hub"),
+    })
+
+
+def evaluate_and_run_fusion(session):
+    """
+    Evaluates whether all multimodal prerequisites (face, text, and voice)
+    are completed. If so, runs the multimodal fusion engine.
+    Safe to trigger in any execution sequence.
+    """
+    has_face = session.analysis_results.filter(modality="face", status="completed").exists()
+    has_text = session.analysis_results.filter(modality="text", status="completed").exists()
+    has_voice = session.analysis_results.filter(modality="voice", status="completed").exists()
+
+    if has_face and has_text and has_voice:
+        try:
+            return process_fusion_session(session)
+        except Exception:
+            return None
+    return None
+
+
+@ensure_csrf_cookie
+def activity_hub(request):
+    session = get_collection_session(request)
+
+    # Check status of each of the 3 modules
+    questionnaire_done = QuestionnaireResponse.objects.filter(session=session).exists()
+    combined_done = MediaCapture.objects.filter(session=session, kind="combined_video").exists()
+    voice_done = MediaCapture.objects.filter(session=session, kind="phonation_audio").exists()
+
+    # Attempt to resolve fusion if modalities are complete
+    evaluate_and_run_fusion(session)
+
+    fusion_done = session.analysis_results.filter(modality="multimodal", status="completed").exists()
+
+    completed_count = sum([1 for done in (questionnaire_done, combined_done, voice_done) if done])
+    all_completed = (completed_count == 3)
+    progress_pct = int((completed_count / 3) * 100)
+
+    # Get participant details for display
+    participant_code = session.participant_code or f"PID-{session.session_id.hex[:8].upper()}"
+    participant_email = ""
+    identity = getattr(session, "identity", None)
+    if identity and identity.participant_email:
+        participant_email = identity.participant_email
+    elif getattr(session, "consent", None) and session.consent.participant_email:
+        participant_email = session.consent.participant_email
+
+    return render(request, "collection/activity_hub.html", {
+        "session": session,
+        "participant_code": participant_code,
+        "participant_email": participant_email,
+        "questionnaire_done": questionnaire_done,
+        "combined_done": combined_done,
+        "voice_done": voice_done,
+        "completed_count": completed_count,
+        "total_activities": 3,
+        "all_completed": all_completed,
+        "progress_pct": progress_pct,
+        "fusion_done": fusion_done,
     })
 
 
@@ -382,7 +442,7 @@ def complete_voice_phonation(request):
         return JsonResponse({"ok": False, "error": f"Voice analysis failed: {str(exc)}"}, status=502)
 
     try:
-        process_fusion_session(session)
+        evaluate_and_run_fusion(session)
     except Exception:
         pass
 
@@ -421,13 +481,18 @@ def submit_questionnaire(request):
     session = get_collection_session(request)
     session.participant_code = str(payload.get("participant_code", "")).strip()
     session.status = "capture"
-    session.current_step = "combined_video"
+    session.current_step = "questionnaire"
     session.save(update_fields=["participant_code", "status", "current_step", "updated_at"])
     response, _ = QuestionnaireResponse.objects.update_or_create(
         session=session,
         defaults={"answers": answers, "scores": scores, "flags": flags},
     )
-    return JsonResponse({"ok": True, "session_id": str(session.session_id), "response_id": response.pk})
+    return JsonResponse({
+        "ok": True,
+        "session_id": str(session.session_id),
+        "response_id": response.pk,
+        "redirect": reverse("collection:activity_hub"),
+    })
 
 
 def health(request):

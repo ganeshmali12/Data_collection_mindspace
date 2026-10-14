@@ -68,7 +68,7 @@
     data-upload-url="{% url 'collection:upload_voice_phonation' %}"
     data-complete-url="{% url 'collection:complete_voice_phonation' %}"
     data-status-url="{% url 'collection:screening_status' %}"
-    data-next-url="{% url 'collection:completed' %}">
+    data-next-url="{% url 'collection:activity_hub' %}">
 
   <!-- Top Header — identical structure to Combined Activity -->
   <div class="flex flex-wrap items-center justify-between gap-4 mb-6 pt-2">
@@ -81,6 +81,9 @@
       <p class="text-xs sm:text-sm text-slate-400 mt-1" id="speakPrompt">Hold each vowel sound steadily until the circle fills.</p>
     </div>
     <div class="flex items-center gap-3">
+      <a href="{% url 'collection:activity_hub' %}" class="inline-flex items-center gap-1.5 text-xs text-slate-400 hover:text-white bg-slate-900/60 hover:bg-slate-800/80 border border-white/10 px-3.5 py-1.5 rounded-full transition">
+        ← Activities Hub
+      </a>
       <span class="text-xs text-slate-400 font-medium bg-slate-900/60 border border-white/10 px-3.5 py-1.5 rounded-full">
         Progress: <strong class="text-white" id="completedText">0 of 7 Completed</strong>
       </span>
