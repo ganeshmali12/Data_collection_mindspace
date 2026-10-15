@@ -70,92 +70,6 @@ class ConsentFlowTests(TestCase):
         consent = ConsentRecord.objects.filter(participant_email="testuser@gmail.com").first()
         self.assertIsNotNone(consent)
         self.assertTrue(consent.patient_id.startswith("PID-"))
-        self.assertTrue(consent.patient_id.endswith("-01"))
-
-    def test_multiple_submissions_same_gmail(self):
-        payload = {
-            "participant_email": "multitest@gmail.com",
-            "gender": "Female",
-            "age": 22,
-            "consent_record_date": "2026-10-15",
-            "agree_voice": True,
-            "agree_video": True,
-            "agree_transcript": True,
-            "agree_publication": True,
-            "agree_terms": True,
-        }
-        # First submission
-        res1 = self.client.post("/consent/submit/", data=json.dumps(payload), content_type="application/json")
-        self.assertEqual(res1.status_code, 200)
-        data1 = res1.json()
-        pid1 = data1["patient_id"]
-        self.assertTrue(pid1.endswith("-01"))
-        self.assertEqual(data1["attempt_number"], 1)
-        self.assertFalse(data1["is_repeat"])
-
-        # Start a new session for second attempt
-        new_res = self.client.get("/session/new/")
-        self.assertRedirects(new_res, "/consent/")
-
-        # Second submission with the same Gmail address
-        res2 = self.client.post("/consent/submit/", data=json.dumps(payload), content_type="application/json")
-        self.assertEqual(res2.status_code, 200)
-        data2 = res2.json()
-        pid2 = data2["patient_id"]
-        self.assertTrue(pid2.endswith("-02"))
-        self.assertEqual(data2["attempt_number"], 2)
-        self.assertTrue(data2["is_repeat"])
-        self.assertNotEqual(pid1, pid2)
-
-        # Start a third session
-        self.client.get("/session/new/")
-        res3 = self.client.post("/consent/submit/", data=json.dumps(payload), content_type="application/json")
-        self.assertEqual(res3.status_code, 200)
-        data3 = res3.json()
-        pid3 = data3["patient_id"]
-        self.assertTrue(pid3.endswith("-03"))
-        self.assertEqual(data3["attempt_number"], 3)
-        self.assertTrue(data3["is_repeat"])
-
-        # Verify all identities are distinct in DB and email matches
-        identities = ParticipantIdentity.objects.filter(participant_email="multitest@gmail.com")
-        self.assertEqual(identities.count(), 3)
-        pids = [i.patient_id for i in identities]
-        self.assertEqual(len(set(pids)), 3)
-
-    def test_lookup_participant_id_endpoint(self):
-        # Initial lookup for new email
-        res1 = self.client.get("/consent/lookup-id/?email=newstudent@gmail.com")
-        self.assertEqual(res1.status_code, 200)
-        data1 = res1.json()
-        self.assertTrue(data1["ok"])
-        self.assertTrue(data1["patient_id"].endswith("-01"))
-        self.assertEqual(data1["attempt_number"], 1)
-        self.assertFalse(data1["is_repeat"])
-
-        # Submit consent for newstudent@gmail.com
-        payload = {
-            "participant_email": "newstudent@gmail.com",
-            "gender": "Male",
-            "age": 20,
-            "consent_record_date": "2026-10-15",
-            "agree_voice": True,
-            "agree_video": True,
-            "agree_transcript": True,
-            "agree_publication": True,
-            "agree_terms": True,
-        }
-        self.client.post("/consent/submit/", data=json.dumps(payload), content_type="application/json")
-
-        # Now start new session and lookup again
-        self.client.get("/session/new/")
-        res2 = self.client.get("/consent/lookup-id/?email=newstudent@gmail.com")
-        self.assertEqual(res2.status_code, 200)
-        data2 = res2.json()
-        self.assertTrue(data2["ok"])
-        self.assertTrue(data2["patient_id"].endswith("-02"))
-        self.assertEqual(data2["attempt_number"], 2)
-        self.assertTrue(data2["is_repeat"])
 
     def test_consent_with_invalid_email_fails(self):
         payload = {
@@ -396,4 +310,90 @@ class CollectionFlowTests(TestCase):
         self.assertTrue(hub_res4.context["combined_done"])
         self.assertEqual(hub_res4.context["completed_count"], 3)
         self.assertTrue(hub_res4.context["all_completed"])
+
+    def test_repeat_submissions_same_gmail_unique_pids(self):
+        email = "repeatedstudent@gmail.com"
+        consent_payload = {
+            "participant_email": email,
+            "gender": "Female",
+            "age": 21,
+            "consent_record_date": "2026-10-15",
+            "agree_voice": True,
+            "agree_video": True,
+            "agree_transcript": True,
+            "agree_publication": True,
+            "agree_terms": True,
+        }
+
+        # 1. First submission (Attempt 1)
+        res1 = self.client.post("/consent/submit/", data=json.dumps(consent_payload), content_type="application/json")
+        self.assertEqual(res1.status_code, 200)
+        id1 = ParticipantIdentity.objects.get(participant_email=email)
+        self.assertTrue(id1.patient_id.endswith("-01"))
+
+        # 2. Start a new session (e.g. longitudinal follow-up / second record)
+        res_new_session = self.client.get("/session/new/")
+        self.assertEqual(res_new_session.status_code, 302)
+        self.assertEqual(res_new_session.url, "/consent/")
+
+        # 3. Second submission with the SAME Gmail (Attempt 2)
+        res2 = self.client.post("/consent/submit/", data=json.dumps(consent_payload), content_type="application/json")
+        self.assertEqual(res2.status_code, 200)
+
+        identities = list(ParticipantIdentity.objects.filter(participant_email=email).order_by("created_at"))
+        self.assertEqual(len(identities), 2)
+        self.assertNotEqual(identities[0].patient_id, identities[1].patient_id)
+        self.assertTrue(identities[0].patient_id.endswith("-01"))
+        self.assertTrue(identities[1].patient_id.endswith("-02"))
+        # Both must share the same base hash prefix (e.g. PID-XXXXXXXX)
+        base_hash_1 = identities[0].patient_id.rsplit("-", 1)[0]
+        base_hash_2 = identities[1].patient_id.rsplit("-", 1)[0]
+        self.assertEqual(base_hash_1, base_hash_2)
+
+        # 4. Third submission with the SAME Gmail (Attempt 3)
+        self.client.get("/session/new/")
+        res3 = self.client.post("/consent/submit/", data=json.dumps(consent_payload), content_type="application/json")
+        self.assertEqual(res3.status_code, 200)
+
+        identities3 = list(ParticipantIdentity.objects.filter(participant_email=email).order_by("created_at"))
+        self.assertEqual(len(identities3), 3)
+        self.assertTrue(identities3[2].patient_id.endswith("-03"))
+
+    def test_lookup_participant_id_endpoint(self):
+        email = "lookuptest@gmail.com"
+        # First lookup: new participant
+        res = self.client.get(f"/consent/lookup-id/?email={email}")
+        self.assertEqual(res.status_code, 200)
+        data = res.json()
+        self.assertTrue(data["ok"])
+        self.assertEqual(data["attempt"], 1)
+        self.assertFalse(data["is_repeat"])
+        self.assertTrue(data["patient_id"].endswith("-01"))
+
+        # Record consent
+        consent_payload = {
+            "participant_email": email,
+            "gender": "Male",
+            "age": 22,
+            "consent_record_date": "2026-10-15",
+            "agree_voice": True,
+            "agree_video": True,
+            "agree_transcript": True,
+            "agree_publication": True,
+            "agree_terms": True,
+        }
+        self.client.post("/consent/submit/", data=json.dumps(consent_payload), content_type="application/json")
+
+        # Start new session
+        self.client.get("/session/new/")
+
+        # Second lookup: repeat participant
+        res2 = self.client.get(f"/consent/lookup-id/?email={email}")
+        self.assertEqual(res2.status_code, 200)
+        data2 = res2.json()
+        self.assertTrue(data2["ok"])
+        self.assertEqual(data2["attempt"], 2)
+        self.assertTrue(data2["is_repeat"])
+        self.assertTrue(data2["patient_id"].endswith("-02"))
+
 

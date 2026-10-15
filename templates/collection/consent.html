@@ -601,27 +601,16 @@
             </div>
             <!-- Live auto-generated Participant ID preview -->
             <div id="pid-preview"
-              style="display:none; margin-top:0.5rem; padding:0.65rem 0.95rem; background:#FAF7F2; border:1px solid #D1C7BA; border-radius:10px; flex-direction:column; gap:0.4rem;">
-              <div style="display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:0.5rem; width:100%;">
-                <div style="display:flex; align-items:center; gap:0.5rem;">
-                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#059669" stroke-width="2.5"
-                    style="flex-shrink:0;">
-                    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
-                  </svg>
-                  <span style="font-size:0.78rem; color:#475569; font-weight:500;">Participant ID:</span>
-                  <code id="pid-display"
-                    style="font-size:0.85rem; color:#059669; font-weight:700; letter-spacing:0.05em; background:rgba(5,150,105,0.08); padding:0.15rem 0.45rem; border-radius:4px;"></code>
-                </div>
-                <div id="repeat-badge-container">
-                  <span id="repeat-badge"
-                    style="display:inline-flex; align-items:center; font-size:0.72rem; font-weight:700; text-transform:uppercase; letter-spacing:0.04em; padding:0.2rem 0.6rem; border-radius:9999px; background:#EFF6FF; color:#1D4ED8; border:1px solid #BFDBFE;">
-                    Record #1
-                  </span>
-                </div>
-              </div>
-              <div id="repeat-notice" style="display:none; font-size:0.75rem; color:#059669; line-height:1.4;">
-                ✓ <strong>Existing participant recognized:</strong> A new unique ID has been assigned for this repeat assessment.
-              </div>
+              style="display:none; margin-top:0.5rem; padding:0.55rem 0.85rem; background:rgba(5,150,105,0.08); border:1px solid rgba(5,150,105,0.3); border-radius:8px; align-items:center; gap:0.6rem; flex-wrap:wrap;">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#059669" stroke-width="2.5"
+                style="flex-shrink:0;">
+                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+              </svg>
+              <span style="font-size:0.78rem; color:#64748B;">Your Participant ID:</span>
+              <code id="pid-display"
+                style="font-size:0.85rem; color:#059669; font-weight:700; letter-spacing:0.05em;"></code>
+              <span id="pid-attempt-badge"
+                style="display:none; font-size:0.72rem; font-weight:700; padding:0.15rem 0.55rem; border-radius:9999px; letter-spacing:0.02em;"></span>
             </div>
             <div id="email-error" style="display:none; font-size:0.78rem; color:#E11D48; margin-top:0.3rem;">Please
               enter a valid Gmail address (@gmail.com).</div>
@@ -993,95 +982,88 @@
       const consentStatusText = document.getElementById("consentStatusText");
       const consentDateInput = document.getElementById("consent_record_date");
 
-      // --- Gmail → Longitudinal Participant ID (Live Server Lookup with fallback) ---
-      async function gmailToParticipantId(email) {
+      // --- Gmail → Participant ID (Multi-Attempt Server Lookup + Client Fallback) ---
+      async function gmailToParticipantIdFallback(email) {
         const normalized = email.trim().toLowerCase();
         const msgBuffer = new TextEncoder().encode(normalized);
         const hashBuffer = await crypto.subtle.digest('SHA-256', msgBuffer);
         const hashArray = Array.from(new Uint8Array(hashBuffer));
         const hexStr = hashArray.slice(0, 4).map(b => b.toString(16).padStart(2, '0')).join('').toUpperCase();
-        return 'PID-' + hexStr;
+        return 'PID-' + hexStr + '-01';
       }
 
       const pidPreview = document.getElementById('pid-preview');
       const pidDisplay = document.getElementById('pid-display');
-      const repeatBadge = document.getElementById('repeat-badge');
-      const repeatNotice = document.getElementById('repeat-notice');
+      const pidAttemptBadge = document.getElementById('pid-attempt-badge');
       const emailError = document.getElementById('email-error');
       const gmailRegex = /^[^\s@]+@gmail\.com$/i;
       let emailLookupTimer = null;
 
-      async function fetchParticipantId(email) {
+      async function queryParticipantId(email) {
         try {
-          const resp = await fetch(`/consent/lookup-id/?email=${encodeURIComponent(email)}`);
-          if (resp.ok) {
-            const data = await resp.json();
-            if (data.ok) {
+          const res = await fetch(`/consent/lookup-id/?email=${encodeURIComponent(email)}`);
+          if (res.ok) {
+            const data = await res.json();
+            if (data.ok && emailInput.value.trim().toLowerCase() === email) {
               pidDisplay.textContent = data.patient_id;
               patientIdInput.value = data.patient_id;
-              if (repeatBadge) {
-                repeatBadge.textContent = `Record #${data.attempt_number}`;
+              if (pidAttemptBadge) {
+                pidAttemptBadge.style.display = 'inline-flex';
                 if (data.is_repeat) {
-                  repeatBadge.style.background = '#ECFDF5';
-                  repeatBadge.style.color = '#065F46';
-                  repeatBadge.style.borderColor = '#A7F3D0';
-                  if (repeatNotice) {
-                    repeatNotice.style.display = 'block';
-                    repeatNotice.innerHTML = `✓ <strong>Repeat Record #${data.attempt_number}:</strong> Welcome back! A new unique PID has been generated for this new attempt.`;
-                  }
+                  pidAttemptBadge.textContent = `Record #${data.attempt} (Repeat Participant)`;
+                  pidAttemptBadge.style.background = '#EFF6FF';
+                  pidAttemptBadge.style.color = '#1D4ED8';
+                  pidAttemptBadge.style.border = '1px solid #BFDBFE';
                 } else {
-                  repeatBadge.style.background = '#EFF6FF';
-                  repeatBadge.style.color = '#1D4ED8';
-                  repeatBadge.style.borderColor = '#BFDBFE';
-                  if (repeatNotice) {
-                    repeatNotice.style.display = 'none';
-                  }
+                  pidAttemptBadge.textContent = 'Record #1 (New Participant)';
+                  pidAttemptBadge.style.background = '#ECFDF5';
+                  pidAttemptBadge.style.color = '#047857';
+                  pidAttemptBadge.style.border = '1px solid #A7F3D0';
                 }
               }
-              pidPreview.style.display = 'flex';
-              emailError.style.display = 'none';
-              emailInput.style.borderColor = 'rgba(16,185,129,0.5)';
-              checkFormValidity();
-              return;
             }
           }
         } catch (err) {
-          console.warn("Could not query server PID lookup, falling back to local hash", err);
+          // If offline or network error, client fallback remains visible
         }
-
-        // Local fallback if offline or API unreachable
-        const fallbackPid = await gmailToParticipantId(email);
-        pidDisplay.textContent = fallbackPid + '-01';
-        patientIdInput.value = fallbackPid + '-01';
-        if (repeatBadge) repeatBadge.textContent = 'Record #1';
-        if (repeatNotice) repeatNotice.style.display = 'none';
-        pidPreview.style.display = 'flex';
-        emailError.style.display = 'none';
-        emailInput.style.borderColor = 'rgba(16,185,129,0.5)';
-        checkFormValidity();
       }
 
-      emailInput.addEventListener('input', function () {
-        const email = this.value.trim();
-        clearTimeout(emailLookupTimer);
+      emailInput.addEventListener('input', async function () {
+        const email = this.value.trim().toLowerCase();
+        if (emailLookupTimer) clearTimeout(emailLookupTimer);
+
         if (gmailRegex.test(email)) {
+          // Show quick local estimate immediately
+          if (!patientIdInput.value) {
+            const fallbackPid = await gmailToParticipantIdFallback(email);
+            pidDisplay.textContent = fallbackPid;
+            patientIdInput.value = fallbackPid;
+          }
+          pidPreview.style.display = 'flex';
+          emailError.style.display = 'none';
+          this.style.borderColor = 'rgba(16,185,129,0.5)';
+
+          // Query server for exact attempt number (handles repeat assessments)
           emailLookupTimer = setTimeout(() => {
-            fetchParticipantId(email);
+            queryParticipantId(email);
           }, 250);
         } else {
           pidPreview.style.display = 'none';
           patientIdInput.value = '';
-          if (repeatNotice) repeatNotice.style.display = 'none';
+          if (pidAttemptBadge) pidAttemptBadge.style.display = 'none';
           emailError.style.display = email.length > 0 ? 'block' : 'none';
           this.style.borderColor = email.length > 0 ? 'rgba(244,63,94,0.5)' : '';
-          checkFormValidity();
         }
+        checkFormValidity();
       });
 
-      // If email input already has a value on page load
-      if (emailInput && gmailRegex.test(emailInput.value.trim())) {
-        fetchParticipantId(emailInput.value.trim());
-      }
+      emailInput.addEventListener('blur', function () {
+        const email = this.value.trim().toLowerCase();
+        if (gmailRegex.test(email)) {
+          if (emailLookupTimer) clearTimeout(emailLookupTimer);
+          queryParticipantId(email);
+        }
+      });
       // ------------------------------------------------------------------
 
       // Ensure consent record date is always auto-filled with current date

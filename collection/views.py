@@ -5,7 +5,6 @@ import threading
 from pathlib import Path
 
 import datetime
-from django.db.models import Q
 from django.http import JsonResponse
 from django.shortcuts import redirect, render
 from django.urls import reverse
@@ -29,107 +28,78 @@ from .services.fusion_processing import process_fusion_session
 STORY_IMAGE_DIR = Path(__file__).resolve().parent.parent / "static" / "images" / "activities" / "story"
 
 
-def generate_participant_id_from_email(email: str, current_session=None) -> tuple[str, int, bool]:
-    """Derive a stable, longitudinal Participant ID from a Gmail address.
+def get_or_create_participant_id_for_email(email: str, current_session=None) -> tuple[str, int, bool]:
+    """
+    Derives an opaque, collision-free Participant ID for a Gmail address.
+    Supports longitudinal/repeat submissions:
+    - Attempt 1: PID-<HASH>-01 (or PID-<HASH> if legacy)
+    - Attempt 2: PID-<HASH>-02
+    - Attempt N: PID-<HASH>-0N
 
-    Format: PID-XXXXXXXX-<attempt:02d>  (e.g., PID-8E3D4F1A-01, PID-8E3D4F1A-02)
-    - XXXXXXXX is an 8-char uppercase hex digest of the normalized Gmail.
-    - Suffix (-01, -02, etc.) denotes the assessment attempt number.
-    - If the student is returning with the same Gmail, a new distinct PID is
-      generated to satisfy database uniqueness while linking attempts.
-    - If the current session already has an identity assigned for this email,
-      the existing PID is preserved without incrementing.
-    Returns: (participant_id, attempt_number, is_repeat)
+    Returns (patient_id, attempt_number, is_repeat).
     """
     normalized = email.strip().lower()
-    base_digest = hashlib.sha256(normalized.encode()).hexdigest()[:8].upper()
-    prefix = f"PID-{base_digest}"
+    digest = hashlib.sha256(normalized.encode()).hexdigest()[:8].upper()
 
-    # Query existing identities with this email or matching base hash
-    existing_identities = ParticipantIdentity.objects.filter(
-        Q(participant_email__iexact=normalized) |
-        Q(patient_id=prefix) |
-        Q(patient_id__startswith=f"{prefix}-")
-    )
-
+    # If current_session already has an identity registered for this email, preserve it
     if current_session:
-        current_identity = existing_identities.filter(session=current_session).first()
-        if current_identity:
-            pid = current_identity.patient_id
-            try:
-                attempt_num = int(pid.rsplit("-", 1)[-1])
-            except ValueError:
-                attempt_num = 1
-            return pid, attempt_num, attempt_num > 1
+        existing_identity = ParticipantIdentity.objects.filter(session=current_session).first()
+        if existing_identity and existing_identity.participant_email.strip().lower() == normalized:
+            pid = existing_identity.patient_id
+            attempt = 1
+            if pid.startswith(f"PID-{digest}-"):
+                try:
+                    attempt = int(pid.split("-")[-1])
+                except ValueError:
+                    attempt = 1
+            other_count = ParticipantIdentity.objects.filter(
+                participant_email=normalized
+            ).exclude(session=current_session).count()
+            return pid, attempt, (other_count > 0 or attempt > 1)
 
-        existing_identities = existing_identities.exclude(session=current_session)
+    # Find existing PIDs for this email or with this hash prefix (excluding current session)
+    existing_query = ParticipantIdentity.objects.filter(participant_email=normalized)
+    if current_session:
+        existing_query = existing_query.exclude(session=current_session)
+    existing_pids = set(existing_query.values_list("patient_id", flat=True))
 
-    # Collect all prior patient_id records across ParticipantIdentity and ConsentRecord
-    existing_pids = set(existing_identities.values_list("patient_id", flat=True))
-    for pid in ConsentRecord.objects.filter(
-        Q(participant_email__iexact=normalized) |
-        Q(patient_id=prefix) |
-        Q(patient_id__startswith=f"{prefix}-")
-    ).values_list("patient_id", flat=True):
-        if not (current_session and ConsentRecord.objects.filter(session=current_session, patient_id=pid).exists()):
-            existing_pids.add(pid)
+    hash_query = ParticipantIdentity.objects.filter(patient_id__startswith=f"PID-{digest}")
+    if current_session:
+        hash_query = hash_query.exclude(session=current_session)
+    existing_pids.update(hash_query.values_list("patient_id", flat=True))
 
-    max_attempt = 0
-    for pid in existing_pids:
-        if pid == prefix:
-            max_attempt = max(max_attempt, 1)
-        elif pid.startswith(f"{prefix}-"):
-            try:
-                num = int(pid.rsplit("-", 1)[-1])
-                max_attempt = max(max_attempt, num)
-            except ValueError:
-                max_attempt = max(max_attempt, 1)
-        else:
-            max_attempt = max(max_attempt, 1)
+    attempt = 1
+    while True:
+        candidate = f"PID-{digest}-{attempt:02d}"
+        # If legacy bare PID-{digest} exists in DB, attempt 1 is considered taken
+        if attempt == 1 and (f"PID-{digest}" in existing_pids or candidate in existing_pids):
+            attempt += 1
+            continue
+        if candidate in existing_pids:
+            attempt += 1
+            continue
+        # Ensure candidate is globally unique in ParticipantIdentity (excluding current session)
+        collision = ParticipantIdentity.objects.filter(patient_id=candidate)
+        if current_session:
+            collision = collision.exclude(session=current_session)
+        if collision.exists():
+            attempt += 1
+            continue
+        break
 
-    attempt_number = max_attempt + 1 if existing_pids else 1
-    candidate_pid = f"{prefix}-{attempt_number:02d}"
-
-    # Collision guard against race conditions or gap numbering
-    while ParticipantIdentity.objects.filter(patient_id=candidate_pid).exclude(session=current_session).exists():
-        attempt_number += 1
-        candidate_pid = f"{prefix}-{attempt_number:02d}"
-
-    is_repeat = (len(existing_pids) > 0)
-    return candidate_pid, attempt_number, is_repeat
+    is_repeat = (attempt > 1) or bool(existing_pids)
+    return candidate, attempt, is_repeat
 
 
-def lookup_participant_id(request):
-    """Live API endpoint to lookup or pre-generate the PID for an entered Gmail address.
+def generate_participant_id_from_email(email: str, current_session=None) -> str:
+    """Derive a stable, short, opaque Participant ID from a Gmail address.
 
-    Returns the next attempt number and flags if this is a repeat submission.
+    Format: PID-XXXXXXXX-01 (or PID-XXXXXXXX-02 for repeat submissions)
+    The raw email is NOT encoded in the ID — only a SHA-256 hash is used,
+    making it safe to display publicly while remaining deterministic.
     """
-    email = request.GET.get("email", "").strip().lower()
-    if not email or not email.endswith("@gmail.com"):
-        return JsonResponse({"ok": False, "error": "Invalid Gmail address."}, status=400)
-
-    session = get_collection_session(request)
-    patient_id, attempt_number, is_repeat = generate_participant_id_from_email(email, current_session=session)
-    return JsonResponse({
-        "ok": True,
-        "patient_id": patient_id,
-        "attempt_number": attempt_number,
-        "is_repeat": is_repeat,
-        "message": f"Welcome back! This will be recorded as Record #{attempt_number}." if is_repeat else "New participant ID generated (Record #1).",
-    })
-
-
-def start_new_session(request):
-    """Clears the active session and creates a fresh session so a participant
-
-    can submit an additional assessment record (e.g. longitudinal follow-up)
-    using the same Gmail address.
-    """
-    if "collection_session_id" in request.session:
-        del request.session["collection_session_id"]
-    new_session = CollectionSession.objects.create()
-    request.session["collection_session_id"] = str(new_session.session_id)
-    return redirect("collection:consent")
+    pid, _, _ = get_or_create_participant_id_for_email(email, current_session=current_session)
+    return pid
 
 
 def pick_story_frames():
@@ -185,6 +155,35 @@ def consent_view(request):
     })
 
 
+def lookup_participant_id(request):
+    """
+    Real-time lookup for participant ID preview.
+    Determines if this Gmail has prior records and returns the next attempt PID.
+    """
+    email = request.GET.get("email", "").strip().lower()
+    if not email or not email.endswith("@gmail.com"):
+        return JsonResponse({"ok": False, "error": "A valid @gmail.com address is required."}, status=400)
+
+    session = get_collection_session(request)
+    patient_id, attempt, is_repeat = get_or_create_participant_id_for_email(email, current_session=session)
+    return JsonResponse({
+        "ok": True,
+        "patient_id": patient_id,
+        "attempt": attempt,
+        "is_repeat": is_repeat,
+    })
+
+
+def start_new_session(request):
+    """
+    Clears the active session token so a student can submit another assessment record
+    with the same Gmail address under a new unique PID (e.g. PID-XXXXXXXX-02).
+    """
+    if "collection_session_id" in request.session:
+        del request.session["collection_session_id"]
+    return redirect("collection:consent")
+
+
 @require_POST
 def submit_consent(request):
     if request.content_type == "application/json":
@@ -198,20 +197,19 @@ def submit_consent(request):
     session = get_collection_session(request)
     participant_email = str(data.get("participant_email", "")).strip().lower()
 
-    attempt_number = 1
-    is_repeat = False
-
     # Validate Gmail address if provided (optional)
     if participant_email:
         if not participant_email.endswith("@gmail.com"):
             return JsonResponse({"ok": False, "error": "Please enter a valid Gmail address (must end with @gmail.com)."}, status=400)
-        patient_id, attempt_number, is_repeat = generate_participant_id_from_email(participant_email, current_session=session)
+        patient_id, _, _ = get_or_create_participant_id_for_email(participant_email, current_session=session)
     else:
         client_patient_id = str(data.get("patient_id", "")).strip()
         if client_patient_id and not ParticipantIdentity.objects.filter(patient_id=client_patient_id).exclude(session=session).exists():
             patient_id = client_patient_id
         else:
-            patient_id = f"PID-{session.session_id.hex[:8].upper()}-01"
+            patient_id = f"PID-{session.session_id.hex[:8].upper()}"
+            if ParticipantIdentity.objects.filter(patient_id=patient_id).exclude(session=session).exists():
+                patient_id = f"PID-{session.session_id.hex[:12].upper()}"
 
     gender = str(data.get("gender", "")).strip()
     age_raw = data.get("age")
@@ -344,9 +342,6 @@ def submit_consent(request):
     return JsonResponse({
         "ok": True,
         "message": "Consent recorded successfully.",
-        "patient_id": patient_id,
-        "attempt_number": attempt_number,
-        "is_repeat": is_repeat,
         "redirect": reverse("collection:activity_hub"),
     })
 
