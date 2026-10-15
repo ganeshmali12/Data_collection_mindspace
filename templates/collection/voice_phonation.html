@@ -41,8 +41,8 @@
 <style>
     html, body {
         font-family: 'Inter', sans-serif;
-        background: radial-gradient(circle at 50% 0%, #151c33 0%, #090d16 70%) fixed !important;
-        color: #f8fafc;
+        background: radial-gradient(circle at 50% 0%, #F5EFEB 0%, #FAF7F2 70%) fixed !important;
+        color: #1E293B;
         min-height: 100vh;
         margin: 0;
         padding: 0;
@@ -50,20 +50,20 @@
     }
 
     .pulse-ring-glow {
-        box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.5);
+        box-shadow: 0 0 0 0 rgba(5, 150, 105, 0.4);
         animation: pulseRingGlow 2.2s infinite;
     }
     @keyframes pulseRingGlow {
-        0%   { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.5); }
-        70%  { box-shadow: 0 0 0 16px rgba(16, 185, 129, 0); }
-        100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
+        0%   { box-shadow: 0 0 0 0 rgba(5, 150, 105, 0.4); }
+        70%  { box-shadow: 0 0 0 16px rgba(5, 150, 105, 0); }
+        100% { box-shadow: 0 0 0 0 rgba(5, 150, 105, 0); }
     }
 </style>
 <link rel="stylesheet" href="{% static 'css/voice_phonation.css' %}?v=6.0">
 {% endblock %}
 
 {% block content %}
-<div class="phonation-page min-h-screen text-slate-100 flex flex-col justify-between py-6 px-4 sm:px-8 max-w-7xl mx-auto w-full relative"
+<div class="phonation-page min-h-screen text-slate-800 flex flex-col justify-between py-6 px-4 sm:px-8 max-w-7xl mx-auto w-full relative"
     data-sounds-url="{% url 'collection:phonation_sound_config' %}"
     data-upload-url="{% url 'collection:upload_voice_phonation' %}"
     data-complete-url="{% url 'collection:complete_voice_phonation' %}"
@@ -73,27 +73,27 @@
   <!-- Top Header — identical structure to Combined Activity -->
   <div class="flex flex-wrap items-center justify-between gap-4 mb-6 pt-2">
     <div>
-      <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-xs font-semibold uppercase tracking-wider mb-2">
-        <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+      <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-50 border border-emerald-300 text-emerald-800 text-xs font-semibold uppercase tracking-wider mb-2">
+        <span class="w-2 h-2 rounded-full bg-emerald-600 animate-pulse"></span>
         Modality 3: Voice Phonation Assessment
       </div>
-      <h1 class="font-display text-2xl sm:text-3xl lg:text-4xl font-bold text-white tracking-tight">Voice Phonation Activity</h1>
-      <p class="text-xs sm:text-sm text-slate-400 mt-1" id="speakPrompt">Hold each vowel sound steadily until the circle fills.</p>
+      <h1 class="font-display text-2xl sm:text-3xl lg:text-4xl font-bold text-slate-900 tracking-tight">Voice Phonation Activity</h1>
+      <p class="text-xs sm:text-sm text-slate-600 mt-1" id="speakPrompt">Hold each vowel sound steadily until the circle fills.</p>
     </div>
     <div class="flex items-center gap-3">
-      <a href="{% url 'collection:activity_hub' %}" class="inline-flex items-center gap-1.5 text-xs text-slate-400 hover:text-white bg-slate-900/60 hover:bg-slate-800/80 border border-white/10 px-3.5 py-1.5 rounded-full transition">
+      <a href="{% url 'collection:activity_hub' %}" class="inline-flex items-center gap-1.5 text-xs text-slate-700 hover:text-slate-900 bg-white hover:bg-stone-50 border border-stone-300 shadow-sm px-3.5 py-1.5 rounded-full transition font-medium">
         ← Activities Hub
       </a>
-      <span class="text-xs text-slate-400 font-medium bg-slate-900/60 border border-white/10 px-3.5 py-1.5 rounded-full">
-        Progress: <strong class="text-white" id="completedText">0 of 7 Completed</strong>
+      <span class="text-xs text-slate-700 font-medium bg-white border border-stone-300 shadow-sm px-3.5 py-1.5 rounded-full">
+        Progress: <strong class="text-slate-900" id="completedText">0 of 7 Completed</strong>
       </span>
     </div>
   </div>
 
   <!-- Overall Progress Bar -->
   <div class="w-full mb-6 relative">
-    <div class="w-full bg-slate-800/80 rounded-full h-1.5 overflow-hidden border border-white/5">
-      <div id="activityProgress" class="bg-gradient-to-r from-emerald-500 via-cyan-400 to-indigo-500 h-1.5 rounded-full transition-all duration-300 shadow-lg shadow-emerald-500/50" style="width: 0%;"></div>
+    <div class="w-full bg-stone-200 rounded-full h-1.5 overflow-hidden border border-stone-300">
+      <div id="activityProgress" class="bg-gradient-to-r from-emerald-600 via-cyan-500 to-indigo-600 h-1.5 rounded-full transition-all duration-300 shadow-sm" style="width: 0%;"></div>
     </div>
   </div>
 
@@ -121,16 +121,16 @@
         <svg class="circle-svg" viewBox="0 0 220 220">
           <defs>
             <linearGradient id="ringGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-              <stop offset="0%" stop-color="#10b981" />
-              <stop offset="50%" stop-color="#06b6d4" />
-              <stop offset="100%" stop-color="#6366f1" />
+              <stop offset="0%" stop-color="#059669" />
+              <stop offset="50%" stop-color="#0284c7" />
+              <stop offset="100%" stop-color="#4f46e5" />
             </linearGradient>
           </defs>
           <circle class="circle-bg" cx="110" cy="110" r="100"></circle>
           <circle class="circle-progress" id="ringProgress" cx="110" cy="110" r="100"></circle>
         </svg>
         <div class="circle-content flex flex-col items-center justify-center text-center">
-          <div class="devanagari-char font-display font-black text-white" id="currentSound">&#2310;</div>
+          <div class="devanagari-char font-display font-black text-slate-900" id="currentSound">&#2310;</div>
           <span class="text-xs text-slate-500 font-semibold tracking-widest uppercase mt-2">Sustain Sound</span>
         </div>
       </div>
@@ -151,36 +151,36 @@
 
     <!-- Live Meters: Voice Strength + Hold Duration -->
     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 max-w-xl mx-auto mb-8">
-      <div class="bg-slate-900/50 border border-white/10 rounded-2xl p-4 flex flex-col gap-2 backdrop-blur-sm">
+      <div class="bg-white border border-stone-200 rounded-2xl p-4 flex flex-col gap-2 shadow-sm">
         <div class="flex items-center justify-between text-xs font-semibold">
-          <span class="inline-flex items-center gap-1.5 text-slate-300">
-            <svg class="w-4 h-4 text-emerald-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <span class="inline-flex items-center gap-1.5 text-slate-700">
+            <svg class="w-4 h-4 text-emerald-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path>
               <path d="M19 10v2a7 7 0 0 1-14 0v-2"></path>
             </svg>
             Voice Strength
           </span>
-          <span class="text-white font-bold tabular-nums" id="voicePercent">0%</span>
+          <span class="text-slate-900 font-bold tabular-nums" id="voicePercent">0%</span>
         </div>
-        <div class="voice-track relative w-full h-2 bg-slate-800 rounded-full overflow-hidden">
+        <div class="voice-track relative w-full h-2 bg-stone-100 rounded-full overflow-hidden border border-stone-200">
           <div class="threshold-marker"></div>
-          <div class="meter-fill voice-fill h-full bg-gradient-to-r from-emerald-500 to-cyan-400 rounded-full" id="voiceFill" style="width: 0%;"></div>
+          <div class="meter-fill voice-fill h-full bg-gradient-to-r from-emerald-500 to-cyan-500 rounded-full" id="voiceFill" style="width: 0%;"></div>
         </div>
       </div>
 
-      <div class="bg-slate-900/50 border border-white/10 rounded-2xl p-4 flex flex-col gap-2 backdrop-blur-sm">
+      <div class="bg-white border border-stone-200 rounded-2xl p-4 flex flex-col gap-2 shadow-sm">
         <div class="flex items-center justify-between text-xs font-semibold">
-          <span class="inline-flex items-center gap-1.5 text-slate-300">
-            <svg class="w-4 h-4 text-cyan-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <span class="inline-flex items-center gap-1.5 text-slate-700">
+            <svg class="w-4 h-4 text-cyan-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <circle cx="12" cy="12" r="10"></circle>
               <polyline points="12 6 12 12 16 14"></polyline>
             </svg>
             Hold Duration
           </span>
-          <span class="text-white font-bold tabular-nums" id="holdPercent">0%</span>
+          <span class="text-slate-900 font-bold tabular-nums" id="holdPercent">0%</span>
         </div>
-        <div class="hold-track relative w-full h-2 bg-slate-800 rounded-full overflow-hidden">
-          <div class="meter-fill hold-fill h-full bg-gradient-to-r from-cyan-400 to-indigo-500 rounded-full" id="holdFill" style="width: 0%;"></div>
+        <div class="hold-track relative w-full h-2 bg-stone-100 rounded-full overflow-hidden border border-stone-200">
+          <div class="meter-fill hold-fill h-full bg-gradient-to-r from-cyan-500 to-indigo-600 rounded-full" id="holdFill" style="width: 0%;"></div>
         </div>
       </div>
     </div>
@@ -188,7 +188,7 @@
     <!-- Action Buttons -->
     <div class="flex flex-wrap items-center justify-center gap-4 mb-6">
       <button type="button" id="startBtn"
-        class="pulse-ring-glow cursor-pointer inline-flex items-center space-x-3 bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-400 hover:to-emerald-500 text-white font-bold text-base px-8 py-3.5 rounded-full shadow-xl shadow-emerald-900/40 transition transform active:scale-95 duration-150">
+        class="pulse-ring-glow cursor-pointer inline-flex items-center space-x-3 bg-gradient-to-r from-emerald-600 to-emerald-700 hover:from-emerald-500 hover:to-emerald-600 text-white font-bold text-base px-8 py-3.5 rounded-full shadow-md shadow-emerald-700/20 transition transform active:scale-95 duration-150">
         <svg class="w-5 h-5 fill-current" viewBox="0 0 24 24">
           <path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3z"/>
           <path d="M17 11c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c3.39-.49 6-3.39 6-6.92h-2z"/>
@@ -197,7 +197,7 @@
       </button>
 
       <button type="button" id="stopBtn" disabled
-        class="inline-flex items-center space-x-2 bg-slate-800/80 hover:bg-rose-500/20 text-slate-300 hover:text-rose-400 border border-white/10 font-semibold text-sm px-6 py-3.5 rounded-full transition transform active:scale-95 duration-150">
+        class="inline-flex items-center space-x-2 bg-stone-100 hover:bg-rose-50 text-slate-700 hover:text-rose-600 border border-stone-300 font-semibold text-sm px-6 py-3.5 rounded-full transition transform active:scale-95 duration-150">
         <svg class="w-4 h-4 fill-current" viewBox="0 0 24 24">
           <rect x="6" y="6" width="12" height="12" rx="2" />
         </svg>
@@ -205,7 +205,7 @@
       </button>
 
       <button type="button" id="submitBtn" disabled
-        class="inline-flex items-center space-x-2 bg-gradient-to-r from-indigo-500 to-indigo-600 hover:from-indigo-400 hover:to-indigo-500 text-white font-semibold text-sm px-6 py-3.5 rounded-full shadow-lg shadow-indigo-900/30 transition transform active:scale-95 duration-150">
+        class="inline-flex items-center space-x-2 bg-gradient-to-r from-indigo-600 to-indigo-700 hover:from-indigo-500 hover:to-indigo-600 text-white font-semibold text-sm px-6 py-3.5 rounded-full shadow-md shadow-indigo-700/20 transition transform active:scale-95 duration-150">
         <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
           <polyline points="20 6 9 17 4 12"></polyline>
         </svg>
@@ -214,7 +214,7 @@
     </div>
 
     <!-- Status Banner -->
-    <div class="text-center text-sm text-slate-400 max-w-2xl mx-auto mb-6" id="statusBox">
+    <div class="text-center text-sm text-slate-600 max-w-2xl mx-auto mb-6" id="statusBox">
       Press Start Recording once. Manovedh will automatically record each vocal sound.
     </div>
 
@@ -224,28 +224,28 @@
   </div>
 
   <!-- Bottom Footer Bar — identical structure to Combined Activity -->
-  <div class="flex flex-col sm:flex-row items-center justify-between gap-6 pt-6 border-t border-white/10 mt-6 w-full">
+  <div class="flex flex-col sm:flex-row items-center justify-between gap-6 pt-6 border-t border-stone-200 mt-6 w-full">
     <div class="flex items-center space-x-3.5">
-      <div class="w-12 h-12 rounded-2xl bg-indigo-500/10 border border-indigo-500/30 shadow-lg flex items-center justify-center animate-float text-indigo-400">
+      <div class="w-12 h-12 rounded-2xl bg-indigo-50 border border-indigo-200 shadow-sm flex items-center justify-center animate-float text-indigo-600">
         <svg class="w-6 h-6 fill-current" viewBox="0 0 24 24">
           <path d="M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z"/>
         </svg>
       </div>
       <div>
-        <div class="text-sm font-bold text-white font-display">Acoustic Biometric Screening</div>
-        <div class="text-xs text-slate-400 font-medium">7 sustained vowel phonations &bull; 6,373 GeMAPS features &amp; PCA extraction</div>
+        <div class="text-sm font-bold text-slate-900 font-display">Acoustic Biometric Screening</div>
+        <div class="text-xs text-slate-600 font-medium">7 sustained vowel phonations &bull; 6,373 GeMAPS features &amp; PCA extraction</div>
       </div>
     </div>
 
     <div class="flex items-center gap-3 text-xs" id="backendResultBox">
-      <span class="text-xs text-slate-400 font-medium bg-slate-900/60 border border-white/10 px-3.5 py-1.5 rounded-full">
-        Raw: <strong class="text-white" id="rawFeatureCount">&mdash;</strong>
+      <span class="text-xs text-slate-700 font-medium bg-white border border-stone-300 px-3.5 py-1.5 rounded-full shadow-sm">
+        Raw: <strong class="text-slate-900" id="rawFeatureCount">&mdash;</strong>
       </span>
-      <span class="text-xs text-slate-400 font-medium bg-slate-900/60 border border-white/10 px-3.5 py-1.5 rounded-full">
-        PCA: <strong class="text-white" id="pcaFeatureCount">&mdash;</strong>
+      <span class="text-xs text-slate-700 font-medium bg-white border border-stone-300 px-3.5 py-1.5 rounded-full shadow-sm">
+        PCA: <strong class="text-slate-900" id="pcaFeatureCount">&mdash;</strong>
       </span>
-      <span class="text-xs text-slate-400 font-medium bg-slate-900/60 border border-white/10 px-3.5 py-1.5 rounded-full">
-        Pipeline: <strong class="text-emerald-400" id="pipelineState">Waiting</strong>
+      <span class="text-xs text-slate-700 font-medium bg-white border border-stone-300 px-3.5 py-1.5 rounded-full shadow-sm">
+        Pipeline: <strong class="text-emerald-700" id="pipelineState">Waiting</strong>
       </span>
     </div>
   </div>
