@@ -134,8 +134,9 @@
           <span class="text-xs font-bold text-emerald-700">{{ completed_count }} of {{ total_activities }} Activities Completed ({{ progress_pct }}%)</span>
         </div>
         <div class="w-full bg-[#E5DFD7] rounded-full h-3 overflow-hidden p-0.5">
-          <div class="bg-gradient-to-r from-indigo-600 via-cyan-600 to-emerald-600 h-full rounded-full transition-all duration-500"
-               style="width: {{ progress_pct }}%;"></div>
+          <div id="hubProgressBar"
+               class="bg-gradient-to-r from-indigo-600 via-cyan-600 to-emerald-600 h-full rounded-full transition-all duration-500"
+               data-progress="{{ progress_pct }}"></div>
         </div>
       </div>
 
@@ -375,4 +376,16 @@
   </footer>
 
 </div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  (function () {
+    var bar = document.getElementById("hubProgressBar");
+    if (bar) {
+      var pct = bar.getAttribute("data-progress") || "0";
+      bar.style.width = pct + "%";
+    }
+  })();
+</script>
 {% endblock %}
