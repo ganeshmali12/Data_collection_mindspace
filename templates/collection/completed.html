@@ -177,6 +177,19 @@
       </div>
     </div>
 
+    <!-- Action Options -->
+    <div class="flex flex-col sm:flex-row items-center justify-center gap-3.5 mt-4">
+      <a href="{% url 'collection:start_new_session' %}" class="inline-flex items-center gap-2 px-6 py-3 rounded-2xl bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-xs uppercase tracking-wider shadow-md hover:shadow-lg transition transform hover:-translate-y-0.5 cursor-pointer">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"></path>
+        </svg>
+        <span>Start Another Record (New Session)</span>
+      </a>
+      <button type="button" id="reopenModalBtn" class="inline-flex items-center gap-2 px-5 py-3 rounded-2xl bg-white hover:bg-stone-50 border border-stone-300 text-slate-700 font-medium text-xs tracking-wide shadow-sm hover:shadow transition cursor-pointer">
+        <span>View Completion Summary</span>
+      </button>
+    </div>
+
   </main>
 
   <!-- Bottom Telemetry Footer matching all screening pages -->
@@ -268,6 +281,19 @@
         <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"></path>
       </svg>
       <span>All activities are complete. You may now close this window.</span>
+    </div>
+
+    <!-- Start Another Record / New Assessment Option -->
+    <div class="w-full mt-4 flex flex-col items-center gap-2">
+      <a href="{% url 'collection:start_new_session' %}" class="w-full py-3 px-4 rounded-2xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold tracking-wider uppercase flex items-center justify-center gap-2 shadow-md hover:shadow-lg transition transform hover:-translate-y-0.5 cursor-pointer">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"></path>
+        </svg>
+        <span>Start Another Record (New Session)</span>
+      </a>
+      <span class="text-[11px] text-slate-500">
+        You can use the same Gmail address — a new unique participant ID will be assigned.
+      </span>
     </div>
 
   </div>
