@@ -1198,47 +1198,29 @@ async function finishQuestionnaire() {
     scores[s.id] = score;
   });
 
-  // PHQ-9 (Q1-Q9): Score >= 10 -> depression
+  // PHQ-9 (Q1-Q9): Score >= 10
   if (scores.phq9 >= 10) {
     flags.push('phq9');
-    flags.push('depression');
   }
 
-  // GAD-7 (Q10-Q16): Score >= 10 -> anxiety
+  // GAD-7 (Q10-Q16): Score >= 10
   if (scores.gad7 >= 10) {
     flags.push('gad7');
-    flags.push('anxiety');
   }
 
-  // PSS-4 (Q17-Q20): Score >= 9 -> stress
+  // PSS-4 (Q17-Q20): Score >= 9
   if (scores.pss4 >= 9) {
     flags.push('pss4');
-    flags.push('stress');
   }
 
-  // MDQ-7 (Q21-Q27): Score >= 5 -> bipolar
+  // MDQ-7 (Q21-Q27): Score >= 5
   if (scores.mdq7 >= 5) {
     flags.push('mdq7');
-    flags.push('bipolar');
   }
 
-  // C-SSRS (Q28-Q30): items at index 27, 28, 29
-  const q28Val = answers[27];
-  const q29Val = answers[28];
-  const q30Val = answers[29];
-
-  let cssrsFlagged = false;
-  if (q28Val === 1 || q29Val === 1) {
-    cssrsFlagged = true;
-    flags.push('suicidal_passive');
-  }
-  if (q30Val === 1) {
-    cssrsFlagged = true;
-    flags.push('suicidal_plan');
-  }
-  if (cssrsFlagged) {
+  // C-SSRS (Q28-Q30): Any positive response
+  if (scores.cssrs >= 1 || answers[27] === 1 || answers[28] === 1 || answers[29] === 1) {
     flags.push('cssrs');
-    flags.push('suicidal_tendency');
   }
 
   if (flags.length === 0) {

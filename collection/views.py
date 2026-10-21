@@ -496,7 +496,7 @@ def phonation_sound_config(request):
     sounds = [
         {"sound_id": f"local-{index}", "label": label, "prompt": label, "say": label,
          "help": "Hold the sound steadily until the circle completes.", "order": index,
-         "required_hold_ms": 3000, "voice_threshold": 40, "accepted": []}
+         "required_hold_ms": 1500, "voice_threshold": 35, "accepted": []}
         for index, label in enumerate(["आ", "ई", "ऊ", "ए", "ओ", "अ", "म्"], start=1)
     ]
     return JsonResponse({"ok": True, "sounds": sounds})

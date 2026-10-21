@@ -219,8 +219,12 @@ def generate_pdf(session_id=None, output_path="screening_report.pdf"):
         if v >= 5: return "Mild Anxiety"
         return "Minimal / None"
 
-    has_plan = 'suicidal_plan' in flags
-    has_passive = 'suicidal_passive' in flags or ('cssrs' in flags and not has_plan) or (cssrs_val > 0 and not has_plan)
+    q_answers = questionnaire.answers if questionnaire else {}
+    q30_entry = q_answers.get('30', {})
+    q30_val = q30_entry.get('value', 0) if isinstance(q30_entry, dict) else (q30_entry if isinstance(q30_entry, (int, float)) else 0)
+
+    has_plan = ('suicidal_plan' in flags) or (('cssrs' in flags or cssrs_val > 0) and q30_val == 1)
+    has_passive = ('suicidal_passive' in flags) or (('cssrs' in flags or cssrs_val > 0) and not has_plan)
 
     if has_plan:
         cssrs_interp = "Specific suicide plan indicated"
