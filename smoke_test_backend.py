@@ -5,6 +5,7 @@ os.environ.setdefault("DJANGO_SETTINGS_MODULE", "config.settings")
 django.setup()
 
 import json
+import uuid
 from unittest.mock import patch
 from io import BytesIO
 from django.core.files.uploadedfile import SimpleUploadedFile
@@ -34,7 +35,7 @@ def run_smoke_test():
 
     # 4. Consent submission
     consent_payload = {
-        "patient_id": "SMOKE-TEST-01",
+        "patient_id": f"SMOKE-TEST-{uuid.uuid4().hex[:8].upper()}",
         "gender": "Female",
         "age": 29,
         "consent_record_date": "2026-09-24",

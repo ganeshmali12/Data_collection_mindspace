@@ -10,7 +10,7 @@
 /* ── Page root — transparent, inherits dark body background */
 .phonation-page {
   font-family: 'Inter', system-ui, -apple-system, sans-serif;
-  color: #f8fafc;
+  color: #1E293B;
   -webkit-font-smoothing: antialiased;
 }
 
@@ -27,7 +27,7 @@
   width: 5px;
   background: linear-gradient(180deg, var(--emerald), var(--cyan));
   border-radius: 9999px;
-  opacity: 0.3;
+  opacity: 0.35;
   transition: all 0.15s ease;
 }
 
@@ -90,10 +90,10 @@
   transform: rotate(-90deg);
 }
 
-/* No dark fill — transparent ring sits over background */
+/* Crisp ring over cream background */
 .circle-bg {
-  fill: rgba(255, 255, 255, 0.03);
-  stroke: rgba(255, 255, 255, 0.08);
+  fill: #FFFFFF;
+  stroke: #E2D9CE;
   stroke-width: 8;
 }
 
@@ -105,7 +105,7 @@
   stroke-dasharray: 628.319;
   stroke-dashoffset: 628.319;
   transition: stroke-dashoffset 0.08s linear;
-  filter: drop-shadow(0 0 10px rgba(16, 185, 129, 0.5));
+  filter: drop-shadow(0 0 8px rgba(5, 150, 105, 0.3));
 }
 
 .circle-content {
@@ -121,12 +121,12 @@
   line-height: 1;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   user-select: none;
-  color: #f8fafc;
+  color: #0F172A;
 }
 
 .devanagari-char.listening {
-  color: #34d399;
-  text-shadow: 0 0 24px rgba(16, 185, 129, 0.75);
+  color: #059669;
+  text-shadow: 0 0 20px rgba(5, 150, 105, 0.35);
   transform: scale(1.08);
 }
 
@@ -142,8 +142,8 @@
 }
 
 .devanagari-char.success {
-  color: #10b981;
-  text-shadow: 0 0 32px rgba(16, 185, 129, 1);
+  color: #059669;
+  text-shadow: 0 0 24px rgba(5, 150, 105, 0.5);
   transform: scale(1.14);
 }
 
@@ -155,8 +155,8 @@
   bottom: 0;
   left: 15%;
   width: 2px;
-  background: #f59e0b;
-  box-shadow: 0 0 6px rgba(245, 158, 11, 0.9);
+  background: #d97706;
+  box-shadow: 0 0 6px rgba(217, 119, 6, 0.6);
   z-index: 2;
   border-radius: 1px;
 }
@@ -174,33 +174,32 @@
   min-width: 52px;
   height: 48px;
   padding: 0 1.1rem;
-  background: rgba(15, 23, 42, 0.55);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: #FFFFFF;
+  border: 1px solid #D8CEBE;
   border-radius: 14px;
   font-family: 'Outfit', 'Noto Sans Devanagari', sans-serif;
   font-size: 1.35rem;
   font-weight: 700;
-  color: #64748b;
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
+  color: #64748B;
+  box-shadow: 0 2px 6px -1px rgba(80, 65, 50, 0.06);
   transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
   user-select: none;
   cursor: default;
 }
 
 .sound-chip.current {
-  background: rgba(16, 185, 129, 0.15);
-  border-color: #10b981;
-  color: #34d399;
-  box-shadow: 0 0 18px rgba(16, 185, 129, 0.3), 0 0 0 1px rgba(16, 185, 129, 0.2);
+  background: #EEF2FF;
+  border-color: #4F46E5;
+  color: #4338CA;
+  box-shadow: 0 0 14px rgba(79, 70, 229, 0.25), 0 0 0 1px rgba(79, 70, 229, 0.3);
   transform: scale(1.1);
 }
 
 .sound-chip.done {
-  background: rgba(16, 185, 129, 0.07);
-  border-color: rgba(16, 185, 129, 0.3);
-  color: #10b981;
-  opacity: 0.9;
+  background: #ECFDF5;
+  border-color: #059669;
+  color: #047857;
+  opacity: 1;
 }
 
 /* ── Disabled Button States ─────────────────────────── */

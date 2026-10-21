@@ -240,3 +240,160 @@ class CollectionFlowTests(TestCase):
         with self.assertRaises(IntegrityError):
             AnalysisResult.objects.create(session=session, modality="face", status="pending")
 
+    def test_consent_redirects_to_activity_hub(self):
+        payload = {
+            "participant_email": "hubuser@gmail.com",
+            "gender": "Female",
+            "age": 25,
+            "consent_record_date": "2026-10-14",
+            "agree_voice": True,
+            "agree_video": True,
+            "agree_transcript": True,
+            "agree_publication": True,
+            "agree_terms": True,
+        }
+        res = self.client.post("/consent/submit/", data=json.dumps(payload), content_type="application/json")
+        self.assertEqual(res.status_code, 200)
+        self.assertEqual(res.json()["redirect"], "/activities/")
+
+    def test_unconsented_user_cannot_access_activity_hub(self):
+        client = self.client_class()
+        res = client.get("/activities/")
+        self.assertRedirects(res, "/consent/")
+
+    def test_activity_hub_renders_and_tracks_progress(self):
+        # 1. Complete Consent
+        payload = {
+            "patient_id": "PID-HUB-01",
+            "gender": "Male",
+            "age": 22,
+            "agree_voice": True,
+            "agree_video": True,
+            "agree_transcript": True,
+            "agree_publication": True,
+            "agree_terms": True,
+        }
+        self.client.post("/consent/submit/", data=json.dumps(payload), content_type="application/json")
+
+        # 2. Visit Activity Hub initially (0 of 3 done)
+        hub_res = self.client.get("/activities/")
+        self.assertEqual(hub_res.status_code, 200)
+        self.assertEqual(hub_res.context["completed_count"], 0)
+        self.assertFalse(hub_res.context["all_completed"])
+
+        # 3. User chooses Voice Phonation FIRST
+        audio = SimpleUploadedFile("audio.webm", b"voice_data", content_type="audio/webm")
+        self.client.post("/screening/voice/upload/", {"audio": audio, "sound_id": "local-1", "hold_ms": "3000"})
+        hub_res2 = self.client.get("/activities/")
+        self.assertTrue(hub_res2.context["voice_done"])
+        self.assertFalse(hub_res2.context["questionnaire_done"])
+        self.assertFalse(hub_res2.context["combined_done"])
+        self.assertEqual(hub_res2.context["completed_count"], 1)
+
+        # 4. User chooses Questionnaire SECOND
+        q_payload = {
+            "answers": {"1": {"question": "Mood", "value": 0}},
+            "scores": {"phq9": 0},
+            "flags": [],
+        }
+        self.client.post("/questionnaire/submit/", data=json.dumps(q_payload), content_type="application/json")
+        hub_res3 = self.client.get("/activities/")
+        self.assertTrue(hub_res3.context["questionnaire_done"])
+        self.assertTrue(hub_res3.context["voice_done"])
+        self.assertFalse(hub_res3.context["combined_done"])
+        self.assertEqual(hub_res3.context["completed_count"], 2)
+
+        # 5. User chooses Combined Activity THIRD
+        video = SimpleUploadedFile("video.webm", b"video_data", content_type="video/webm")
+        self.client.post("/screening/combined/upload/", {"video": video, "duration_seconds": "30.0"})
+        hub_res4 = self.client.get("/activities/")
+        self.assertTrue(hub_res4.context["combined_done"])
+        self.assertEqual(hub_res4.context["completed_count"], 3)
+        self.assertTrue(hub_res4.context["all_completed"])
+
+    def test_repeat_submissions_same_gmail_unique_pids(self):
+        email = "repeatedstudent@gmail.com"
+        consent_payload = {
+            "participant_email": email,
+            "gender": "Female",
+            "age": 21,
+            "consent_record_date": "2026-10-15",
+            "agree_voice": True,
+            "agree_video": True,
+            "agree_transcript": True,
+            "agree_publication": True,
+            "agree_terms": True,
+        }
+
+        # 1. First submission (Attempt 1)
+        res1 = self.client.post("/consent/submit/", data=json.dumps(consent_payload), content_type="application/json")
+        self.assertEqual(res1.status_code, 200)
+        id1 = ParticipantIdentity.objects.get(participant_email=email)
+        self.assertTrue(id1.patient_id.endswith("-01"))
+
+        # 2. Start a new session (e.g. longitudinal follow-up / second record)
+        res_new_session = self.client.get("/session/new/")
+        self.assertEqual(res_new_session.status_code, 302)
+        self.assertEqual(res_new_session.url, "/consent/")
+
+        # 3. Second submission with the SAME Gmail (Attempt 2)
+        res2 = self.client.post("/consent/submit/", data=json.dumps(consent_payload), content_type="application/json")
+        self.assertEqual(res2.status_code, 200)
+
+        identities = list(ParticipantIdentity.objects.filter(participant_email=email).order_by("created_at"))
+        self.assertEqual(len(identities), 2)
+        self.assertNotEqual(identities[0].patient_id, identities[1].patient_id)
+        self.assertTrue(identities[0].patient_id.endswith("-01"))
+        self.assertTrue(identities[1].patient_id.endswith("-02"))
+        # Both must share the same base hash prefix (e.g. PID-XXXXXXXX)
+        base_hash_1 = identities[0].patient_id.rsplit("-", 1)[0]
+        base_hash_2 = identities[1].patient_id.rsplit("-", 1)[0]
+        self.assertEqual(base_hash_1, base_hash_2)
+
+        # 4. Third submission with the SAME Gmail (Attempt 3)
+        self.client.get("/session/new/")
+        res3 = self.client.post("/consent/submit/", data=json.dumps(consent_payload), content_type="application/json")
+        self.assertEqual(res3.status_code, 200)
+
+        identities3 = list(ParticipantIdentity.objects.filter(participant_email=email).order_by("created_at"))
+        self.assertEqual(len(identities3), 3)
+        self.assertTrue(identities3[2].patient_id.endswith("-03"))
+
+    def test_lookup_participant_id_endpoint(self):
+        email = "lookuptest@gmail.com"
+        # First lookup: new participant
+        res = self.client.get(f"/consent/lookup-id/?email={email}")
+        self.assertEqual(res.status_code, 200)
+        data = res.json()
+        self.assertTrue(data["ok"])
+        self.assertEqual(data["attempt"], 1)
+        self.assertFalse(data["is_repeat"])
+        self.assertTrue(data["patient_id"].endswith("-01"))
+
+        # Record consent
+        consent_payload = {
+            "participant_email": email,
+            "gender": "Male",
+            "age": 22,
+            "consent_record_date": "2026-10-15",
+            "agree_voice": True,
+            "agree_video": True,
+            "agree_transcript": True,
+            "agree_publication": True,
+            "agree_terms": True,
+        }
+        self.client.post("/consent/submit/", data=json.dumps(consent_payload), content_type="application/json")
+
+        # Start new session
+        self.client.get("/session/new/")
+
+        # Second lookup: repeat participant
+        res2 = self.client.get(f"/consent/lookup-id/?email={email}")
+        self.assertEqual(res2.status_code, 200)
+        data2 = res2.json()
+        self.assertTrue(data2["ok"])
+        self.assertEqual(data2["attempt"], 2)
+        self.assertTrue(data2["is_repeat"])
+        self.assertTrue(data2["patient_id"].endswith("-02"))
+
+

@@ -28,16 +28,78 @@ from .services.fusion_processing import process_fusion_session
 STORY_IMAGE_DIR = Path(__file__).resolve().parent.parent / "static" / "images" / "activities" / "story"
 
 
-def generate_participant_id_from_email(email: str) -> str:
-    """Derive a stable, short, opaque Participant ID from a Gmail address.
+def get_or_create_participant_id_for_email(email: str, current_session=None) -> tuple[str, int, bool]:
+    """
+    Derives an opaque, collision-free Participant ID for a Gmail address.
+    Supports longitudinal/repeat submissions:
+    - Attempt 1: PID-<HASH>-01 (or PID-<HASH> if legacy)
+    - Attempt 2: PID-<HASH>-02
+    - Attempt N: PID-<HASH>-0N
 
-    Format: PID-XXXXXXXX  (8 uppercase hex chars)
-    The raw email is NOT encoded in the ID — only a SHA-256 hash is used,
-    making it safe to display publicly while remaining deterministic.
+    Returns (patient_id, attempt_number, is_repeat).
     """
     normalized = email.strip().lower()
     digest = hashlib.sha256(normalized.encode()).hexdigest()[:8].upper()
-    return f"PID-{digest}"
+
+    # If current_session already has an identity registered for this email, preserve it
+    if current_session:
+        existing_identity = ParticipantIdentity.objects.filter(session=current_session).first()
+        if existing_identity and existing_identity.participant_email.strip().lower() == normalized:
+            pid = existing_identity.patient_id
+            attempt = 1
+            if pid.startswith(f"PID-{digest}-"):
+                try:
+                    attempt = int(pid.split("-")[-1])
+                except ValueError:
+                    attempt = 1
+            other_count = ParticipantIdentity.objects.filter(
+                participant_email=normalized
+            ).exclude(session=current_session).count()
+            return pid, attempt, (other_count > 0 or attempt > 1)
+
+    # Find existing PIDs for this email or with this hash prefix (excluding current session)
+    existing_query = ParticipantIdentity.objects.filter(participant_email=normalized)
+    if current_session:
+        existing_query = existing_query.exclude(session=current_session)
+    existing_pids = set(existing_query.values_list("patient_id", flat=True))
+
+    hash_query = ParticipantIdentity.objects.filter(patient_id__startswith=f"PID-{digest}")
+    if current_session:
+        hash_query = hash_query.exclude(session=current_session)
+    existing_pids.update(hash_query.values_list("patient_id", flat=True))
+
+    attempt = 1
+    while True:
+        candidate = f"PID-{digest}-{attempt:02d}"
+        # If legacy bare PID-{digest} exists in DB, attempt 1 is considered taken
+        if attempt == 1 and (f"PID-{digest}" in existing_pids or candidate in existing_pids):
+            attempt += 1
+            continue
+        if candidate in existing_pids:
+            attempt += 1
+            continue
+        # Ensure candidate is globally unique in ParticipantIdentity (excluding current session)
+        collision = ParticipantIdentity.objects.filter(patient_id=candidate)
+        if current_session:
+            collision = collision.exclude(session=current_session)
+        if collision.exists():
+            attempt += 1
+            continue
+        break
+
+    is_repeat = (attempt > 1) or bool(existing_pids)
+    return candidate, attempt, is_repeat
+
+
+def generate_participant_id_from_email(email: str, current_session=None) -> str:
+    """Derive a stable, short, opaque Participant ID from a Gmail address.
+
+    Format: PID-XXXXXXXX-01 (or PID-XXXXXXXX-02 for repeat submissions)
+    The raw email is NOT encoded in the ID — only a SHA-256 hash is used,
+    making it safe to display publicly while remaining deterministic.
+    """
+    pid, _, _ = get_or_create_participant_id_for_email(email, current_session=current_session)
+    return pid
 
 
 def pick_story_frames():
@@ -69,7 +131,7 @@ def home(request):
         consented_at__isnull=False,
         consent__isnull=False,
     ).exists():
-        return redirect("collection:questionnaire")
+        return redirect("collection:activity_hub")
     return redirect("collection:consent")
 
 
@@ -93,6 +155,35 @@ def consent_view(request):
     })
 
 
+def lookup_participant_id(request):
+    """
+    Real-time lookup for participant ID preview.
+    Determines if this Gmail has prior records and returns the next attempt PID.
+    """
+    email = request.GET.get("email", "").strip().lower()
+    if not email or not email.endswith("@gmail.com"):
+        return JsonResponse({"ok": False, "error": "A valid @gmail.com address is required."}, status=400)
+
+    session = get_collection_session(request)
+    patient_id, attempt, is_repeat = get_or_create_participant_id_for_email(email, current_session=session)
+    return JsonResponse({
+        "ok": True,
+        "patient_id": patient_id,
+        "attempt": attempt,
+        "is_repeat": is_repeat,
+    })
+
+
+def start_new_session(request):
+    """
+    Clears the active session token so a student can submit another assessment record
+    with the same Gmail address under a new unique PID (e.g. PID-XXXXXXXX-02).
+    """
+    if "collection_session_id" in request.session:
+        del request.session["collection_session_id"]
+    return redirect("collection:consent")
+
+
 @require_POST
 def submit_consent(request):
     if request.content_type == "application/json":
@@ -110,13 +201,15 @@ def submit_consent(request):
     if participant_email:
         if not participant_email.endswith("@gmail.com"):
             return JsonResponse({"ok": False, "error": "Please enter a valid Gmail address (must end with @gmail.com)."}, status=400)
-        patient_id = generate_participant_id_from_email(participant_email)
+        patient_id, _, _ = get_or_create_participant_id_for_email(participant_email, current_session=session)
     else:
         client_patient_id = str(data.get("patient_id", "")).strip()
-        if client_patient_id:
+        if client_patient_id and not ParticipantIdentity.objects.filter(patient_id=client_patient_id).exclude(session=session).exists():
             patient_id = client_patient_id
         else:
             patient_id = f"PID-{session.session_id.hex[:8].upper()}"
+            if ParticipantIdentity.objects.filter(patient_id=patient_id).exclude(session=session).exists():
+                patient_id = f"PID-{session.session_id.hex[:12].upper()}"
 
     gender = str(data.get("gender", "")).strip()
     age_raw = data.get("age")
@@ -249,7 +342,67 @@ def submit_consent(request):
     return JsonResponse({
         "ok": True,
         "message": "Consent recorded successfully.",
-        "redirect": reverse("collection:questionnaire"),
+        "redirect": reverse("collection:activity_hub"),
+    })
+
+
+def evaluate_and_run_fusion(session):
+    """
+    Evaluates whether all multimodal prerequisites (face, text, and voice)
+    are completed. If so, runs the multimodal fusion engine.
+    Safe to trigger in any execution sequence.
+    """
+    has_face = session.analysis_results.filter(modality="face", status="completed").exists()
+    has_text = session.analysis_results.filter(modality="text", status="completed").exists()
+    has_voice = session.analysis_results.filter(modality="voice", status="completed").exists()
+
+    if has_face and has_text and has_voice:
+        try:
+            return process_fusion_session(session)
+        except Exception:
+            return None
+    return None
+
+
+@ensure_csrf_cookie
+def activity_hub(request):
+    session = get_collection_session(request)
+
+    # Check status of each of the 3 modules
+    questionnaire_done = QuestionnaireResponse.objects.filter(session=session).exists()
+    combined_done = MediaCapture.objects.filter(session=session, kind="combined_video").exists()
+    voice_done = MediaCapture.objects.filter(session=session, kind="phonation_audio").exists()
+
+    # Attempt to resolve fusion if modalities are complete
+    evaluate_and_run_fusion(session)
+
+    fusion_done = session.analysis_results.filter(modality="multimodal", status="completed").exists()
+
+    completed_count = sum([1 for done in (questionnaire_done, combined_done, voice_done) if done])
+    all_completed = (completed_count == 3)
+    progress_pct = int((completed_count / 3) * 100)
+
+    # Get participant details for display
+    participant_code = session.participant_code or f"PID-{session.session_id.hex[:8].upper()}"
+    participant_email = ""
+    identity = getattr(session, "identity", None)
+    if identity and identity.participant_email:
+        participant_email = identity.participant_email
+    elif getattr(session, "consent", None) and session.consent.participant_email:
+        participant_email = session.consent.participant_email
+
+    return render(request, "collection/activity_hub.html", {
+        "session": session,
+        "participant_code": participant_code,
+        "participant_email": participant_email,
+        "questionnaire_done": questionnaire_done,
+        "combined_done": combined_done,
+        "voice_done": voice_done,
+        "completed_count": completed_count,
+        "total_activities": 3,
+        "all_completed": all_completed,
+        "progress_pct": progress_pct,
+        "fusion_done": fusion_done,
     })
 
 
@@ -343,7 +496,7 @@ def phonation_sound_config(request):
     sounds = [
         {"sound_id": f"local-{index}", "label": label, "prompt": label, "say": label,
          "help": "Hold the sound steadily until the circle completes.", "order": index,
-         "required_hold_ms": 3000, "voice_threshold": 40, "accepted": []}
+         "required_hold_ms": 1500, "voice_threshold": 35, "accepted": []}
         for index, label in enumerate(["आ", "ई", "ऊ", "ए", "ओ", "अ", "म्"], start=1)
     ]
     return JsonResponse({"ok": True, "sounds": sounds})
@@ -382,7 +535,7 @@ def complete_voice_phonation(request):
         return JsonResponse({"ok": False, "error": f"Voice analysis failed: {str(exc)}"}, status=502)
 
     try:
-        process_fusion_session(session)
+        evaluate_and_run_fusion(session)
     except Exception:
         pass
 
@@ -421,13 +574,18 @@ def submit_questionnaire(request):
     session = get_collection_session(request)
     session.participant_code = str(payload.get("participant_code", "")).strip()
     session.status = "capture"
-    session.current_step = "combined_video"
+    session.current_step = "questionnaire"
     session.save(update_fields=["participant_code", "status", "current_step", "updated_at"])
     response, _ = QuestionnaireResponse.objects.update_or_create(
         session=session,
         defaults={"answers": answers, "scores": scores, "flags": flags},
     )
-    return JsonResponse({"ok": True, "session_id": str(session.session_id), "response_id": response.pk})
+    return JsonResponse({
+        "ok": True,
+        "session_id": str(session.session_id),
+        "response_id": response.pk,
+        "redirect": reverse("collection:activity_hub"),
+    })
 
 
 def health(request):

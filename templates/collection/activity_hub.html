@@ -1,0 +1,391 @@
+{% extends "collection/base.html" %}
+{% load static %}
+
+{% block title %}Activity Hub | Choose Your Screening Path | Manovedh{% endblock %}
+
+{% block extra_css %}
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
+<script>
+    tailwind.config = {
+        ...(tailwind.config || {}),
+        theme: {
+            extend: {
+                colors: {
+                    darkBg: '#090d16',
+                    darkCard: 'rgba(17, 24, 39, 0.75)',
+                    darkCardSolid: '#111827',
+                    darkBorder: 'rgba(255, 255, 255, 0.08)',
+                    accentIndigo: '#6366f1',
+                    accentEmerald: '#10b981',
+                    accentAmber: '#f59e0b',
+                    accentRose: '#f43f5e',
+                    accentCyan: '#06b6d4'
+                },
+                fontFamily: {
+                    sans: ['Inter', 'system-ui', 'sans-serif'],
+                    display: ['Outfit', 'sans-serif']
+                },
+                animation: {
+                    'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+                    'float': 'float 4s ease-in-out infinite',
+                },
+                keyframes: {
+                    float: { '0%, 100%': { transform: 'translateY(0px)' }, '50%': { transform: 'translateY(-6px)' } }
+                }
+            }
+        }
+    }
+</script>
+<style>
+    html, body {
+        font-family: 'Inter', sans-serif;
+        background: radial-gradient(circle at 50% 0%, #F5EFEB 0%, #FAF7F2 70%) fixed !important;
+        color: #1E293B;
+        min-height: 100vh;
+        margin: 0;
+        padding: 0;
+        -webkit-font-smoothing: antialiased;
+    }
+
+    .glass-panel {
+        background: #FFFFFF;
+        border: 1px solid #E2D9CE;
+        box-shadow: 0 4px 20px -2px rgba(80, 65, 50, 0.06), 0 1px 3px rgba(80, 65, 50, 0.04);
+    }
+
+    .activity-card {
+        transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+        background: #FFFFFF;
+        border: 1px solid #E2D9CE;
+        box-shadow: 0 4px 20px -2px rgba(80, 65, 50, 0.06), 0 1px 3px rgba(80, 65, 50, 0.04);
+    }
+
+    .activity-card:hover {
+        transform: translateY(-4px);
+        border-color: #4F46E5;
+        box-shadow: 0 16px 36px -12px rgba(79, 70, 229, 0.15);
+    }
+
+    .activity-card.is-completed {
+        border-color: #A7F3D0;
+        background: #F0FDF4;
+    }
+
+    .activity-card.is-completed:hover {
+        transform: translateY(-2px);
+        border-color: #34D399;
+        box-shadow: 0 14px 30px -10px rgba(5, 150, 105, 0.15);
+    }
+
+    .step-pill {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 28px;
+        height: 28px;
+        border-radius: 9999px;
+        font-size: 13px;
+        font-weight: 700;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="min-h-screen text-slate-800 flex flex-col justify-between py-6 px-4 sm:px-8 max-w-7xl mx-auto w-full relative">
+
+  <!-- Ambient Glow Background Effects -->
+  <div class="absolute top-1/4 left-1/4 -translate-x-1/2 w-96 h-96 bg-amber-400/8 rounded-full blur-3xl pointer-events-none"></div>
+  <div class="absolute top-1/3 right-1/4 w-96 h-96 bg-indigo-400/8 rounded-full blur-3xl pointer-events-none"></div>
+
+  <!-- Header Bar -->
+  <header class="flex flex-wrap items-center justify-between gap-4 border-b border-[#E2D9CE] pb-6 w-full relative z-10">
+    <div>
+      <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-50 border border-indigo-200 text-indigo-700 text-xs font-semibold uppercase tracking-wider mb-2">
+        <span class="w-2 h-2 rounded-full bg-indigo-600 animate-pulse"></span>
+        Personalized Screening Journey
+      </div>
+      <h1 class="font-display text-2xl sm:text-3xl lg:text-4xl font-bold text-slate-900 tracking-tight">Activity Control Hub</h1>
+      <p class="text-xs sm:text-sm text-slate-600 mt-1">
+        Select which activity you want to complete first, second, and third. You have full freedom to choose your order.
+      </p>
+    </div>
+
+    <div class="flex items-center gap-3">
+      <div class="bg-white border border-[#E2D9CE] rounded-2xl px-4 py-2 flex items-center gap-3 shadow-sm">
+        <div class="w-8 h-8 rounded-full bg-emerald-50 border border-emerald-200 flex items-center justify-center text-emerald-700 text-xs font-bold">
+          ID
+        </div>
+        <div class="text-left">
+          <div class="text-[10px] text-slate-500 uppercase tracking-wider font-semibold">Participant</div>
+          <div class="text-xs font-bold text-slate-900 font-mono">{{ participant_code }}</div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Hub Dashboard -->
+  <main class="my-auto py-8 flex flex-col items-center justify-center gap-8 w-full relative z-10">
+    
+    <!-- Progress Banner -->
+    <div class="w-full glass-panel rounded-3xl p-6 sm:p-8 flex flex-col md:flex-row items-center justify-between gap-6 shadow-sm">
+      <div class="flex-grow w-full md:w-auto">
+        <div class="flex items-center justify-between gap-4 mb-2">
+          <span class="text-xs font-bold text-slate-500 uppercase tracking-wider">Overall Session Progress</span>
+          <span class="text-xs font-bold text-emerald-700">{{ completed_count }} of {{ total_activities }} Activities Completed ({{ progress_pct }}%)</span>
+        </div>
+        <div class="w-full bg-[#E5DFD7] rounded-full h-3 overflow-hidden p-0.5">
+          <div id="hubProgressBar"
+               class="bg-gradient-to-r from-indigo-600 via-cyan-600 to-emerald-600 h-full rounded-full transition-all duration-500"
+               data-progress="{{ progress_pct }}"></div>
+        </div>
+      </div>
+
+      {% if all_completed %}
+      <div class="w-full md:w-auto flex-shrink-0">
+        <a href="{% url 'collection:completed' %}"
+           class="cursor-pointer inline-flex items-center justify-center gap-2 w-full md:w-auto px-6 py-3.5 rounded-full bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-bold text-sm shadow-md shadow-emerald-700/20 transition transform active:scale-95 duration-150">
+          <span>Finalize Session & View Summary</span>
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+            <polyline points="9 18 15 12 9 6"></polyline>
+          </svg>
+        </a>
+      </div>
+      {% endif %}
+    </div>
+
+    <!-- The 3 Activity Selection Cards -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 w-full">
+
+      <!-- CARD 1: QUESTIONNAIRE -->
+      <div class="activity-card rounded-3xl p-6 sm:p-7 flex flex-col justify-between relative overflow-hidden {% if questionnaire_done %}is-completed{% endif %}">
+        
+        <!-- Header Info -->
+        <div>
+          <div class="flex items-center justify-between gap-3 mb-4">
+            <div class="w-12 h-12 rounded-2xl bg-indigo-50 border border-indigo-200 flex items-center justify-center text-indigo-700">
+              <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+              </svg>
+            </div>
+            
+            {% if questionnaire_done %}
+            <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-50 border border-emerald-300 text-emerald-800 text-xs font-bold uppercase tracking-wider">
+              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"></polyline></svg>
+              Completed
+            </span>
+            {% else %}
+            <span class="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-slate-100 border border-[#E2D9CE] text-slate-700 text-xs font-semibold">
+              Ready to Start
+            </span>
+            {% endif %}
+          </div>
+
+          <h3 class="font-display text-xl font-bold text-slate-900 tracking-tight">1. Participant Questionnaire</h3>
+          <p class="text-xs text-slate-600 mt-2 leading-relaxed">
+            Standardized self-report survey covering lifestyle, mood, anxiety, and thought reflection patterns in English, Hindi, or Marathi.
+          </p>
+
+          <div class="flex items-center gap-4 mt-4 pt-4 border-t border-[#E2D9CE] text-xs text-slate-500">
+            <span class="flex items-center gap-1.5 font-medium">
+              <svg class="w-3.5 h-3.5 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" stroke-width="2"></circle><path stroke-width="2" d="M12 6v6l4 2"></path></svg>
+              ~3 minutes
+            </span>
+            <span>&bull;</span>
+            <span class="font-medium">Survey Format</span>
+          </div>
+        </div>
+
+        <!-- Action Button -->
+        <div class="mt-6 pt-4 border-t border-[#E2D9CE]">
+          {% if questionnaire_done %}
+          <div class="flex items-center justify-between gap-3">
+            <span class="text-xs text-emerald-700 font-semibold flex items-center gap-1">
+              <span>Responses Recorded</span>
+            </span>
+            <a href="{% url 'collection:questionnaire' %}" class="text-xs text-slate-500 hover:text-slate-900 underline transition font-medium">
+              Retake / Update
+            </a>
+          </div>
+          {% else %}
+          <a href="{% url 'collection:questionnaire' %}"
+             class="cursor-pointer inline-flex items-center justify-center gap-2 w-full py-3.5 rounded-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-sm shadow-md shadow-indigo-600/20 transition transform active:scale-95 duration-150">
+            <span>Start Questionnaire</span>
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"></polyline></svg>
+          </a>
+          {% endif %}
+        </div>
+      </div>
+
+      <!-- CARD 2: COMBINED OBSERVATIONAL ACTIVITY -->
+      <div class="activity-card rounded-3xl p-6 sm:p-7 flex flex-col justify-between relative overflow-hidden {% if combined_done %}is-completed{% endif %}">
+        
+        <!-- Header Info -->
+        <div>
+          <div class="flex items-center justify-between gap-3 mb-4">
+            <div class="w-12 h-12 rounded-2xl bg-cyan-50 border border-cyan-200 flex items-center justify-center text-cyan-700">
+              <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"></path>
+              </svg>
+            </div>
+            
+            {% if combined_done %}
+            <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-50 border border-emerald-300 text-emerald-800 text-xs font-bold uppercase tracking-wider">
+              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"></polyline></svg>
+              Completed
+            </span>
+            {% else %}
+            <span class="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-slate-100 border border-[#E2D9CE] text-slate-700 text-xs font-semibold">
+              Ready to Start
+            </span>
+            {% endif %}
+          </div>
+
+          <h3 class="font-display text-xl font-bold text-slate-900 tracking-tight">2. Observe &amp; Describe Video</h3>
+          <p class="text-xs text-slate-600 mt-2 leading-relaxed">
+            Gamified 4-scene storytelling journey. Observe pictures on screen and speak your thoughts aloud with webcam facial & audio analysis.
+          </p>
+
+          <div class="flex items-center gap-4 mt-4 pt-4 border-t border-[#E2D9CE] text-xs text-slate-500">
+            <span class="flex items-center gap-1.5 font-medium">
+              <svg class="w-3.5 h-3.5 text-cyan-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" stroke-width="2"></circle><path stroke-width="2" d="M12 6v6l4 2"></path></svg>
+              ~3 minutes
+            </span>
+            <span>&bull;</span>
+            <span class="font-medium">Webcam & Microphone</span>
+          </div>
+        </div>
+
+        <!-- Action Button -->
+        <div class="mt-6 pt-4 border-t border-[#E2D9CE]">
+          {% if combined_done %}
+          <div class="flex items-center justify-between gap-3">
+            <span class="text-xs text-emerald-700 font-semibold flex items-center gap-1">
+              <span>Video Captured</span>
+            </span>
+            <a href="{% url 'collection:combined_activity' %}" class="text-xs text-slate-500 hover:text-slate-900 underline transition font-medium">
+              Retake Activity
+            </a>
+          </div>
+          {% else %}
+          <a href="{% url 'collection:combined_activity' %}"
+             class="cursor-pointer inline-flex items-center justify-center gap-2 w-full py-3.5 rounded-full bg-cyan-600 hover:bg-cyan-700 text-white font-bold text-sm shadow-md shadow-cyan-600/20 transition transform active:scale-95 duration-150">
+            <span>Start Video Activity</span>
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"></polyline></svg>
+          </a>
+          {% endif %}
+        </div>
+      </div>
+
+      <!-- CARD 3: VOICE PHONATION -->
+      <div class="activity-card rounded-3xl p-6 sm:p-7 flex flex-col justify-between relative overflow-hidden {% if voice_done %}is-completed{% endif %}">
+        
+        <!-- Header Info -->
+        <div>
+          <div class="flex items-center justify-between gap-3 mb-4">
+            <div class="w-12 h-12 rounded-2xl bg-violet-50 border border-violet-200 flex items-center justify-center text-violet-700">
+              <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z"/>
+              </svg>
+            </div>
+            
+            {% if voice_done %}
+            <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-50 border border-emerald-300 text-emerald-800 text-xs font-bold uppercase tracking-wider">
+              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"></polyline></svg>
+              Completed
+            </span>
+            {% else %}
+            <span class="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-slate-100 border border-[#E2D9CE] text-slate-700 text-xs font-semibold">
+              Ready to Start
+            </span>
+            {% endif %}
+          </div>
+
+          <h3 class="font-display text-xl font-bold text-slate-900 tracking-tight">3. Voice Phonation Assessment</h3>
+          <p class="text-xs text-slate-600 mt-2 leading-relaxed">
+            Record 7 sustained vowel sounds (आ, ई, ऊ, ए, ओ, अ, म्) with your microphone for acoustic biometric and speech feature extraction.
+          </p>
+
+          <div class="flex items-center gap-4 mt-4 pt-4 border-t border-[#E2D9CE] text-xs text-slate-500">
+            <span class="flex items-center gap-1.5 font-medium">
+              <svg class="w-3.5 h-3.5 text-violet-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" stroke-width="2"></circle><path stroke-width="2" d="M12 6v6l4 2"></path></svg>
+              ~2 minutes
+            </span>
+            <span>&bull;</span>
+            <span class="font-medium">Microphone Audio</span>
+          </div>
+        </div>
+
+        <!-- Action Button -->
+        <div class="mt-6 pt-4 border-t border-[#E2D9CE]">
+          {% if voice_done %}
+          <div class="flex items-center justify-between gap-3">
+            <span class="text-xs text-emerald-700 font-semibold flex items-center gap-1">
+              <span>Acoustics Recorded</span>
+            </span>
+            <a href="{% url 'collection:voice_phonation' %}" class="text-xs text-slate-500 hover:text-slate-900 underline transition font-medium">
+              Retake Activity
+            </a>
+          </div>
+          {% else %}
+          <a href="{% url 'collection:voice_phonation' %}"
+             class="cursor-pointer inline-flex items-center justify-center gap-2 w-full py-3.5 rounded-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-sm shadow-md shadow-indigo-600/20 transition transform active:scale-95 duration-150">
+            <span>Start Voice Phonation</span>
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"></polyline></svg>
+          </a>
+          {% endif %}
+        </div>
+      </div>
+
+    </div>
+
+    <!-- User Freedom & Order Guidance Banner -->
+    <div class="flex flex-col sm:flex-row items-center justify-between gap-4 p-4 rounded-2xl bg-white border border-[#E2D9CE] w-full text-xs text-slate-600 shadow-sm">
+      <div class="flex items-center gap-2.5">
+        <span class="w-2.5 h-2.5 rounded-full bg-emerald-600 animate-pulse"></span>
+        <span class="text-slate-700 font-medium">
+          <strong>Tip:</strong> You can perform any of the 3 activities in any order you choose. Once all 3 are completed, you will be able to review and finish your session.
+        </span>
+      </div>
+      <div>
+        {% if all_completed %}
+        <span class="text-emerald-700 font-bold">Ready to submit!</span>
+        {% else %}
+        <span class="font-medium text-slate-600">{{ total_activities|add:"-1" }} of {{ total_activities }} pending</span>
+        {% endif %}
+      </div>
+    </div>
+
+  </main>
+
+  <!-- Bottom Telemetry Footer matching screening pages -->
+  <footer class="flex flex-col sm:flex-row items-center justify-between gap-6 pt-6 border-t border-[#E2D9CE] mt-6 w-full relative z-10">
+    <div class="flex items-center space-x-3.5">
+      <div class="w-10 h-10 rounded-xl bg-indigo-50 border border-indigo-200 flex items-center justify-center text-indigo-700">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path>
+        </svg>
+      </div>
+      <div>
+        <div class="text-xs font-bold text-slate-900 font-display">Manovedh AI Research Platform</div>
+        <div class="text-[11px] text-slate-600 font-medium">Session UUID: <span class="font-mono text-slate-800">{{ session.session_id }}</span></div>
+      </div>
+    </div>
+    <div class="text-xs text-slate-600 font-medium">
+      Session Status: <strong class="text-emerald-700">{% if all_completed %}All Activities Complete{% else %}In Progress{% endif %}</strong>
+    </div>
+  </footer>
+
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  (function () {
+    var bar = document.getElementById("hubProgressBar");
+    if (bar) {
+      var pct = bar.getAttribute("data-progress") || "0";
+      bar.style.width = pct + "%";
+    }
+  })();
+</script>
+{% endblock %}

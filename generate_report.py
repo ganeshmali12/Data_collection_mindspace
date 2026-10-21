@@ -199,6 +199,7 @@ def generate_pdf(session_id=None, output_path="screening_report.pdf"):
     elements.append(Paragraph("1. Standardized Psychometric Instruments", section_h1))
     
     scores = questionnaire.scores if questionnaire else {}
+    flags = questionnaire.flags if questionnaire else []
     phq9_val = scores.get('phq9', 0)
     gad7_val = scores.get('gad7', 0)
     pss4_val = scores.get('pss4', 0)
@@ -218,6 +219,26 @@ def generate_pdf(session_id=None, output_path="screening_report.pdf"):
         if v >= 5: return "Mild Anxiety"
         return "Minimal / None"
 
+    q_answers = questionnaire.answers if questionnaire else {}
+    q30_entry = q_answers.get('30', {})
+    q30_val = q30_entry.get('value', 0) if isinstance(q30_entry, dict) else (q30_entry if isinstance(q30_entry, (int, float)) else 0)
+
+    has_plan = ('suicidal_plan' in flags) or (('cssrs' in flags or cssrs_val > 0) and q30_val == 1)
+    has_passive = ('suicidal_passive' in flags) or (('cssrs' in flags or cssrs_val > 0) and not has_plan)
+
+    if has_plan:
+        cssrs_interp = "Specific suicide plan indicated"
+        cssrs_flag_text = "ELEVATED (Plan)"
+        cssrs_cell_style = cell_flagged
+    elif has_passive:
+        cssrs_interp = "Passive suicidal ideation indicated"
+        cssrs_flag_text = "ELEVATED (Passive)"
+        cssrs_cell_style = cell_flagged
+    else:
+        cssrs_interp = "No active suicidal ideation reported"
+        cssrs_flag_text = "Negative"
+        cssrs_cell_style = cell_green
+
     q_data = [
         [Paragraph("Instrument", cell_bold), Paragraph("Score", cell_bold), Paragraph("Severity / Clinical Interpretation", cell_bold), Paragraph("Threshold Flag", cell_bold)],
         [
@@ -235,20 +256,20 @@ def generate_pdf(session_id=None, output_path="screening_report.pdf"):
         [
             Paragraph("PSS-4 (Perceived Stress Scale)", cell_normal),
             Paragraph(f"<b>{pss4_val} / 16</b>", cell_bold),
-            Paragraph("Mild Perceived Stress" if pss4_val < 8 else "High Perceived Stress", cell_normal),
-            Paragraph("Normal", cell_green),
+            Paragraph("High Perceived Stress" if pss4_val >= 9 else "Mild Perceived Stress", cell_flagged if pss4_val >= 9 else cell_normal),
+            Paragraph("ELEVATED (>=9)" if pss4_val >= 9 else "Normal", cell_flagged if pss4_val >= 9 else cell_green),
         ],
         [
             Paragraph("MDQ-7 (Mood Disorder Questionnaire)", cell_normal),
             Paragraph(f"<b>{mdq7_val} / 7</b>", cell_bold),
-            Paragraph("No co-occurring manic indicators on screener", cell_normal),
-            Paragraph("Negative", cell_green),
+            Paragraph("Positive mood episode screen" if mdq7_val >= 5 else "No co-occurring manic indicators on screener", cell_flagged if mdq7_val >= 5 else cell_normal),
+            Paragraph("ELEVATED (>=5)" if mdq7_val >= 5 else "Negative", cell_flagged if mdq7_val >= 5 else cell_green),
         ],
         [
             Paragraph("C-SSRS (Columbia Suicide Severity)", cell_normal),
-            Paragraph(f"<b>{cssrs_val} / 5</b>", cell_bold),
-            Paragraph("No active suicidal ideation reported", cell_normal),
-            Paragraph("Negative", cell_green),
+            Paragraph(f"<b>{cssrs_val} / 3</b>", cell_bold),
+            Paragraph(cssrs_interp, cssrs_cell_style),
+            Paragraph(cssrs_flag_text, cssrs_cell_style),
         ],
     ]
     q_table = Table(q_data, colWidths=[180, 60, 200, 100])

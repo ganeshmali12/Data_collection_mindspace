@@ -124,21 +124,21 @@
 
       if (state.completedSteps[i]) {
         badge.textContent = "Completed ✓";
-        badge.className = "inline-block mt-1.5 text-[11px] font-semibold px-3 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/40";
-        circle.className = "w-36 h-36 sm:w-40 sm:h-40 rounded-full overflow-hidden border-4 border-slate-800 shadow-2xl ring-4 ring-emerald-500/50 transition duration-300";
-        numBadge.className = "absolute -top-1.5 right-1.5 w-9 h-9 bg-emerald-600 text-white font-black rounded-full flex items-center justify-center text-sm border-2 border-slate-900 shadow-lg";
+        badge.className = "inline-block mt-1.5 text-[11px] font-semibold px-3 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-300";
+        circle.className = "w-36 h-36 sm:w-40 sm:h-40 rounded-full overflow-hidden border-4 border-white shadow-xl ring-4 ring-emerald-500/40 transition duration-300 bg-white";
+        numBadge.className = "absolute -top-1.5 right-1.5 w-9 h-9 bg-emerald-600 text-white font-black rounded-full flex items-center justify-center text-sm border-2 border-white shadow-md";
         numBadge.innerHTML = "✓";
       } else if (i === 1 || state.completedSteps[i - 1]) {
         badge.textContent = "Ready";
-        badge.className = "inline-block mt-1.5 text-[11px] font-semibold px-3 py-0.5 rounded-full bg-indigo-500/20 text-indigo-300 border border-indigo-500/40";
-        circle.className = "w-36 h-36 sm:w-40 sm:h-40 rounded-full overflow-hidden border-4 border-slate-800 shadow-2xl ring-4 ring-indigo-500/50 transition duration-300";
-        numBadge.className = "absolute -top-1.5 right-1.5 w-9 h-9 bg-indigo-600 text-white font-black rounded-full flex items-center justify-center text-sm border-2 border-slate-900 shadow-lg";
+        badge.className = "inline-block mt-1.5 text-[11px] font-semibold px-3 py-0.5 rounded-full bg-indigo-50 text-indigo-700 border border-indigo-200";
+        circle.className = "w-36 h-36 sm:w-40 sm:h-40 rounded-full overflow-hidden border-4 border-white shadow-xl ring-4 ring-indigo-500/40 transition duration-300 bg-white";
+        numBadge.className = "absolute -top-1.5 right-1.5 w-9 h-9 bg-indigo-600 text-white font-black rounded-full flex items-center justify-center text-sm border-2 border-white shadow-md";
         numBadge.innerHTML = i;
       } else {
         badge.textContent = "Locked";
-        badge.className = "inline-block mt-1.5 text-[11px] font-semibold px-3 py-0.5 rounded-full bg-slate-800 text-slate-400 border border-slate-700";
-        circle.className = "w-36 h-36 sm:w-40 sm:h-40 rounded-full overflow-hidden border-4 border-slate-800 shadow-lg ring-4 ring-slate-700/50 opacity-50 transition duration-300";
-        numBadge.className = "absolute -top-1.5 right-1.5 w-9 h-9 bg-slate-700 text-slate-400 font-black rounded-full flex items-center justify-center text-sm border-2 border-slate-900 shadow-md";
+        badge.className = "inline-block mt-1.5 text-[11px] font-semibold px-3 py-0.5 rounded-full bg-stone-100 text-stone-500 border border-stone-200";
+        circle.className = "w-36 h-36 sm:w-40 sm:h-40 rounded-full overflow-hidden border-4 border-stone-200 shadow-md ring-4 ring-stone-200/50 opacity-60 transition duration-300 bg-stone-100";
+        numBadge.className = "absolute -top-1.5 right-1.5 w-9 h-9 bg-stone-300 text-stone-600 font-black rounded-full flex items-center justify-center text-sm border-2 border-white shadow-sm";
         numBadge.innerHTML = i;
       }
     }
@@ -175,15 +175,15 @@
           dot.className = "w-8 h-8 rounded-full bg-emerald-600 text-white text-xs font-bold flex items-center justify-center shadow-md transition";
           dot.innerHTML = "✓";
         } else if (i === state.currentStep + 1) {
-          dot.className = "w-8 h-8 rounded-full bg-indigo-600 text-white text-xs font-bold flex items-center justify-center ring-2 ring-indigo-400 shadow-md transition";
+          dot.className = "w-8 h-8 rounded-full bg-indigo-600 text-white text-xs font-bold flex items-center justify-center ring-2 ring-indigo-300 shadow-md transition";
           dot.innerHTML = i;
         } else {
-          dot.className = "w-8 h-8 rounded-full bg-slate-800 text-slate-400 text-xs font-bold flex items-center justify-center border border-slate-700 transition";
+          dot.className = "w-8 h-8 rounded-full bg-stone-100 text-stone-500 text-xs font-bold flex items-center justify-center border border-stone-300 transition";
           dot.innerHTML = i;
         }
       }
       if (line) {
-        line.className = "w-4 sm:w-8 h-[2px] rounded-full " + (state.completedSteps[i] ? "bg-indigo-600" : "bg-slate-700");
+        line.className = "w-4 sm:w-8 h-[2px] rounded-full " + (state.completedSteps[i] ? "bg-indigo-600" : "bg-stone-300");
       }
     }
 
@@ -219,11 +219,11 @@
     if (state.recordedSeconds < MIN_STEP_SECONDS) {
       var remaining = MIN_STEP_SECONDS - state.recordedSeconds;
       btnNextStep.disabled = true;
-      btnNextStep.className = "cursor-not-allowed opacity-60 inline-flex items-center gap-2 bg-slate-800 text-slate-400 border border-slate-700 text-xs sm:text-sm font-bold px-4 sm:px-5 py-2 rounded-full shadow transition";
+      btnNextStep.className = "cursor-not-allowed opacity-60 inline-flex items-center gap-2 bg-stone-100 text-slate-500 border border-stone-300 text-xs sm:text-sm font-bold px-4 sm:px-5 py-2 rounded-full shadow transition";
       btnNextStepText.textContent = isLastStep ? ("Finish in " + remaining + "s...") : ("Next in " + remaining + "s...");
     } else {
       btnNextStep.disabled = false;
-      btnNextStep.className = "cursor-pointer inline-flex items-center gap-2 bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-400 hover:to-emerald-500 text-white text-xs sm:text-sm font-bold px-4 sm:px-5 py-2 rounded-full shadow-lg shadow-emerald-900/40 transition transform active:scale-95";
+      btnNextStep.className = "cursor-pointer inline-flex items-center gap-2 bg-gradient-to-r from-emerald-600 to-emerald-700 hover:from-emerald-500 hover:to-emerald-600 text-white text-xs sm:text-sm font-bold px-4 sm:px-5 py-2 rounded-full shadow-md shadow-emerald-700/20 transition transform active:scale-95";
       btnNextStepText.textContent = isLastStep ? "Finish Activity ✓" : "Next Step →";
     }
   }

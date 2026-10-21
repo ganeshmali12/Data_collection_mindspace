@@ -9,36 +9,37 @@
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
   :root {
-    --bg: #0a0e1a;
-    --bg-card: #111827;
-    --bg-card-hover: #141f33;
-    --border: rgba(255,255,255,0.07);
-    --border-active: rgba(120,160,255,0.45);
-    --text-primary: #f0f4ff;
-    --text-secondary: #8b97b8;
-    --text-muted: #4a5578;
-    --accent: #6b8eff;
-    --accent-soft: rgba(107,142,255,0.1);
-    --accent-border: rgba(107,142,255,0.3);
-    --section-phq: #ff6b6b;
-    --section-phq-soft: rgba(255,107,107,0.08);
-    --section-gad: #ffa94d;
-    --section-gad-soft: rgba(255,169,77,0.08);
-    --section-pss: #51cf66;
-    --section-pss-soft: rgba(81,207,102,0.08);
-    --section-mdq: #cc5de8;
-    --section-mdq-soft: rgba(204,93,232,0.08);
-    --section-cssrs: #f06595;
-    --section-cssrs-soft: rgba(240,101,149,0.08);
+    --bg: #FAF7F2;
+    --bg-card: #FFFFFF;
+    --bg-card-hover: #F5EFEB;
+    --border: #E2D9CE;
+    --border-active: rgba(79, 70, 229, 0.6);
+    --text-primary: #1E293B;
+    --text-secondary: #475569;
+    --text-muted: #64748B;
+    --accent: #4F46E5;
+    --accent-soft: rgba(79, 70, 229, 0.08);
+    --accent-border: rgba(79, 70, 229, 0.35);
+    --section-phq: #D94848;
+    --section-phq-soft: rgba(217, 72, 72, 0.1);
+    --section-gad: #D97706;
+    --section-gad-soft: rgba(217, 119, 6, 0.1);
+    --section-pss: #059669;
+    --section-pss-soft: rgba(5, 150, 105, 0.1);
+    --section-mdq: #7C3AED;
+    --section-mdq-soft: rgba(124, 58, 237, 0.1);
+    --section-cssrs: #E11D48;
+    --section-cssrs-soft: rgba(225, 29, 72, 0.1);
     --radius: 14px;
     --radius-sm: 8px;
     --radius-pill: 100px;
     --transition: 0.2s cubic-bezier(0.4,0,0.2,1);
+    --shadow-card: 0 4px 20px -2px rgba(80, 65, 50, 0.06), 0 1px 3px rgba(80, 65, 50, 0.04);
   }
 
   body {
     font-family: 'Inter', 'Noto Sans Devanagari', sans-serif;
-    background: var(--bg);
+    background: radial-gradient(circle at 50% 0%, #F5EFEB 0%, #FAF7F2 70%) fixed;
     color: var(--text-primary);
     min-height: 100vh;
     display: flex;
@@ -86,7 +87,7 @@
   .lang-switcher {
     display: inline-flex;
     align-items: center;
-    background: rgba(255, 255, 255, 0.05);
+    background: #EDE6DC;
     border: 1px solid var(--border);
     border-radius: var(--radius-pill);
     padding: 3px;
@@ -107,13 +108,13 @@
   }
   .lang-btn:hover {
     color: var(--text-primary);
-    background: rgba(255, 255, 255, 0.08);
+    background: rgba(255, 255, 255, 0.7);
   }
   .lang-btn.active {
     background: var(--accent);
     color: #ffffff;
     font-weight: 600;
-    box-shadow: 0 2px 8px rgba(107, 142, 255, 0.35);
+    box-shadow: 0 2px 6px rgba(79, 70, 229, 0.3);
   }
 
   /* ── Progress ── */
@@ -126,7 +127,7 @@
   }
   .progress-section-name {
     font-size: 12px;
-    font-weight: 500;
+    font-weight: 600;
     color: var(--text-muted);
     text-transform: uppercase;
     letter-spacing: 0.8px;
@@ -135,11 +136,11 @@
   .progress-pct {
     font-size: 12px;
     color: var(--text-muted);
-    font-weight: 500;
+    font-weight: 600;
   }
   .progress-track {
-    height: 3px;
-    background: rgba(255,255,255,0.06);
+    height: 4px;
+    background: #E8E0D5;
     border-radius: 2px;
     overflow: hidden;
   }
@@ -156,6 +157,7 @@
     border-radius: var(--radius);
     padding: 1.75rem;
     margin-bottom: 1.25rem;
+    box-shadow: var(--shadow-card);
     will-change: transform, opacity;
   }
 
@@ -227,6 +229,11 @@
     grid-template-columns: repeat(4, 1fr);
     gap: 8px;
   }
+  .options-choice {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 8px;
+  }
   .options-freq-5 {
     display: grid;
     grid-template-columns: repeat(5, 1fr);
@@ -239,6 +246,44 @@
     max-width: 320px;
   }
 
+  .opt-choice {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 14px 10px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    background: #FFFFFF;
+    color: var(--text-secondary);
+    font-family: 'Inter', 'Noto Sans Devanagari', sans-serif;
+    font-size: 13.5px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.18s cubic-bezier(0.4,0,0.2,1);
+    text-align: center;
+    line-height: 1.35;
+    min-height: 54px;
+    user-select: none;
+    box-shadow: 0 1px 2px rgba(80, 65, 50, 0.04);
+  }
+  .opt-choice:hover {
+    border-color: var(--accent);
+    background: #F8F5F0;
+    color: var(--text-primary);
+    transform: translateY(-2px);
+  }
+  .opt-choice:active {
+    transform: scale(0.96);
+  }
+  .opt-choice.selected {
+    border-color: var(--accent);
+    background: #EEF2FF;
+    color: #1E1B4B;
+    font-weight: 600;
+    box-shadow: 0 0 0 1px var(--accent), 0 2px 8px rgba(79, 70, 229, 0.18);
+    transform: scale(1.02);
+  }
+
   .opt {
     display: flex;
     flex-direction: column;
@@ -248,21 +293,22 @@
     padding: 12px 8px;
     border: 1px solid var(--border);
     border-radius: var(--radius-sm);
-    background: transparent;
+    background: #FFFFFF;
     color: var(--text-secondary);
     font-family: 'Inter', 'Noto Sans Devanagari', sans-serif;
     font-size: 12px;
-    font-weight: 400;
+    font-weight: 500;
     cursor: pointer;
     transition: all 0.18s cubic-bezier(0.4,0,0.2,1);
     text-align: center;
     line-height: 1.35;
     min-height: 72px;
     user-select: none;
+    box-shadow: 0 1px 2px rgba(80, 65, 50, 0.04);
   }
   .opt:hover {
-    border-color: var(--border-active);
-    background: var(--accent-soft);
+    border-color: var(--accent);
+    background: #F8F5F0;
     color: var(--text-primary);
     transform: translateY(-2px);
   }
@@ -271,16 +317,17 @@
   }
   .opt.selected {
     border-color: var(--accent);
-    background: rgba(107, 142, 255, 0.22);
-    color: #ffffff;
+    background: #EEF2FF;
+    color: #1E1B4B;
     font-weight: 600;
-    box-shadow: 0 0 16px rgba(107, 142, 255, 0.35);
+    box-shadow: 0 0 0 1px var(--accent), 0 2px 8px rgba(79, 70, 229, 0.18);
     transform: scale(1.02);
   }
   .opt .opt-num {
     font-size: 16px;
-    font-weight: 600;
+    font-weight: 700;
     font-family: 'Fraunces', serif;
+    color: var(--accent);
     line-height: 1;
   }
 
@@ -288,7 +335,7 @@
     padding: 14px 20px;
     border: 1px solid var(--border);
     border-radius: var(--radius-sm);
-    background: transparent;
+    background: #FFFFFF;
     color: var(--text-secondary);
     font-family: 'Inter', 'Noto Sans Devanagari', sans-serif;
     font-size: 14px;
@@ -301,10 +348,11 @@
     align-items: center;
     justify-content: center;
     user-select: none;
+    box-shadow: 0 1px 2px rgba(80, 65, 50, 0.04);
   }
   .opt-yn:hover {
     border-color: var(--border-active);
-    background: var(--accent-soft);
+    background: #F8F5F0;
     color: var(--text-primary);
     transform: translateY(-2px);
   }
@@ -313,18 +361,18 @@
   }
   .opt-yn.selected {
     border-color: var(--accent);
-    background: rgba(107, 142, 255, 0.22);
-    color: #ffffff;
+    background: #EEF2FF;
+    color: #1E1B4B;
     font-weight: 600;
-    box-shadow: 0 0 16px rgba(107, 142, 255, 0.35);
+    box-shadow: 0 0 0 1px var(--accent), 0 2px 8px rgba(79, 70, 229, 0.18);
     transform: scale(1.02);
   }
   .opt-yn.selected-yes {
     border-color: var(--section-cssrs);
-    background: rgba(240, 101, 149, 0.22);
-    color: #ffffff;
+    background: #FFF1F2;
+    color: #9F1239;
     font-weight: 600;
-    box-shadow: 0 0 16px rgba(240, 101, 149, 0.35);
+    box-shadow: 0 0 0 1px var(--section-cssrs), 0 2px 8px rgba(225, 29, 72, 0.18);
     transform: scale(1.02);
   }
 
@@ -353,27 +401,29 @@
     padding: 12px 20px;
     border: 1px solid var(--border);
     border-radius: var(--radius-sm);
-    background: transparent;
+    background: #FFFFFF;
     color: var(--text-secondary);
     font-family: 'Inter', 'Noto Sans Devanagari', sans-serif;
     font-size: 14px;
+    font-weight: 500;
     cursor: pointer;
     transition: var(--transition);
     display: flex; align-items: center; gap: 6px;
+    box-shadow: 0 1px 2px rgba(80, 65, 50, 0.04);
   }
-  .btn-back:hover { border-color: var(--border-active); color: var(--text-primary); }
+  .btn-back:hover { border-color: var(--accent); color: var(--text-primary); background: #F8F5F0; }
   .btn-back:invisible { visibility: hidden; }
 
   .step-indicator {
     font-size: 12px;
     color: var(--text-muted);
-    font-weight: 500;
+    font-weight: 600;
     letter-spacing: 0.3px;
     font-family: 'Inter', 'Noto Sans Devanagari', sans-serif;
   }
 
   button:focus-visible {
-    outline: 3px solid rgba(107,142,255,0.55);
+    outline: 3px solid rgba(79, 70, 229, 0.55);
     outline-offset: 2px;
   }
 
@@ -385,6 +435,7 @@
     border: 1px solid var(--border);
     border-radius: var(--radius);
     margin-bottom: 1.25rem;
+    box-shadow: var(--shadow-card);
     animation: slideIn 0.35s cubic-bezier(0.4,0,0.2,1);
   }
   .result-hero-label {
@@ -443,10 +494,12 @@
     }
 
     .options-freq { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .options-choice { grid-template-columns: repeat(2, minmax(0, 1fr)); }
     .options-freq-5 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 
     .opt,
     .opt-yn,
+    .opt-choice,
     .btn-back {
       min-height: 48px;
     }
@@ -495,10 +548,15 @@
     </div>
 
     <!-- Language Selector Pill -->
-    <div class="lang-switcher" id="lang-switcher">
-      <button type="button" class="lang-btn active" data-lang="en" onclick="setLanguage('en')">English</button>
-      <button type="button" class="lang-btn" data-lang="hi" onclick="setLanguage('hi')">हिंदी</button>
-      <button type="button" class="lang-btn" data-lang="mr" onclick="setLanguage('mr')">मराठी</button>
+    <div style="display:flex;align-items:center;gap:12px;">
+      <a href="{% url 'collection:activity_hub' %}" style="font-size:12px;color:var(--text-secondary);text-decoration:none;padding:5px 12px;border-radius:20px;border:1px solid var(--border);background:#FFFFFF;box-shadow:0 1px 2px rgba(80,65,50,0.04);font-weight:500;">
+        ← Activities Hub
+      </a>
+      <div class="lang-switcher" id="lang-switcher">
+        <button type="button" class="lang-btn active" data-lang="en" onclick="setLanguage('en')">English</button>
+        <button type="button" class="lang-btn" data-lang="hi" onclick="setLanguage('hi')">हिंदी</button>
+        <button type="button" class="lang-btn" data-lang="mr" onclick="setLanguage('mr')">मराठी</button>
+      </div>
     </div>
   </div>
 
@@ -597,7 +655,7 @@ const SECTIONS = [
     },
     type: 'freq',
     scale: {
-      en: ['Never', 'Sometimes', 'Often (Most days)', 'Almost always'],
+      en: ['Not at all', 'Several days', 'More than half the days', 'Nearly every day'],
       hi: ['बिल्कुल नहीं', 'कुछ दिन', 'आधे से ज़्यादा दिन', 'लगभग हर रोज़'],
       mr: ['अजिबात नाही', 'काही दिवस', 'निम्म्याहून अधिक दिवस', 'जवळजवळ रोज']
     },
@@ -605,12 +663,12 @@ const SECTIONS = [
     cutoff: 10, max: 27,
     questions: [
       {
-        en: 'Little interest or pleasure in doing things',
-        hi: 'किसी भी काम में रुचि या आनंद न आना।',
-        mr: 'कोणत्याही गोष्टीत रस किंवा आनंद वाटणे कमी झाले आहे.'
+        en: 'Reduced interest or pleasure in activities you normally enjoy',
+        hi: 'उन गतिविधियों में रुचि या आनंद कम होना जो आप सामान्यतः पसंद करते हैं',
+        mr: 'ज्या गोष्टी तुम्हाला सहसा आवडतात त्यांमध्ये रस किंवा आनंद कमी होणे'
       },
       {
-        en: 'Feeling down, low, or hopeless',
+        en: 'Feeling down, depressed, or hopeless',
         hi: 'मन उदास, निराश या बेहद हताश महसूस होना।',
         mr: 'उदास, निराश किंवा हताश वाटत आहे.'
       },
@@ -630,9 +688,9 @@ const SECTIONS = [
         mr: 'भूक न लागणे किंवा जास्त खाणे.'
       },
       {
-        en: 'Feeling bad about yourself — or that you are a failure or have let yourself or your family down',
-        hi: 'खुद के बारे में बुरा लगना — खुद को असफल समझना या परिवार को निराश करने का एहसास होना।',
-        mr: 'स्वतःबद्दल वाईट वाटणे — स्वतःला अपयशी समजणे किंवा कुटुंबाला निराश केल्यासारखे वाटणे.'
+        en: 'Feeling that your sense of worth or value has been lower than usual lately',
+        hi: 'यह महसूस करना कि हाल ही में आपकी आत्म-मूल्य की भावना सामान्य से कम रही है',
+        mr: 'अलीकडे स्वतःच्या मूल्याची किंवा महत्त्वाची भावना नेहमीपेक्षा कमी वाटणे'
       },
       {
         en: 'Trouble concentrating on things, such as reading or watching television',
@@ -640,14 +698,14 @@ const SECTIONS = [
         mr: 'एखाद्या गोष्टीवर लक्ष केंद्रित करण्यात अडचण येणे, जसे की वाचन किंवा टीव्ही पाहणे.'
       },
       {
-        en: 'Moving or speaking so slowly that other people could have noticed, or being fidgety and restless',
-        hi: 'इतना धीरे-धीरे बोलना या हिलना-डुलना कि दूसरों को ध्यान आए — या इसके उलट बहुत बेचैन होना।',
-        mr: 'इतरांना दिसेल इतक्या हळूहळू बोलणे किंवा हालचाल करणे — किंवा उलट, अस्वस्थपणे सतत हालचाल करणे.'
+        en: "Noticing a change in your body's pace — either feeling unusually slowed down, or unusually unable to stay still",
+        hi: 'अपने शरीर की गति में बदलाव महसूस करना — या तो असामान्य रूप से धीमा महसूस करना, या असामान्य रूप से स्थिर न रह पाना',
+        mr: 'शरीराच्या गतीत बदल जाणवणे — एकतर असामान्यपणे मंद वाटणे, किंवा असामान्यपणे स्थिर राहता न येणे'
       },
       {
-        en: 'Thoughts that you would be better off dead, or of hurting yourself in some way',
-        hi: 'यह सोचना कि मर जाना बेहतर होगा, या खुद को नुकसान पहुँचाने के विचार आना।',
-        mr: 'मेल्यावर बरे होईल असे वाटणे किंवा स्वतःला दुखवण्याचे विचार येणे.'
+        en: 'Feeling like a burden to the people around you, or sensing that things might be easier for others if you were not there',
+        hi: 'यह महसूस करना कि आप अपने आसपास के लोगों पर बोझ हैं, या यह अनुभव करना कि यदि आप नहीं होते तो दूसरों के लिए शायद आसान होता',
+        mr: 'आपल्या आजूबाजूच्या लोकांवर ओझे असल्यासारखे वाटणे, किंवा असे जाणवणे की तुम्ही नसता तर इतरांना कदाचित सोपे गेले असते'
       }
     ]
   },
@@ -672,7 +730,7 @@ const SECTIONS = [
     },
     type: 'freq',
     scale: {
-      en: ['Never', 'Sometimes', 'Often (Most days)', 'Almost always'],
+      en: ['Not at all', 'Several days', 'More than half the days', 'Nearly every day'],
       hi: ['बिल्कुल नहीं', 'कुछ दिन', 'आधे से ज़्यादा दिन', 'लगभग हर रोज़'],
       mr: ['अजिबात नाही', 'काही दिवस', 'निम्म्याहून अधिक दिवस', 'जवळजवळ रोज']
     },
@@ -786,49 +844,49 @@ const SECTIONS = [
       hi: 'निर्देश: क्या कभी ऐसा समय आया जब आप अपने सामान्य स्वभाव से अलग थे और...',
       mr: 'सूचना: कधी असा काळ आला होता का जेव्हा तुम्ही नेहमीसारखे नव्हते आणि...'
     },
-    type: 'yesno',
+    type: 'choice4',
     scale: {
-      en: ['No', 'Yes'],
-      hi: ['नहीं', 'हाँ'],
-      mr: ['नाही', 'हो']
+      en: ['Never', 'Rarely', 'Sometimes', 'Often'],
+      hi: ['कभी नहीं', 'शायद ही कभी', 'कभी-कभी', 'अक्सर'],
+      mr: ['कधीच नाही', 'क्वचित', 'कधी कधी', 'अनेकदा']
     },
-    values: [0,1],
+    values: [0,1,2,3],
     cutoff: 5, max: 7,
     questions: [
       {
-        en: 'You felt so good or hyper that others thought you were not your normal self',
-        hi: 'आप इतने उत्साहित या हाइपर थे कि दूसरों को लगा आप सामान्य नहीं हैं।',
-        mr: 'तुम्ही इतके उत्साहित किंवा हायपर होता की इतरांना वाटले तुम्ही नेहमीसारखे नाही.'
+        en: 'You felt so good or hyper that other people thought you were not your normal self',
+        hi: 'आप इतना अच्छा या उत्साहित महसूस करते थे कि दूसरे लोगों को लगा आप अपने सामान्य स्वभाव में नहीं हैं',
+        mr: 'तुम्हाला इतके छान किंवा उत्साहित वाटत होते की इतर लोकांना वाटले तुम्ही नेहमीसारखे नाही आहात'
       },
       {
-        en: 'You were so irritable you shouted at people or started fights',
-        hi: 'आप इतने चिड़चिड़े थे कि चिल्लाए या झगड़े।',
-        mr: 'तुम्ही इतके चिडलेले होता की ओरडलात किंवा भांडणे झाली.'
+        en: 'You were so irritable that you shouted at people or started fights',
+        hi: 'आप इतने चिड़चिड़े थे कि लोगों पर चिल्लाते थे या झगड़े शुरू कर देते थे',
+        mr: 'तुम्ही इतके चिडचिडे होता की लोकांवर ओरडत होता किंवा भांडणे सुरू करत होता'
       },
       {
         en: 'You felt much more self-confident than usual',
-        hi: 'आपको सामान्य से बहुत ज़्यादा आत्मविश्वास महसूस हुआ।',
-        mr: 'तुम्हाला नेहमीपेक्षा खूप जास्त आत्मविश्वास वाटला.'
+        hi: 'आप सामान्य से बहुत अधिक आत्मविश्वासी महसूस करते थे',
+        mr: 'तुम्हाला नेहमीपेक्षा खूप जास्त आत्मविश्वास वाटत होता'
       },
       {
         en: 'You needed much less sleep than usual and did not really miss it',
-        hi: 'सामान्य से बहुत कम नींद आई और उसकी कमी भी नहीं लगी।',
-        mr: 'नेहमीपेक्षा खूप कमी झोप लागली तरी त्याची उणीव भासली नाही.'
+        hi: 'आपको सामान्य से बहुत कम नींद की जरूरत थी और आप उसकी कमी भी महसूस नहीं करते थे',
+        mr: 'तुम्हाला नेहमीपेक्षा खूप कमी झोप लागत होती आणि त्याची कमतरताही जाणवत नव्हती'
       },
       {
         en: 'You were much more talkative or spoke much faster than usual',
-        hi: 'सामान्य से बहुत ज़्यादा या बहुत तेज़ बोले।',
-        mr: 'नेहमीपेक्षा जास्त बोललात किंवा खूप वेगाने बोललात.'
+        hi: 'आप सामान्य से बहुत अधिक बातें करते थे या बहुत तेज बोलते थे',
+        mr: 'तुम्ही नेहमीपेक्षा खूप जास्त बोलत होता किंवा खूप वेगाने बोलत होता'
       },
       {
         en: 'You had much more energy than usual',
-        hi: 'सामान्य से बहुत ज़्यादा ऊर्जा थी।',
-        mr: 'नेहमीपेक्षा खूप जास्त ऊर्जा होती.'
+        hi: 'आपके पास सामान्य से बहुत अधिक ऊर्जा थी',
+        mr: 'तुमच्याकडे नेहमीपेक्षा खूप जास्त ऊर्जा होती'
       },
       {
         en: 'You did things that were unusual for you or got you into trouble',
-        hi: 'कुछ ऐसा किया जो आपके लिए असामान्य था या जिससे परेशानी हुई।',
-        mr: 'असे काही केले जे तुमच्यासाठी असामान्य होते किंवा ज्यामुळे अडचण निर्माण झाली.'
+        hi: 'आपने ऐसे काम किए जो आपके लिए असामान्य थे या जिनसे आप मुसीबत में पड़ गए',
+        mr: 'तुम्ही असे काही केले जे तुमच्यासाठी असामान्य होते किंवा ज्यामुळे तुम्ही अडचणीत आलात'
       }
     ]
   },
@@ -862,19 +920,19 @@ const SECTIONS = [
     suicidal: true,
     questions: [
       {
-        en: 'Have you wished you were dead or wished you could go to sleep and not wake up?',
-        hi: 'क्या आपने कभी यह चाहा कि काश मैं मर जाता, या सो जाता और उठता ही नहीं?',
-        mr: 'तुम्हाला कधी असे वाटले का की मेलो तर बरे होईल किंवा झोपेत गेलो आणि उठलोच नाही तर चांगले होईल?'
+        en: 'Have there been times when you felt so exhausted by everything that part of you just wished it could all stop or go away?',
+        hi: 'क्या कभी ऐसा हुआ जब आप हर चीज़ से इतने थक गए कि आपके मन का एक हिस्सा चाहता था कि सब कुछ रुक जाए या चला जाए?',
+        mr: 'असे कधी झाले का की तुम्ही सगळ्या गोष्टींनी इतके थकलात की मनाच्या एका कोपऱ्याला वाटले की हे सगळे थांबले किंवा संपले तर बरे होईल?'
       },
       {
-        en: 'Have you had thoughts of killing yourself?',
-        hi: 'क्या आपके मन में कभी खुद को खत्म करने के विचार आए?',
-        mr: 'तुम्हाला कधी स्वतःला संपवण्याचे विचार आले का?'
+        en: 'Have you ever found yourself having thoughts about not wanting to be alive, or wishing you could disappear?',
+        hi: 'क्या आपके मन में कभी ऐसे विचार आए कि आप जीना नहीं चाहते, या काश आप कहीं गायब हो जाते?',
+        mr: 'तुमच्या मनात कधी असे विचार आले का की जगणे नको आहे, किंवा आपण कुठेतरी नाहीसे झालो तर बरे होईल?'
       },
       {
-        en: 'Have you ever thought about a specific way or method by which you could end your life?',
-        hi: 'क्या आपने कभी यह सोचा कि आप अपनी जान किस तरीके से ले सकते हैं?',
-        mr: 'तुम्ही कधी असा विचार केला का की स्वतःचा जीव कोणत्या मार्गाने घेता येईल?'
+        en: 'Have you ever thought about the specific ways in which you might act on thoughts of not wanting to be alive?',
+        hi: 'क्या आपने कभी यह सोचा है कि आप जीना नहीं चाहते — इस भावना पर आप किन तरीकों से काम कर सकते हैं?',
+        mr: 'तुम्ही कधी असा विचार केला का की जगणे नको आहे — आणि त्या भावनेवर कोणत्या विशिष्ट मार्गांनी कृती करता येईल?'
       }
     ]
   }
@@ -910,8 +968,16 @@ function getSectionScore(si) {
   s.questions.forEach((_,i) => {
     let v = answers[start+i];
     if (v === null) return;
-    if (s.reverse && s.reverse.includes(i)) v = s.values[s.values.length-1] - v;
-    total += v;
+    if (s.id === 'mdq7') {
+      // 0 = Never, 1 = Rarely, 2 = Sometimes, 3 = Often
+      // Scoring: Never/Rarely = 0, Sometimes/Often = 1
+      total += (v >= 2 ? 1 : 0);
+    } else if (s.reverse && s.reverse.includes(i)) {
+      v = s.values[s.values.length-1] - v;
+      total += v;
+    } else {
+      total += v;
+    }
   });
   return total;
 }
@@ -966,6 +1032,15 @@ function render(direction = 'initial') {
       </button>`;
     });
     optionsHtml += `</div>`;
+  } else if (s.type === 'choice4') {
+    optionsHtml = `<div class="options-choice">`;
+    activeScale.forEach((label, i) => {
+      const sel = answers[cur] === i ? 'selected' : '';
+      optionsHtml += `<button type="button" class="opt-choice ${sel}" onclick="selectAnswer(${i}, this)">
+        <span>${label}</span>
+      </button>`;
+    });
+    optionsHtml += `</div>`;
   } else if (s.type === 'freq5') {
     optionsHtml = `<div class="options-freq-5">`;
     activeScale.forEach((label, i) => {
@@ -1012,10 +1087,10 @@ function selectAnswer(val, buttonElement) {
   answers[cur] = val;
 
   // Immediate visual feedback
-  const container = buttonElement ? buttonElement.closest('.options-freq, .options-freq-5, .options-yesno') : null;
+  const container = buttonElement ? buttonElement.closest('.options-freq, .options-choice, .options-freq-5, .options-yesno') : null;
   if (container) {
     container.classList.add('options-disabled');
-    container.querySelectorAll('.opt, .opt-yn').forEach(btn => {
+    container.querySelectorAll('.opt, .opt-choice, .opt-yn').forEach(btn => {
       btn.classList.remove('selected', 'selected-yes');
     });
     const q = allQ[cur];
@@ -1067,11 +1142,18 @@ function prev() {
 async function saveQuestionnaire(scores, flags) {
   const answerMap = {};
   allQ.forEach((question, index) => {
+    const rawVal = answers[index];
+    const s = SECTIONS[question.sec];
+    let scoreVal = rawVal;
+    if (s.id === 'mdq7') {
+      scoreVal = rawVal >= 2 ? 1 : 0;
+    }
     answerMap[String(index + 1)] = {
       question: question.textObj.en,
       question_localized: question.textObj[currentLang] || question.textObj.en,
       language: currentLang,
-      value: answers[index]
+      value: rawVal,
+      score_value: scoreVal
     };
   });
 
@@ -1114,9 +1196,36 @@ async function finishQuestionnaire() {
   SECTIONS.forEach((s, si) => {
     const score = getSectionScore(si);
     scores[s.id] = score;
-    const flagged = s.suicidal ? score >= 1 : score >= s.cutoff;
-    if (flagged) flags.push(s.id);
   });
+
+  // PHQ-9 (Q1-Q9): Score >= 10
+  if (scores.phq9 >= 10) {
+    flags.push('phq9');
+  }
+
+  // GAD-7 (Q10-Q16): Score >= 10
+  if (scores.gad7 >= 10) {
+    flags.push('gad7');
+  }
+
+  // PSS-4 (Q17-Q20): Score >= 9
+  if (scores.pss4 >= 9) {
+    flags.push('pss4');
+  }
+
+  // MDQ-7 (Q21-Q27): Score >= 5
+  if (scores.mdq7 >= 5) {
+    flags.push('mdq7');
+  }
+
+  // C-SSRS (Q28-Q30): Any positive response
+  if (scores.cssrs >= 1 || answers[27] === 1 || answers[28] === 1 || answers[29] === 1) {
+    flags.push('cssrs');
+  }
+
+  if (flags.length === 0) {
+    flags.push('normal');
+  }
 
   document.getElementById('main-area').innerHTML = `
     <div class="result-hero">
@@ -1131,7 +1240,7 @@ async function finishQuestionnaire() {
 
   try {
     await saveQuestionnaire(scores, flags);
-    window.location.href = '{% url "collection:combined_activity" %}';
+    window.location.href = '{% url "collection:activity_hub" %}';
   } catch (error) {
     const notice = document.createElement('p');
     notice.className = 'disclaimer';
