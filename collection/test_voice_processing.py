@@ -63,3 +63,27 @@ class VoiceProcessingTests(TestCase):
         session.refresh_from_db()
         self.assertEqual(session.current_step, "multimodal_processing")
         self.assertFalse(os.path.exists(cleaned.name))
+
+        # Verify the saved MediaCapture has .wav extension
+        cap = MediaCapture.objects.get(session=session, kind="phonation_audio")
+        self.assertTrue(cap.file.name.endswith(".wav"))
+        self.assertIn("voice_phonation", cap.file.name)
+
+    def test_convert_to_wav_produces_valid_wav_format(self):
+        import io
+        import struct
+        import wave
+        from collection.services.audio_cleaner import convert_to_wav
+
+        # Generate a small 0.1s valid WAV
+        buf = io.BytesIO()
+        with wave.open(buf, "wb") as wf:
+            wf.setnchannels(1)
+            wf.setsampwidth(2)
+            wf.setframerate(16000)
+            wf.writeframes(struct.pack("<1600h", *([0] * 1600)))
+        raw_wav = buf.getvalue()
+
+        converted = convert_to_wav(raw_wav, target_sr=16000)
+        self.assertTrue(converted.startswith(b"RIFF"))
+        self.assertIn(b"WAVE", converted[:16])

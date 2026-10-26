@@ -16,6 +16,7 @@ def media_capture_upload_path(instance, filename):
         sound_number = re.sub(r"[^0-9]", "", sound_id) or "unknown"
         folder = "voice_phonation"
         name = f"sound_{sound_number.zfill(2)}_{uuid.uuid4().hex[:10]}"
+        extension = ".wav"
     return f"captures/session_{session_id}/{folder}/{name}{extension}"
 
 

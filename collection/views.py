@@ -5,6 +5,7 @@ import threading
 from pathlib import Path
 
 import datetime
+from django.core.files.base import ContentFile
 from django.http import JsonResponse
 from django.shortcuts import redirect, render
 from django.urls import reverse
@@ -20,6 +21,7 @@ from .models import (
     ParticipantIdentity,
     QuestionnaireResponse,
 )
+from .services.audio_cleaner import convert_to_wav
 from .services.combined_processing import process_combined_capture
 from .services.voice_processing import process_voice_session
 from .services.fusion_processing import process_fusion_session
@@ -515,13 +517,17 @@ def upload_voice_phonation(request):
     except (ValueError, TypeError):
         pass
 
+    # Convert incoming audio (WebM, OGG, etc.) to 16-bit mono PCM WAV
+    wav_bytes = convert_to_wav(audio, target_sr=16000)
+    audio_file = ContentFile(wav_bytes, name=f"{sound_id or 'sound'}.wav")
+
     capture = MediaCapture.objects.create(
         session=get_collection_session(request),
         kind="phonation_audio",
-        file=audio,
+        file=audio_file,
         sound_code=sound_id,
         hold_ms=hold_val,
-        metadata={"sound_id": sound_id, "hold_ms": hold_raw},
+        metadata={"sound_id": sound_id, "hold_ms": hold_raw, "format": "wav", "sample_rate": 16000},
     )
     return JsonResponse({"ok": True, "capture_id": capture.pk, "passed": True})
 

@@ -181,6 +181,7 @@ class CollectionFlowTests(TestCase):
         self.assertEqual(response.status_code, 200)
         capture = MediaCapture.objects.get()
         self.assertIn(f"session_{capture.session.session_id}/voice_phonation/sound_03_", capture.file.name)
+        self.assertTrue(capture.file.name.endswith(".wav"))
 
     def test_missing_upload_is_rejected(self):
         response = self.client.post("/screening/combined/upload/")

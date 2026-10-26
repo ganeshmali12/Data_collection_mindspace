@@ -148,7 +148,7 @@ For example:
 
 ```text
 media\captures\session_<session-uuid>\combined_video\combined_video_<id>.webm
-media\captures\session_<session-uuid>\voice_phonation\sound_03_<id>.webm
+media\captures\session_<session-uuid>\voice_phonation\sound_03_<id>.wav
 ```
 
 The database stores the Django file reference. The actual binary video/audio remains in the `media` folder. Existing files created before this organization change keep their old names; new uploads use the session-specific structure.

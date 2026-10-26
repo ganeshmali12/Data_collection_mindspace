@@ -169,3 +169,64 @@ def combine_and_clean_captures(captures, target_sr: int = 16000) -> str:
                     os.remove(temp_file)
                 except OSError:
                     pass
+
+
+def convert_to_wav(
+    input_file,
+    target_sr: int = 16000,
+) -> bytes:
+    """
+    Converts an uploaded audio file (WebM, OGG, MP3, etc.) or file-like object
+    to 16-bit mono PCM WAV bytes at target_sr.
+    """
+    if hasattr(input_file, "read"):
+        content = input_file.read()
+        if hasattr(input_file, "seek"):
+            input_file.seek(0)
+    elif isinstance(input_file, (bytes, bytearray)):
+        content = bytes(input_file)
+    else:
+        with open(str(input_file), "rb") as f:
+            content = f.read()
+
+    if not content:
+        return b""
+
+    # Write input to a temp file for FFmpeg
+    with tempfile.NamedTemporaryFile(suffix=".input", delete=False) as in_temp:
+        in_temp.write(content)
+        in_temp_path = in_temp.name
+
+    out_temp = tempfile.NamedTemporaryFile(suffix=".wav", delete=False)
+    out_temp_path = out_temp.name
+    out_temp.close()
+
+    command = [
+        "ffmpeg",
+        "-y",
+        "-i", in_temp_path,
+        "-ar", str(target_sr),
+        "-ac", "1",
+        "-c:a", "pcm_s16le",
+        out_temp_path,
+    ]
+
+    try:
+        subprocess.run(command, check=True, capture_output=True, text=True)
+        with open(out_temp_path, "rb") as f:
+            wav_bytes = f.read()
+        return wav_bytes
+    except (subprocess.CalledProcessError, FileNotFoundError) as exc:
+        logger.warning(
+            "FFmpeg conversion to WAV failed or FFmpeg not available: %s. Preserving original payload.",
+            exc,
+        )
+        return content
+    finally:
+        for p in (in_temp_path, out_temp_path):
+            if os.path.exists(p):
+                try:
+                    os.remove(p)
+                except OSError:
+                    pass
+
